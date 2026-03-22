@@ -1,0 +1,162 @@
+spring:
+  main:
+    allow-bean-definition-overriding: true
+  application:
+    name: projectmanagement
+
+  service:
+    token:
+      enabled: true
+
+  # =============================
+  # MySQL Database Configuration
+  # =============================
+  datasource:
+    url: jdbc:mysql://192.168.3.144:3306/projectmanagement?createDatabaseIfNotExist=true
+    username: app_user
+    password: userpassword123
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      connectionTimeout: 20000
+      maximumPoolSize: 20
+
+  jpa:
+    database-platform: org.hibernate.dialect.MySQL8Dialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    defer-datasource-initialization: false
+    properties:
+      hibernate:
+        format_sql: true
+
+  sql:
+    init:
+      schema-locations:
+        - classpath:activiti.engine.schema.sql
+      mode: always
+
+  # =============================
+  # Redis Configuration
+  # =============================
+  data:
+    redis:
+      host: 192.168.3.144
+      port: 6379
+      password: redispassword123
+      database: 0
+      lettuce:
+        pool:
+          max-active: 10
+          max-idle: 8
+          min-idle: 2
+          max-wait: 5s
+
+  # =============================
+  # MongoDB Configuration
+  # =============================
+    mongodb:
+      host: 192.168.3.144
+      port: 27017
+      username: root
+      password: mongopassword123
+      authentication-database: admin
+
+  mongodb:
+    client:
+      settings:
+        connection-pool:
+          max-size: 500
+          min-size: 10
+          max-connection-idle-time: 10s
+          max-wait-time: 5s
+
+  # =============================
+  # Kafka Configuration
+  # =============================
+  kafka:
+    bootstrap-servers: 192.168.3.144:9092
+    properties:
+      schema:
+        registry:
+          url: http://192.168.3.144:8081
+      specific:
+        avro:
+          reader: true
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
+    consumer:
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: io.confluent.kafka.serializers.KafkaAvroDeserializer
+      group-id: ${spring.application.name}-consumer-group
+      auto-offset-reset: earliest
+
+  # =============================
+  # Security Configuration
+  # =============================
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://ikoncloud-dev.keross.com/ikon-api/platform
+
+
+# =============================
+# IKON Platform Configurations
+# =============================
+ikon:
+  user:
+    agent: "IKON App Server"
+  platform:
+    rest: https://ikoncloud-dev.keross.com/ikon-api
+  logger:
+    enabled: false 
+  accessmanagement:
+    init:
+      file: ../../bpmn/project.json
+  processengine:
+    databaseSchemaUpdate: false 
+    bpmn:
+      enabled: true
+      path: ../../bpmn
+  app:
+    softwareId: "bfbb1d15-7e43-46ea-9b4c-109c8574aff8"
+    softwareVerion: 1
+    softwareName: ${spring.application.name}
+    softwareRepositoryName: projectmanagement
+  job:
+    max-pool-size: 100
+
+
+# =============================
+# Logging Configuration
+# =============================
+logging:
+  level:
+    com.ikon: DEBUG
+  file:
+    name: "../logs/${spring.application.name}-app.log"
+
+
+# =============================
+# Server Configuration
+# =============================
+server:
+  address: 0.0.0.0
+  port: 8071
+
+
+# =============================
+# Eureka (Optional)
+# =============================
+eureka:
+  instance:
+    ip-address: ${server.address}
+    preferIpAddress: true
+    instance-id: ${spring.cloud.client.ip-address}:${spring.application.name}:${server.port}
+  client:
+    register-with-eureka: false
+    fetch-registry: false
+    service-url:
+      default-zone: http://localhost:8761/eureka

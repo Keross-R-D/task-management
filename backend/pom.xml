@@ -8,10 +8,12 @@
 		<version>3.4.4</version>
 		<relativePath/>
 	</parent>
-	<groupId>com.ikon</groupId> <!-- lookup parent from repository -->
-	<artifactId>invoice-management</artifactId><!-- lookup parent from repository -->
-	<version>0.0.1-SNAPSHOT</version>
-	<name>invoice-management</name><!-- lookup parent from repository -->
+	<groupId>com.ikon.taskmanagement</groupId> <!-- lookup parent from repository -->
+	<artifactId>taskmanagement</artifactId><!-- lookup parent from repository -->
+	<version>1.0.0</version>
+	<packaging>pom</packaging>
+
+	<name>taskmanagement</name><!-- lookup parent from repository -->
 	<url/>
 	<licenses>
 		<license/>
@@ -26,53 +28,68 @@
 		<url/>
 	</scm>
 	<properties>
-		<java.version>21</java.version>
-	</properties>
-	<dependencies>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-web</artifactId>
-		</dependency>
+        <maven.compiler.release>21</maven.compiler.release>
+        <java.version>21</java.version>
+        <spring-cloud.version>2024.0.0</spring-cloud.version>
+        <graalvm.version>24.1.1</graalvm.version>
+        <avro.version>1.12.0</avro.version>
+        <avro-serializer.version>7.8.0</avro-serializer.version>
+        <ikon.sdk.version>1.0.0</ikon.sdk.version>
+        <TaskManagement.version>1.0.0</TaskManagement.version>
+    </properties>
 
-		<dependency>
-			<groupId>org.projectlombok</groupId>
-			<artifactId>lombok</artifactId>
-			<optional>true</optional>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-test</artifactId>
-			<scope>test</scope>
-		</dependency>
-	</dependencies>
+    <repositories>
+        <repository>
+            <id>maven-central</id>
+            <name>Maven Central Repository</name>
+            <url>https://ikon-vpm.keross.com/nexus/repository/maven-central</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>ikon-nexus</id>
+            <name>Ikon Repository</name>
+            <url>https://ikon-vpm.keross.com/nexus/repository/maven-releases</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
 
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<configuration>
-					<annotationProcessorPaths>
-						<path>
-							<groupId>org.projectlombok</groupId>
-							<artifactId>lombok</artifactId>
-						</path>
-					</annotationProcessorPaths>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-				<configuration>
-					<excludes>
-						<exclude>
-							<groupId>org.projectlombok</groupId>
-							<artifactId>lombok</artifactId>
-						</exclude>
-					</excludes>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
+    <distributionManagement>
+        <!--<repository>
+            <id>ikon-repository</id>
+            <name>Ikon Repository</name>
+            <url>https://ikon-vpm.keross.com/nexus/repository/maven-releases</url>
+        </repository>-->
+		<repository>
+			<id>ikon-apps-lib-dist</id>
+			<name>Ikon App Lib Repository</name>
+			<url>https://ikon-vpm.keross.com/nexus/repository/ikon-apps-lib-dist/</url>
+		</repository>
+	</distributionManagement>
 
+	<dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            
+        </dependencies>
+    </dependencyManagement>
+	<modules>
+		<module>taskmanagement-client</module>
+		<module>taskmanagement-server</module>
+	</modules>
 </project>
