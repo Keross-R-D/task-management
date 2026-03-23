@@ -1,0 +1,117 @@
+spring:
+  application:
+    name: projectmanagement
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/projectmanagement?createDatabaseIfNotExist=true
+    username: root
+    password: rootpassword123
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      connectionTimeout: 20000
+      maximumPoolSize: 20
+  jpa:
+    database-platform: org.hibernate.dialect.MySQL8Dialect
+    hibernate:
+      ddl-auto: update  # Options: none, validate, update, create, create-drop
+    show-sql: true
+    defer-datasource-initialization: false
+    properties:
+      hibernate:
+        format_sql: true
+  sql:
+    init:
+      schema-locations:
+        - classpath:activiti.engine.schema.sql
+      mode: always
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password: 7410
+      database: 0
+      lettuce:
+        pool:
+          max-active: 10       # Maximum number of connections
+          max-idle: 8          # Maximum idle connections
+          min-idle: 2          # Minimum idle connections
+          max-wait: 5s         # Max wait time for a connection
+    mongodb:
+      host: localhost
+      port: 27017
+      username: admin
+      password: password123
+      authentication-database: admin
+  mongodb:
+    client:
+      settings:
+        connection-pool:
+          max-size: 500           # Maximum connections in the pool
+          min-size: 10           # Minimum idle connections
+          max-connection-idle-time: 10s     # Time a connection can be idle before being closed
+          max-wait-time: 5s
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    properties:
+      schema:
+        registry:
+          url: http://localhost:9093
+      specific:
+        avro:
+          reader: true
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
+    consumer:
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: io.confluent.kafka.serializers.KafkaAvroDeserializer
+      group-id: ${spring.application.name}-consumer-group
+      auto-offset-reset: earliest
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+#          issuer-uri: http://localhost:8081/api/platform
+          issuer-uri: https://ikoncloud-dev.keross.com/ikon-api/platform
+
+ikon:
+  user:
+    agent: "IKON App Server"
+  platform:
+    rest:
+      url: https://ikoncloud-dev.keross.com/ikon-api
+  logger:
+    enabled: false # set true when deployed in dev/uat/prod otherwise set to false if running in local/devtools environment.
+  accessmanagement:
+    init:
+      file: ../../bpmn/project.json
+  processengine:
+    databaseSchemaUpdate: false # possible values: "true", "false", "create-drop"
+    bpmn:
+      enabled: true
+      path: "../../bpmn"
+
+logging:
+  level:
+    com.ikon: DEBUG
+  file:
+    name: "../logs/${spring.application.name}-app.log"
+
+server:
+  address: 0.0.0.0
+#  address: 127.0.0.1
+  port: 8072
+
+eureka:
+  instance:
+    ip-address: ${server.address}
+    preferIpAddress: true
+    instance-id: ${spring.cloud.client.ip-address}:${spring.application.name}:${server.port}
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      default-zone: http://localhost:8761/eureka
