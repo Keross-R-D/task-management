@@ -1,9 +1,16 @@
 spring:
   application:
+<<<<<<< HEAD
     name: taskmanagement
 
   datasource:
     url: jdbc:mysql://localhost:3306/taskmanagement?createDatabaseIfNotExist=true
+=======
+    name: projectmanagement
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/projectmanagement?createDatabaseIfNotExist=true
+>>>>>>> 0b3935e1abdb895be2b79f8984a06a1f0eaa3367
     username: root
     password: rootpassword123
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -90,15 +97,26 @@ ikon:
     softwareId: "fe6e3390-c5e1-4797-9d59-7393d2fab5c1"
     softwareVerion: 1
     softwareName: ${spring.application.name}
+<<<<<<< HEAD
     softwareRepositoryName: taskmanagement
   accessmanagement:
     init:
       file: C:\Sales_CRM_New\taskmanagement\taskmanagement\bpmn\project.json
+=======
+    softwareRepositoryName: projectmanagement
+  accessmanagement:
+    init:
+      file: C:\Sales_CRM_New\projectmanagement\projectmanagement\bpmn\project.json
+>>>>>>> 0b3935e1abdb895be2b79f8984a06a1f0eaa3367
   processengine:
     databaseSchemaUpdate: false # possible values: "true", "false", "create-drop"
     bpmn:
       enabled: true
+<<<<<<< HEAD
       path: C:\Sales_CRM_New\taskmanagement\taskmanagement\bpmn
+=======
+      path: C:\Sales_CRM_New\projectmanagement\projectmanagement\bpmn
+>>>>>>> 0b3935e1abdb895be2b79f8984a06a1f0eaa3367
   job:
     max-pool-size: 100
 
