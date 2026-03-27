@@ -2,11 +2,7 @@ spring:
   main:
     allow-bean-definition-overriding: true
   application:
-<<<<<<< HEAD
     name: taskmanagement
-=======
-    name: projectmanagement
->>>>>>> 0b3935e1abdb895be2b79f8984a06a1f0eaa3367
 
   service:
     token:
@@ -16,11 +12,7 @@ spring:
   # MySQL Database Configuration
   # =============================
   datasource:
-<<<<<<< HEAD
     url: jdbc:mysql://192.168.3.144:3306/taskmanagement?createDatabaseIfNotExist=true
-=======
-    url: jdbc:mysql://192.168.3.144:3306/projectmanagement?createDatabaseIfNotExist=true
->>>>>>> 0b3935e1abdb895be2b79f8984a06a1f0eaa3367
     username: app_user
     password: userpassword123
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -60,9 +52,9 @@ spring:
           min-idle: 2
           max-wait: 5s
 
-  # =============================
-  # MongoDB Configuration
-  # =============================
+    # =============================
+    # MongoDB Configuration
+    # =============================
     mongodb:
       host: 192.168.3.144
       port: 27017
@@ -109,7 +101,6 @@ spring:
         jwt:
           issuer-uri: https://ikoncloud-dev.keross.com/ikon-api/platform
 
-
 # =============================
 # IKON Platform Configurations
 # =============================
@@ -119,12 +110,12 @@ ikon:
   platform:
     rest: https://ikoncloud-dev.keross.com/ikon-api
   logger:
-    enabled: false 
+    enabled: false
   accessmanagement:
     init:
       file: ../../bpmn/project.json
   processengine:
-    databaseSchemaUpdate: false 
+    databaseSchemaUpdate: false
     bpmn:
       enabled: true
       path: ../../bpmn
@@ -132,14 +123,9 @@ ikon:
     softwareId: "bfbb1d15-7e43-46ea-9b4c-109c8574aff8"
     softwareVerion: 1
     softwareName: ${spring.application.name}
-<<<<<<< HEAD
     softwareRepositoryName: taskmanagement
-=======
-    softwareRepositoryName: projectmanagement
->>>>>>> 0b3935e1abdb895be2b79f8984a06a1f0eaa3367
   job:
     max-pool-size: 100
-
 
 # =============================
 # Logging Configuration
@@ -150,14 +136,12 @@ logging:
   file:
     name: "../logs/${spring.application.name}-app.log"
 
-
 # =============================
 # Server Configuration
 # =============================
 server:
   address: 0.0.0.0
   port: 8071
-
 
 # =============================
 # Eureka (Optional)

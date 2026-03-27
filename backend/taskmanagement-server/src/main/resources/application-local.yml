@@ -1,16 +1,9 @@
 spring:
   application:
-<<<<<<< HEAD
     name: taskmanagement
 
   datasource:
     url: jdbc:mysql://localhost:3306/taskmanagement?createDatabaseIfNotExist=true
-=======
-    name: projectmanagement
-
-  datasource:
-    url: jdbc:mysql://localhost:3306/projectmanagement?createDatabaseIfNotExist=true
->>>>>>> 0b3935e1abdb895be2b79f8984a06a1f0eaa3367
     username: root
     password: rootpassword123
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -20,7 +13,7 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.MySQL8Dialect
     hibernate:
-      ddl-auto: update  # Options: none, validate, update, create, create-drop
+      ddl-auto: update # Options: none, validate, update, create, create-drop
     show-sql: true
     defer-datasource-initialization: false
     properties:
@@ -40,10 +33,10 @@ spring:
       database: 0
       lettuce:
         pool:
-          max-active: 10       # Maximum number of connections
-          max-idle: 8          # Maximum idle connections
-          min-idle: 2          # Minimum idle connections
-          max-wait: 5s        # Max wait time for a connection
+          max-active: 10 # Maximum number of connections
+          max-idle: 8 # Maximum idle connections
+          min-idle: 2 # Minimum idle connections
+          max-wait: 5s # Max wait time for a connection
     mongodb:
       host: localhost
       port: 27017
@@ -54,9 +47,9 @@ spring:
     client:
       settings:
         connection-pool:
-          max-size: 500           # Maximum connections in the pool
-          min-size: 10           # Minimum idle connections
-          max-connection-idle-time: 10s     # Time a connection can be idle before being closed
+          max-size: 500 # Maximum connections in the pool
+          min-size: 10 # Minimum idle connections
+          max-connection-idle-time: 10s # Time a connection can be idle before being closed
           max-wait-time: 5s
 
   kafka:
@@ -81,7 +74,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-#          issuer-uri: http://localhost:8081/api/platform
+          #          issuer-uri: http://localhost:8081/api/platform
           issuer-uri: https://ikoncloud-dev.keross.com/ikon-api/platform
 
 ikon:
@@ -97,26 +90,15 @@ ikon:
     softwareId: "fe6e3390-c5e1-4797-9d59-7393d2fab5c1"
     softwareVerion: 1
     softwareName: ${spring.application.name}
-<<<<<<< HEAD
     softwareRepositoryName: taskmanagement
   accessmanagement:
     init:
       file: C:\Sales_CRM_New\taskmanagement\taskmanagement\bpmn\project.json
-=======
-    softwareRepositoryName: projectmanagement
-  accessmanagement:
-    init:
-      file: C:\Sales_CRM_New\projectmanagement\projectmanagement\bpmn\project.json
->>>>>>> 0b3935e1abdb895be2b79f8984a06a1f0eaa3367
   processengine:
     databaseSchemaUpdate: false # possible values: "true", "false", "create-drop"
     bpmn:
       enabled: true
-<<<<<<< HEAD
       path: C:\Sales_CRM_New\taskmanagement\taskmanagement\bpmn
-=======
-      path: C:\Sales_CRM_New\projectmanagement\projectmanagement\bpmn
->>>>>>> 0b3935e1abdb895be2b79f8984a06a1f0eaa3367
   job:
     max-pool-size: 100
 

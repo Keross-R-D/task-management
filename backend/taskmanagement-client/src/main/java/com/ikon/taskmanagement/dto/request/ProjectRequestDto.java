@@ -1,15 +1,13 @@
-package com.ikon.taskmanagement.dto.response;
+package com.ikon.taskmanagement.dto.request;
 
 import lombok.Data;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
 @Data
-public class ProjectResponseDto {
-    private Long id;
+public class ProjectRequestDto {
     private String projectName;
     private String clientName;
     private UUID managerId;
@@ -18,6 +16,4 @@ public class ProjectResponseDto {
     private String projectStatus;
     private String type;
     private List<UUID> teamMemberIds;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
 }

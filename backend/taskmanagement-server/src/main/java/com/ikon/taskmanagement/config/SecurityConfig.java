@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 package com.ikon.taskmanagement.config;
-=======
-package com.ikon.projectmanagement.config;
->>>>>>> 0b3935e1abdb895be2b79f8984a06a1f0eaa3367
 
 import java.util.Arrays;
 import java.util.List;
@@ -42,7 +38,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests((authorize) -> {
                     authorize
 
-                            .requestMatchers("/actuator/health", "/actuator/health/**").permitAll()
+                            .requestMatchers("/actuator/health", "/actuator/health/**", "/api/projects/**").permitAll()
 
                             .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                             .anyRequest().authenticated();
@@ -50,7 +46,7 @@ public class SecurityConfig {
                 .oauth2ResourceServer((oauth2) -> {
                     oauth2.jwt((jwt) -> jwt.jwtAuthenticationConverter(ikonJwtTokenConverter));
                 });
-                
+
         return http.build();
     }
 

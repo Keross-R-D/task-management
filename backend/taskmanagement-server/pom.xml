@@ -26,6 +26,11 @@
             <artifactId>taskmanagement-client</artifactId>
             <version>${taskmanagement.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.ikon</groupId>
+            <artifactId>ikon-client</artifactId>
+            <version>${ikon.sdk.version}</version>
+        </dependency>
         <!-- <dependency>
             <groupId>com.ikon</groupId>
             <artifactId>ikon-processmanagement</artifactId>
@@ -69,7 +74,6 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
-
 
 
         <dependency>

@@ -14,29 +14,29 @@ import com.ikon.autoconfigure.annotation.EnableIkonSdk;
 import com.ikon.sdk.config.IkonSdkConfig;
 
 @EntityScan(basePackages = {
-                "com.ikon.taskmanagement.entity",
+        "com.ikon.taskmanagement.entity",
 
 })
 @EnableJpaRepositories(basePackages = {
-                "com.ikon.taskmanagement.repository",
+        "com.ikon.taskmanagement.repository",
 
 })
 @EnableFeignClients(basePackages = {
-                "com.ikon.client",
+        "com.ikon.client",
 
 })
 @SpringBootApplication(scanBasePackages = {
-                "com.ikon.taskmanagement",
+        "com.ikon.taskmanagement",
 
 }, exclude = {
-                CassandraAutoConfiguration.class,
-                CassandraHealthContributorAutoConfiguration.class
+        CassandraAutoConfiguration.class,
+        CassandraHealthContributorAutoConfiguration.class
 })
 @EnableJpaAuditing
 @EnableIkonSdk(configuration = IkonSdkConfig.class)
-public class taskmanagementApplication {
+public class TaskmanagementApplication {
 
-        public static void main(String[] args) {
-                SpringApplication.run(taskmanagementApplication.class, args);
-        }
+    public static void main(String[] args) {
+        SpringApplication.run(TaskmanagementApplication.class, args);
+    }
 }
