@@ -1,4 +1,3 @@
-
 package com.ikon.taskmanagement;
 
 import org.springframework.boot.SpringApplication;
@@ -34,9 +33,9 @@ import com.ikon.sdk.config.IkonSdkConfig;
 })
 @EnableJpaAuditing
 @EnableIkonSdk(configuration = IkonSdkConfig.class)
-public class TaskmanagementApplication {
+public class TaskManagementApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(TaskmanagementApplication.class, args);
+        SpringApplication.run(TaskManagementApplication.class, args);
     }
 }
