@@ -8,7 +8,7 @@ import java.util.UUID;
 
 @Data
 public class MyTaskResponseDto {
-    private Long id;
+    private UUID id;
 
     private String taskTitle;
     private String taskDescription;
