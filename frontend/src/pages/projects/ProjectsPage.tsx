@@ -8,13 +8,25 @@ import {
 import AddProjectModal, {
   type ProjectFormValues,
 } from "./components/AddProjectModal";
+import { useNavigate } from "react-router-dom";
 
-const columns = [
+
+
+const ProjectsPage: React.FC = () => {
+  const { data: projects = [], isLoading, isError } = useGetProjectsQuery();
+  const [createProject, { isLoading: isCreating }] = useCreateProjectMutation();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const navigate = useNavigate();
+
+
+  const columns = [
   {
     accessorKey: "projectName",
     header: () => <div className="text-left font-semibold">Project Name</div>,
     cell: ({ row }: any) => (
-      <span className="font-medium">{row.original.projectName}</span>
+      <span className="font-medium" onClick={() => navigate(`/main/projects/${row.original.id}`)}>
+        {row.original.projectName}
+      </span>
     ),
   },
   {
@@ -97,6 +109,7 @@ const ProjectsPage: React.FC = () => {
       />
     </div>
   );
+}
 };
 
 export default ProjectsPage;
