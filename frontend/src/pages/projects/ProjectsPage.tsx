@@ -10,46 +10,42 @@ import AddProjectModal, {
 } from "./components/AddProjectModal";
 import { useNavigate } from "react-router-dom";
 
-
-
 const ProjectsPage: React.FC = () => {
   const { data: projects = [], isLoading, isError } = useGetProjectsQuery();
   const [createProject, { isLoading: isCreating }] = useCreateProjectMutation();
   const [isModalOpen, setIsModalOpen] = useState(false);
+
   const navigate = useNavigate();
 
-
   const columns = [
-  {
-    accessorKey: "projectName",
-    header: () => <div className="text-left font-semibold">Project Name</div>,
-    cell: ({ row }: any) => (
-      <span className="font-medium" onClick={() => navigate(`/main/projects/${row.original.id}`)}>
-        {row.original.projectName}
-      </span>
-    ),
-  },
-  {
-    accessorKey: "clientName",
-    header: () => <div className="text-left font-semibold">Client Name</div>,
-    cell: ({ row }: any) => <span>{row.original.clientName}</span>,
-  },
-  {
-    accessorKey: "projectStatus",
-    header: () => <div className="text-left font-semibold">Status</div>,
-    cell: ({ row }: any) => <span>{row.original.projectStatus}</span>,
-  },
-  {
-    accessorKey: "startDate",
-    header: () => <div className="text-left font-semibold">Start Date</div>,
-    cell: ({ row }: any) => <span>{row.original.startDate}</span>,
-  },
-];
-
-const ProjectsPage: React.FC = () => {
-  const { data: projects = [], isLoading, isError } = useGetProjectsQuery();
-  const [createProject, { isLoading: isCreating }] = useCreateProjectMutation();
-  const [isModalOpen, setIsModalOpen] = useState(false);
+    {
+      accessorKey: "projectName",
+      header: () => <div className="text-left font-semibold">Project Name</div>,
+      cell: ({ row }: any) => (
+        <span
+          className="font-medium cursor-pointer"
+          onClick={() => navigate(`/main/projects/${row.original.id}`)}
+        >
+          {row.original.projectName}
+        </span>
+      ),
+    },
+    {
+      accessorKey: "clientName",
+      header: () => <div className="text-left font-semibold">Client Name</div>,
+      cell: ({ row }: any) => <span>{row.original.clientName}</span>,
+    },
+    {
+      accessorKey: "projectStatus",
+      header: () => <div className="text-left font-semibold">Status</div>,
+      cell: ({ row }: any) => <span>{row.original.projectStatus}</span>,
+    },
+    {
+      accessorKey: "startDate",
+      header: () => <div className="text-left font-semibold">Start Date</div>,
+      cell: ({ row }: any) => <span>{row.original.startDate}</span>,
+    },
+  ];
 
   const handleCreateProject = async (data: ProjectFormValues) => {
     try {
@@ -109,7 +105,6 @@ const ProjectsPage: React.FC = () => {
       />
     </div>
   );
-}
 };
 
 export default ProjectsPage;

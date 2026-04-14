@@ -24,7 +24,7 @@ import { MdOutlineTimer } from "react-icons/md";
 
 export default function Backlog() {
   return (
-    <div className="w-full  p-4 rounded-xl border">
+    <div className="w-full rounded-xl">
       <Accordion type="single" collapsible className="w-full">
         <div className="border  rounded-xl">
           <AccordionItem
@@ -33,12 +33,11 @@ export default function Backlog() {
           >
             {/* PROJECT HEADER */}
             <AccordionTrigger className="group hover:no-underline px-3 py-3 [&[data-state]>svg]:hidden">
-              <div className="flex items-center justify-between w-full min-w-0">
+              <div className="flex items-center justify-between w-full min-w-0 cursor-pointer">
                 {/* LEFT */}
                 <div className="flex items-center gap-3 min-w-0">
                   <ChevronRight className="h-4 w-4  transition-transform duration-200 group-data-[state=open]:rotate-90 shrink-0" />
 
-                  {/* React Icon (added) */}
                   <div className="h-8 w-8 flex items-center justify-center rounded-full  border ">
                     <MdDashboard className="text-[#61DAFB] text-sm" />
                   </div>
@@ -62,7 +61,7 @@ export default function Backlog() {
             {/* CONTENT */}
 
             <AccordionContent className="px-2 pb-2 py-2 overflow-hidden">
-              <div className=" px-6 py-4 flex items-center justify-between w-full border-b ">
+              <div className=" px-6 py-4 flex items-center justify-between w-full ">
                 {/* Left Section */}
                 <div className="flex items-center gap-4">
                   <div className="flex items-center gap-2">
@@ -89,7 +88,6 @@ export default function Backlog() {
                   <span className="font-medium">90h</span>
 
                   <DropdownMenu>
-                    {/* Trigger → clean icon */}
                     <DropdownMenuTrigger asChild>
                       <div className="p-0  border-none outline-none">
                         <MoreHorizontal size={18} className=" cursor-pointer" />

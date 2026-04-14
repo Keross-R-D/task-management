@@ -72,8 +72,8 @@ function DraggableItem({ item, column }: DraggableItemProps) {
 
   return (
     <div ref={setNodeRef} style={style} {...listeners} {...attributes}>
-      <Card className="mb-3 cursor-pointer border rounded-2xl shadow-sm hover:shadow-md transition">
-        <CardContent className="space-y-2">
+      <Card className="mb-3 cursor-pointer border rounded-2xl shadow-sm hover:shadow-md transition py-2 m-4">
+        <CardContent className="space-y-3">
           {/* Top Row */}
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-2">
@@ -109,17 +109,19 @@ function DraggableItem({ item, column }: DraggableItemProps) {
           </div>
 
           {/* Middle Row */}
-          <div className="flex items-center gap-2 text-xs">
-            <span className="text-yellow-400 border px-2 py-0.5 rounded-xl font-medium text-xs">
-              MEDIUM
-            </span>
-            <span>epic1 → sprint1</span>
-          </div>
+          <div className="grid gap-2">
+            <div className="flex items-center gap-2 text-xs">
+              <span className="text-yellow-400 border px-2 py-0.5 rounded-xl font-medium text-xs">
+                MEDIUM
+              </span>
+              <span>epic1 → sprint1</span>
+            </div>
 
-          {/* Bottom Row */}
-          <div className="flex items-center gap-2 text-xs">
-            <FiClock />
-            <span>0/0h</span>
+            {/* Bottom Row */}
+            <div className="flex items-center gap-2 text-xs">
+              <FiClock />
+              <span>0/0h</span>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -133,9 +135,9 @@ function Column({ id, items }: ColumnProps) {
   return (
     <div
       ref={setNodeRef}
-      className="rounded-xl border p-4 w-full min-h-[400px]"
+      className="rounded-xl border w-full min-h-[400px]"
     >
-      <div className="flex items-start justify-between">
+      <div className="flex items-start px-4 pt-4 pb-2 justify-between">
         <h3 className="font-semibold mb-3 capitalize">{id}</h3>
         <span className="text-xs">{items.length} tasks</span>
       </div>
@@ -181,7 +183,7 @@ export default function TaskBoard() {
 
   return (
     <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-      <div className="flex gap-6 overflow-x-auto">
+      <div className="flex gap-6  overflow-x-auto">
         {Object.entries(columns).map(([colId, items]) => (
           <Column key={colId} id={colId} items={items} />
         ))}

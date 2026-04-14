@@ -2,6 +2,13 @@
   "configurations": [
     {
       "type": "java",
+      "name": "TaskManagementApplication",
+      "request": "launch",
+      "mainClass": "com.ikon.taskmanagement.TaskManagementApplication",
+      "projectName": "taskmanagement-server"
+    },
+    {
+      "type": "java",
       "name": "Spring Boot-TaskmanagementApplication<taskmanagement-server>",
       "request": "launch",
       "cwd": "${workspaceFolder}",

@@ -1,7 +1,6 @@
-
-import Backlog from './Backlog'
-import SearchAndFilter from './SearchAndFilter'
-import Epic from './Epic'
+import Backlog from "./Backlog";
+import SearchAndFilter from "./SearchAndFilter";
+import Epic from "./Epic";
 
 const TaskList = () => {
   return (
@@ -10,7 +9,7 @@ const TaskList = () => {
       <Epic />
       <Backlog />
     </div>
-  )
-}
+  );
+};
 
-export default TaskList
+export default TaskList;

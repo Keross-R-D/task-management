@@ -1,39 +1,53 @@
 "use client";
 
 import { useState } from "react";
-import { Input } from "ikon-react-components-lib";
-import {
-  Combobox,
-  ComboboxContent,
-  ComboboxEmpty,
-  ComboboxInput,
-  ComboboxItem,
-  ComboboxList,
-} from "@/components/ui/combobox";
-
+import { Input, ComboboxInput } from "ikon-react-components-lib";
 import { IoSearch } from "react-icons/io5";
 import { CiFilter } from "react-icons/ci";
 
-// Added default options inside arrays
-const statusItems = ["All Status", "To Do", "In Progress", "Done", "Blocked"];
-const priorityItems = ["All Priority", "Critical", "Low", "Medium", "High"];
-const typeItems = ["All Types", "Task", "Bug", "Story", "Improvement"];
-const stateItems = ["All Sprints", "Active Sprints", "Planned", "Completed", "Cancelled"];
+const statusItems = [
+  { label: "All Status", value: "All Status" },
+  { label: "To Do", value: "To Do" },
+  { label: "In Progress", value: "In Progress" },
+  { label: "Done", value: "Done" },
+  { label: "Blocked", value: "Blocked" },
+];
+
+const priorityItems = [
+  { label: "All Priority", value: "All Priority" },
+  { label: "Critical", value: "Critical" },
+  { label: "Low", value: "Low" },
+  { label: "Medium", value: "Medium" },
+  { label: "High", value: "High" },
+];
+
+const typeItems = [
+  { label: "All Types", value: "All Types" },
+  { label: "Task", value: "Task" },
+  { label: "Bug", value: "Bug" },
+  { label: "Story", value: "Story" },
+  { label: "Improvement", value: "Improvement" },
+];
+
+const stateItems = [
+  { label: "All Sprints", value: "All Sprints" },
+  { label: "Active Sprints", value: "Active Sprints" },
+  { label: "Planned", value: "Planned" },
+  { label: "Completed", value: "Completed" },
+  { label: "Cancelled", value: "Cancelled" },
+];
 
 export default function SearchAndFilter() {
-
-  // Default selected values
-  const [status, setStatus] = useState<string | null>("All Status");
-  const [priority, setPriority] = useState<string | null>("All Priority");
-  const [type, setType] = useState<string | null>("All Types");
-  const [state, setState] = useState<string | null>("All Sprints");
+  const [status, setStatus] = useState("All Status");
+  const [priority, setPriority] = useState("All Priority");
+  const [type, setType] = useState("All Types");
+  const [state, setState] = useState("All Sprints");
 
   return (
     <div className="w-full flex flex-wrap items-center gap-3 my-4">
-
       {/* SEARCH */}
-      <div className="flex items-center w-[300px]  border  rounded-lg ps-3">
-        <IoSearch className=" mr-2" />
+      <div className="flex items-center w-[300px] border rounded-lg ps-3">
+        <IoSearch className="mr-2" />
         <Input
           placeholder="Search..."
           className="border-none focus-visible:ring-0"
@@ -41,87 +55,53 @@ export default function SearchAndFilter() {
       </div>
 
       {/* STATUS */}
-      <div className="flex items-center w-40 gap-2 ps-2 border  rounded-lg">
+      <div className="flex items-center w-40 gap-2 ps-2 border rounded-lg">
         <CiFilter className="text-lg font-bold" />
-
-        <Combobox items={statusItems} value={status} onValueChange={setStatus}>
+        <div className="flex-1">
           <ComboboxInput
             placeholder="All Status"
-            className=" border-none  focus:ring-0"
+            items={statusItems}
+            defaultValue={status}
+            onSelect={(value) => setStatus(value as string)}
           />
-          <ComboboxContent>
-            <ComboboxEmpty>No items found.</ComboboxEmpty>
-            <ComboboxList>
-              {(item) => (
-                <ComboboxItem key={item} value={item}>
-                  {item}
-                </ComboboxItem>
-              )}
-            </ComboboxList>
-          </ComboboxContent>
-        </Combobox>
+        </div>
       </div>
 
       {/* PRIORITY */}
-      <div className="flex items-center w-40 gap-2 border  rounded-lg ">
-        <Combobox items={priorityItems} value={priority} onValueChange={setPriority}>
+      <div className="flex items-center w-40 gap-2 border rounded-lg">
+        <div className="flex-1">
           <ComboboxInput
             placeholder="All Priority"
-            className=" border-none  focus:ring-0"
+            items={priorityItems}
+            defaultValue={priority}
+            onSelect={(value) => setPriority(value as string)}
           />
-          <ComboboxContent>
-            <ComboboxEmpty>No items found.</ComboboxEmpty>
-            <ComboboxList>
-              {(item) => (
-                <ComboboxItem key={item} value={item}>
-                  {item}
-                </ComboboxItem>
-              )}
-            </ComboboxList>
-          </ComboboxContent>
-        </Combobox>
+        </div>
       </div>
 
       {/* TYPE */}
-      <div className="flex items-center w-40 gap-2 border  rounded-lg ">
-        <Combobox items={typeItems} value={type} onValueChange={setType}>
+      <div className="flex items-center w-40 gap-2 border rounded-lg">
+        <div className="flex-1">
           <ComboboxInput
             placeholder="All Types"
-            className=" border-none  focus:ring-0"
+            items={typeItems}
+            defaultValue={type}
+            onSelect={(value) => setType(value as string)}
           />
-          <ComboboxContent>
-            <ComboboxEmpty>No items found.</ComboboxEmpty>
-            <ComboboxList>
-              {(item) => (
-                <ComboboxItem key={item} value={item}>
-                  {item}
-                </ComboboxItem>
-              )}
-            </ComboboxList>
-          </ComboboxContent>
-        </Combobox>
+        </div>
       </div>
 
       {/* STATE */}
-      <div className="flex items-center w-40 gap-2 border  rounded-lg ">
-        <Combobox items={stateItems} value={state} onValueChange={setState}>
+      <div className="flex items-center w-40 gap-2 border rounded-lg">
+        <div className="flex-1">
           <ComboboxInput
             placeholder="All Sprints"
-            className=" border-none  focus:ring-0"
+            items={stateItems}
+            defaultValue={state}
+            onSelect={(value) => setState(value as string)}
           />
-          <ComboboxContent>
-            <ComboboxEmpty>No items found.</ComboboxEmpty>
-            <ComboboxList>
-              {(item) => (
-                <ComboboxItem key={item} value={item}>
-                  {item}
-                </ComboboxItem>
-              )}
-            </ComboboxList>
-          </ComboboxContent>
-        </Combobox>
+        </div>
       </div>
-
     </div>
   );
 }

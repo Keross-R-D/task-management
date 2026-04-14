@@ -26,7 +26,6 @@ export default function UnAssignedTask() {
                 <div className="flex items-center gap-3 min-w-0">
                   <ChevronRight className="h-4 w-4 transition-transform duration-200 group-data-[state=open]:rotate-90 shrink-0" />
 
-                  {/* React Icon (added) */}
                   <div className="h-8 w-8 flex items-center justify-center rounded-full  border ">
                     <MdDashboard className=" text-sm" />
                   </div>
