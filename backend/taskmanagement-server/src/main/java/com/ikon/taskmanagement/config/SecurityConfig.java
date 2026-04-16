@@ -38,7 +38,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests((authorize) -> {
                     authorize
 
-                            .requestMatchers("/actuator/health", "/actuator/health/**", "/api/projects/**").permitAll()
+                            .requestMatchers("/actuator/health", "/actuator/health/**", "/api/projects/**","/api/myTasks/**").permitAll()
 
                             .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                             .anyRequest().authenticated();
@@ -53,8 +53,8 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:3000"));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedOrigins(List.of("http://localhost:5173"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT","PATCH","DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
