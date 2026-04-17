@@ -2,38 +2,58 @@ package com.ikon.taskmanagement.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
-
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 
 @Entity
-@Table(name = "projects")
+@Table(name = "tasks")
 @Data
 @EntityListeners(AuditingEntityListener.class)
-public class Project {
-
+public class Task {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "id", updatable = false, nullable = false)
     private UUID id;
 
     @Column(nullable = false)
-    private String projectName;
+    private UUID projectId;
 
     @Column
-    private String clientName;
+    private UUID epicId;
 
     @Column
-    @JdbcTypeCode(SqlTypes.UUID)
-    private UUID managerId;
+    private UUID sprintId;
+
+    @Column(nullable = false)
+    private String title;
+
+    @Column(columnDefinition = "TEXT")
+    private String description;
+
+    @Column
+    private String type = "task";
+
+    @Column
+    private String status = "todo";
+
+    @Column
+    private String priority = "medium";
+
+    @Column
+    private UUID assigneeId;
+
+    @Column
+    private UUID reporterId;
+
+    @Column
+    private Double estimatedHours = 0.0;
+
+    @Column
+    private Double actualHours = 0.0;
 
     @Column
     private LocalDate startDate;
@@ -42,16 +62,7 @@ public class Project {
     private LocalDate endDate;
 
     @Column
-    private String projectStatus;
-
-    @Column
-    private String type = "Project";
-
-    @ElementCollection
-    @CollectionTable(name = "project_team_members", joinColumns = @JoinColumn(name = "project_id"))
-    @Column(name = "team_member_id")
-    @JdbcTypeCode(SqlTypes.UUID)
-    private List<UUID> teamMemberIds;
+    private Double plannedDuration;
 
     @CreatedDate
     @Column(updatable = false)

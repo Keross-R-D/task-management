@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @CrossOrigin(origins = "*")
@@ -31,17 +32,17 @@ public class ProjectController implements ProjectApi {
     }
 
     @Override
-    public ResponseEntity<ProjectResponseDto> getProjectById(Long id) {
+    public ResponseEntity<ProjectResponseDto> getProjectById(UUID id) {
         return ResponseEntity.ok(projectService.getProjectById(id));
     }
 
     @Override
-    public ResponseEntity<ProjectResponseDto> updateProject(Long id, ProjectRequestDto projectDto) {
+    public ResponseEntity<ProjectResponseDto> updateProject(UUID id, ProjectRequestDto projectDto) {
         return ResponseEntity.ok(projectService.updateProject(id, projectDto));
     }
 
     @Override
-    public ResponseEntity<Void> deleteProject(Long id) {
+    public ResponseEntity<Void> deleteProject(UUID id) {
         projectService.deleteProject(id);
         return ResponseEntity.noContent().build();
     }

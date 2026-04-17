@@ -4,15 +4,16 @@ import com.ikon.taskmanagement.dto.request.ProjectRequestDto;
 import com.ikon.taskmanagement.dto.response.ProjectResponseDto;
 
 import java.util.List;
+import java.util.UUID;
 
 public interface ProjectService {
     ProjectResponseDto createProject(ProjectRequestDto projectDto);
 
     List<ProjectResponseDto> getAllProjects();
 
-    ProjectResponseDto getProjectById(Long id);
+    ProjectResponseDto getProjectById(UUID id);
 
-    ProjectResponseDto updateProject(Long id, ProjectRequestDto projectDto);
+    ProjectResponseDto updateProject(UUID id, ProjectRequestDto projectDto);
 
-    void deleteProject(Long id);
+    void deleteProject(UUID id);
 }

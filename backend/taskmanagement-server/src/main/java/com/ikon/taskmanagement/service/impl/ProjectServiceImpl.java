@@ -9,6 +9,7 @@ import com.ikon.taskmanagement.service.ProjectService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -37,14 +38,14 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public ProjectResponseDto getProjectById(Long id) {
+    public ProjectResponseDto getProjectById(UUID id) {
         Project project = projectRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Project not found with id: " + id));
         return projectMapper.mapToDto(project);
     }
 
     @Override
-    public ProjectResponseDto updateProject(Long id, ProjectRequestDto projectDto) {
+    public ProjectResponseDto updateProject(UUID id, ProjectRequestDto projectDto) {
         Project existingProject = projectRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Project not found with id: " + id));
 
@@ -55,7 +56,7 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public void deleteProject(Long id) {
+    public void deleteProject(UUID id) {
         projectRepository.deleteById(id);
     }
 }

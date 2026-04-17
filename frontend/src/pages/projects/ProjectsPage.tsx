@@ -102,6 +102,7 @@ const ProjectsPage: React.FC = () => {
         onClose={() => setIsModalOpen(false)}
         onSubmit={handleCreateProject}
         isLoading={isCreating}
+        
       />
     </div>
   );

@@ -2,7 +2,6 @@ package com.ikon.taskmanagement.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
-
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 import org.springframework.data.annotation.CreatedDate;
@@ -11,47 +10,42 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Entity
-@Table(name = "projects")
+@Table(name = "task_worklogs")
 @Data
 @EntityListeners(AuditingEntityListener.class)
-public class Project {
-
+public class TaskWorklog {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "id", updatable = false, nullable = false)
     private UUID id;
 
     @Column(nullable = false)
-    private String projectName;
+    private UUID taskId;
 
-    @Column
-    private String clientName;
+    @Column(nullable = false)
+    private UUID projectId;
 
-    @Column
-    @JdbcTypeCode(SqlTypes.UUID)
-    private UUID managerId;
+    @Column(nullable = false)
+    private UUID teamMemberId;
 
-    @Column
+    @Column(nullable = false)
     private LocalDate startDate;
 
-    @Column
+    @Column(nullable = false)
     private LocalDate endDate;
 
-    @Column
-    private String projectStatus;
+    @Column(nullable = false)
+    private Double totalHours;
 
-    @Column
-    private String type = "Project";
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "jsonb", nullable = false)
+    private Map<String, Double> hoursDistribution;
 
-    @ElementCollection
-    @CollectionTable(name = "project_team_members", joinColumns = @JoinColumn(name = "project_id"))
-    @Column(name = "team_member_id")
-    @JdbcTypeCode(SqlTypes.UUID)
-    private List<UUID> teamMemberIds;
+    @Column(columnDefinition = "TEXT")
+    private String description;
 
     @CreatedDate
     @Column(updatable = false)

@@ -12,8 +12,43 @@ import SearchAndFilter from "./components/SearchAndFilter";
 import TaskBoard from "./components/TaskBoard";
 import ResourceUtilization from "./components/ResouceUtilisation";
 import { SimpleWidget } from "ikon-react-components-lib";
+import { useState } from "react";
+import AddEpicModal, { type EpicFormValues } from "./components/AddEpicModal";
+import {
+  
+  useCreateEpicMutation,
+} from "@/features/epics/epicsApiSlice";
+import { useParams } from "react-router-dom";
 
 export default function ProjectDetailPage() {
+  
+  const [createEpic] = useCreateEpicMutation();
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const { id } = useParams();
+
+  const handleCreateEpic = async (data: EpicFormValues) => {
+    try {
+      if (!id) {
+        console.error("Project ID missing");
+        return;
+      }
+     
+      setLoading(true);
+
+      await createEpic({
+        ...data,
+        projectId :id,
+      }).unwrap();
+
+      setOpen(false);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="w-full">
       {/* ================= TOP PROJECT CARD ================= */}
@@ -111,7 +146,7 @@ export default function ProjectDetailPage() {
                 Bulk Upload
               </Button>
 
-              <Button>
+              <Button onClick={() => setOpen(true)}>
                 <Plus size={16} className="mr-2" />
                 Add Epic
               </Button>
@@ -135,6 +170,12 @@ export default function ProjectDetailPage() {
           </TabsContent>
         </Tabs>
       </div>
+      <AddEpicModal
+        open={open}
+        onClose={() => setOpen(false)}
+        onSubmit={handleCreateEpic}
+        isLoading={loading}
+      />
     </div>
   );
 }

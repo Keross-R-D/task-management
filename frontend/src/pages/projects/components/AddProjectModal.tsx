@@ -20,6 +20,7 @@ import {
   SelectValue,
   SelectContent,
   SelectItem,
+  Textarea,
 } from "ikon-react-components-lib";
 
 const projectSchema = z.object({
@@ -188,6 +189,7 @@ export default function AddProjectModal({ open, onClose, onSubmit, isLoading }: 
                   </FormItem>
                 )}
               />
+              <Textarea />
             </div>
 
             <div className="flex justify-end gap-3 pt-4">

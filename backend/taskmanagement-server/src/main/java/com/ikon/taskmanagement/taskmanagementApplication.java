@@ -1,3 +1,4 @@
+
 package com.ikon.taskmanagement;
 
 import org.springframework.boot.SpringApplication;
@@ -33,9 +34,10 @@ import com.ikon.sdk.config.IkonSdkConfig;
 })
 @EnableJpaAuditing
 @EnableIkonSdk(configuration = IkonSdkConfig.class)
-public class TaskManagementApplication {
+public class TaskmanagementApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(TaskManagementApplication.class, args);
+        java.util.TimeZone.setDefault(java.util.TimeZone.getTimeZone("Asia/Kolkata"));
+        SpringApplication.run(TaskmanagementApplication.class, args);
     }
 }
