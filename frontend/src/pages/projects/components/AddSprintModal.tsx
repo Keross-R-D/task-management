@@ -23,34 +23,35 @@ import {
   Textarea,
 } from "ikon-react-components-lib";
 
-const epicSchema = z.object({
-  name: z.string().min(3, "Epic name is required"),
-  description: z.string().min(5, "Description is required"),
-  status: z.string().min(4, "Status is required"),
+
+const sprintSchema = z.object({
+  name: z.string().min(2, "Sprint name is required"),
+  goal: z.string().min(3, "Goal is required"),
+  status: z.string().min(3, "Status is required"),
   startDate: z.string().min(1, "Start date is required"),
   endDate: z.string().min(1, "End date is required"),
 });
 
-export type EpicFormValues = z.infer<typeof epicSchema>;
+export type SprintFormValues = z.infer<typeof sprintSchema>;
 
 interface Props {
   open: boolean;
   onClose: () => void;
-  onSubmit: (data: EpicFormValues) => void;
+  onSubmit: (data: SprintFormValues) => void;
   isLoading?: boolean;
 }
 
-export default function AddEpicModal({
+export default function AddSprintModal({
   open,
   onClose,
   onSubmit,
   isLoading,
 }: Props) {
-  const form = useForm<EpicFormValues>({
-    resolver: zodResolver(epicSchema),
+  const form = useForm<SprintFormValues>({
+    resolver: zodResolver(sprintSchema),
     defaultValues: {
       name: "",
-      description: "",
+      goal: "",
       status: "",
       startDate: "",
       endDate: "",
@@ -62,7 +63,7 @@ export default function AddEpicModal({
     onClose();
   };
 
-  const handleCreate = (data: EpicFormValues) => {
+  const handleCreate = (data: SprintFormValues) => {
     onSubmit(data);
     form.reset();
   };
@@ -71,29 +72,45 @@ export default function AddEpicModal({
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-lg">
         <DialogHeader className="my-3">
-          <DialogTitle>Add Epic</DialogTitle>
+          <DialogTitle>Add Sprint</DialogTitle>
           <span className="text-gray-400">
-            Create a new epic for this project.
+            Create a new sprint within this epic.
           </span>
         </DialogHeader>
 
         <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(handleCreate)}
-            className="space-y-4"
-          >
-            {/* Name */}
+          <form onSubmit={form.handleSubmit(handleCreate)} className="space-y-4">
+
+            {/* Sprint Name */}
             <FormField
               control={form.control}
               name="name"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
-                    Epic Name <span className="text-red-500">*</span>
+                    Sprint Name <span className="text-red-500">*</span>
                   </FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder="e.g., Authentication Module"
+                    <Input placeholder="e.g. Sprint 1" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Goal */}
+            <FormField
+              control={form.control}
+              name="goal"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    Goal <span className="text-red-500">*</span>
+                  </FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="What is the goal of this sprint?"
+                      className="min-h-[80px]"
                       {...field}
                     />
                   </FormControl>
@@ -102,26 +119,7 @@ export default function AddEpicModal({
               )}
             />
 
-            {/* Description */}
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Description <span className="text-red-500">*</span>
-                  </FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Describe the epic..."
-                      className="min-h-[100px]"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {/* Status */}
             <FormField
               control={form.control}
               name="status"
@@ -139,8 +137,8 @@ export default function AddEpicModal({
                     </FormControl>
 
                     <SelectContent>
-                      <SelectItem value="NOT_STARTED">Not Started</SelectItem>
-                      <SelectItem value="IN_PROGRESS">In Progress</SelectItem>
+                      <SelectItem value="PLANNED">Planned</SelectItem>
+                      <SelectItem value="ACTIVE">Active</SelectItem>
                       <SelectItem value="COMPLETED">Completed</SelectItem>
                     </SelectContent>
                   </Select>
@@ -185,15 +183,13 @@ export default function AddEpicModal({
               />
             </div>
 
-            {/* Status */}
-
             {/* Actions */}
             <div className="flex justify-end gap-3 pt-4">
               <Button type="button" variant="secondary" onClick={handleClose}>
                 Cancel
               </Button>
               <Button type="submit" disabled={isLoading}>
-                {isLoading ? "Creating..." : "Add Epic"}
+                {isLoading ? "Creating..." : "Add Sprint"}
               </Button>
             </div>
           </form>

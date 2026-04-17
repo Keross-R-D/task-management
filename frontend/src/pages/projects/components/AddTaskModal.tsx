@@ -22,28 +22,28 @@ import {
   SelectItem,
   Textarea,
 } from "ikon-react-components-lib";
+
 const taskSchema = z.object({
   title: z.string().min(1, "Title is required"),
-  description: z.string().optional(),
+  description: z.string().min(4,"Description is required"),
 
-  type: z.string().min(1),
-  status: z.string().min(1),
-  priority: z.string().min(1),
+  type: z.string().min(1, "Type is required"),
+  status: z.string().min(1, "Status is required"),
+  priority: z.string().min(1, "Priority is required"),
 
-  assigneeId: z.string().optional(),
+ assigneeId: z.string().min(1, "Assignee is required"),
+reporterId: z.string().min(1, "Reporter is required"),
 
-  estimatedHours: z.preprocess(
-    (val) => (val === "" ? undefined : Number(val)),
-    z.number().optional()
-  ),
+estimatedHours: z
+  .number()
+  .min(1, "Must be greater than 0"),
 
-  plannedDuration: z.preprocess(
-    (val) => (val === "" ? undefined : Number(val)),
-    z.number().optional()
-  ),
+plannedDuration: z
+  .number()
+  .min(1, "Must be greater than 0"),
 
-  startDate: z.string().optional(),
-  endDate: z.string().optional(),
+startDate: z.string().min(1, "Start date is required"),
+endDate: z.string().min(1, "End date is required"),
 });
 
 export type TaskFormValues = z.infer<typeof taskSchema>;
@@ -62,19 +62,20 @@ export default function AddTaskModal({
   isLoading,
 }: Props) {
   const form = useForm<TaskFormValues>({
-    resolver: zodResolver(taskSchema) as any,
-   defaultValues: {
-  title: "",
-  description: "",
-  type: "TASK",
-  status: "TODO",
-  priority: "MEDIUM",
-  assigneeId: "",
-  estimatedHours: undefined,
-  plannedDuration: undefined,
-  startDate: "",
-  endDate: "",
-}
+    resolver: zodResolver(taskSchema),
+    defaultValues: {
+      title: "",
+      description: "",
+      type: "",       
+      status: "",     
+      priority: "",   
+      assigneeId: "",
+      reporterId: "",
+      estimatedHours: undefined,
+      plannedDuration: undefined,
+      startDate: "",
+      endDate: "",
+    },
   });
 
   const handleClose = () => {
@@ -105,9 +106,7 @@ export default function AddTaskModal({
               name="title"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>
-                    Title <span className="text-red-500">*</span>
-                  </FormLabel>
+                  <FormLabel>Title *</FormLabel>
                   <FormControl>
                     <Input placeholder="Enter task title" {...field} />
                   </FormControl>
@@ -124,10 +123,7 @@ export default function AddTaskModal({
                 <FormItem>
                   <FormLabel>Description</FormLabel>
                   <FormControl>
-                    <Textarea
-                      placeholder="Enter description"
-                      {...field}
-                    />
+                    <Textarea {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -136,19 +132,17 @@ export default function AddTaskModal({
 
             {/* Type | Priority | Status */}
             <div className="grid grid-cols-3 gap-4">
+              {/* Type */}
               <FormField
                 control={form.control}
                 name="type"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Type</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      value={field.value}
-                    >
+                    <FormLabel>Type *</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value || ""}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Type" />
+                          <SelectValue placeholder="Select Type" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -157,23 +151,22 @@ export default function AddTaskModal({
                         <SelectItem value="STORY">Story</SelectItem>
                       </SelectContent>
                     </Select>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
 
+              {/* Priority */}
               <FormField
                 control={form.control}
                 name="priority"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Priority</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      value={field.value}
-                    >
+                    <FormLabel>Priority *</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value || ""}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Priority" />
+                          <SelectValue placeholder="Select Priority" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -182,54 +175,66 @@ export default function AddTaskModal({
                         <SelectItem value="HIGH">High</SelectItem>
                       </SelectContent>
                     </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Status */}
+              <FormField
+                control={form.control}
+                name="status"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Status *</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value || ""}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select Status" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="TODO">To Do</SelectItem>
+                        <SelectItem value="IN_PROGRESS">In Progress</SelectItem>
+                        <SelectItem value="DONE">Done</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            {/* Assignee + Reporter */}
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="assigneeId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Assignee ID</FormLabel>
+                    <FormControl>
+                      <Input placeholder="UUID" {...field} />
+                    </FormControl>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
 
               <FormField
                 control={form.control}
-                name="status"
+                name="reporterId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Status</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      value={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Status" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="TODO">To Do</SelectItem>
-                        <SelectItem value="IN_PROGRESS">
-                          In Progress
-                        </SelectItem>
-                        <SelectItem value="DONE">Done</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <FormLabel>Reporter ID</FormLabel>
+                    <FormControl>
+                      <Input placeholder="UUID" {...field} />
+                    </FormControl>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
-
-            {/* Assignee */}
-            <FormField
-              control={form.control}
-              name="assigneeId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Assignee</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Enter Assignee UUID"
-                      {...field}
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
 
             {/* Dates */}
             <div className="grid grid-cols-2 gap-4">
@@ -242,6 +247,7 @@ export default function AddTaskModal({
                     <FormControl>
                       <Input type="date" {...field} />
                     </FormControl>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -255,12 +261,13 @@ export default function AddTaskModal({
                     <FormControl>
                       <Input type="date" {...field} />
                     </FormControl>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
 
-            {/* Hours */}
+            {/* Numbers */}
             <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
@@ -271,10 +278,15 @@ export default function AddTaskModal({
                     <FormControl>
                       <Input
                         type="number"
-                        placeholder="e.g. 5"
-                        {...field}
+                        value={field.value ?? ""}
+                        onChange={(e) =>
+                          field.onChange(
+                            e.target.value === "" ? undefined : e.target.valueAsNumber
+                          )
+                        }
                       />
                     </FormControl>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -284,14 +296,19 @@ export default function AddTaskModal({
                 name="plannedDuration"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Planned Duration (days)</FormLabel>
+                    <FormLabel>Planned Duration</FormLabel>
                     <FormControl>
                       <Input
                         type="number"
-                        placeholder="e.g. 2"
-                        {...field}
+                        value={field.value ?? ""}
+                        onChange={(e) =>
+                          field.onChange(
+                            e.target.value === "" ? undefined : e.target.valueAsNumber
+                          )
+                        }
                       />
                     </FormControl>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -299,11 +316,7 @@ export default function AddTaskModal({
 
             {/* Buttons */}
             <div className="flex justify-end gap-3 pt-4">
-              <Button
-                type="button"
-                variant="secondary"
-                onClick={handleClose}
-              >
+              <Button type="button" variant="secondary" onClick={handleClose}>
                 Cancel
               </Button>
               <Button type="submit" disabled={isLoading}>
