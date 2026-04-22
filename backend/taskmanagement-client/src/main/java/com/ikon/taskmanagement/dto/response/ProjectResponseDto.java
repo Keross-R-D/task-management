@@ -9,7 +9,7 @@ import java.util.UUID;
 
 @Data
 public class ProjectResponseDto {
-    private Long id;
+    private UUID id;
     private String projectName;
     private String clientName;
     private UUID managerId;

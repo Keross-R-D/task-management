@@ -1,6 +1,13 @@
-import React, { useState } from "react";
-import { DataTable, Button, DataTableLayout } from "ikon-react-components-lib";
-import { Plus } from "lucide-react";
+import React, { useState, useMemo } from "react";
+import { DataTableLayout, Button } from "ikon-react-components-lib";
+import {
+  Plus,
+  Users,
+  ClipboardCheck,
+  ArrowUpRight,
+  FolderOpen,
+} from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import {
   useGetProjectsQuery,
   useCreateProjectMutation,
@@ -9,33 +16,117 @@ import AddProjectModal, {
   type ProjectFormValues,
 } from "./components/AddProjectModal";
 
-const columns = [
-  {
-    accessorKey: "projectName",
-    header: () => <div className="text-left font-semibold">Project Name</div>,
-    cell: ({ row }: any) => (
-      <span className="font-medium">{row.original.projectName}</span>
-    ),
-  },
-  {
-    accessorKey: "clientName",
-    header: () => <div className="text-left font-semibold">Client Name</div>,
-    cell: ({ row }: any) => <span>{row.original.clientName}</span>,
-  },
-  {
-    accessorKey: "projectStatus",
-    header: () => <div className="text-left font-semibold">Status</div>,
-    cell: ({ row }: any) => <span>{row.original.projectStatus}</span>,
-  },
-  {
-    accessorKey: "startDate",
-    header: () => <div className="text-left font-semibold">Start Date</div>,
-    cell: ({ row }: any) => <span>{row.original.startDate}</span>,
-  },
-];
+export function ProjectsGrid({ data }: { data: any[] }) {
+  const navigate = useNavigate();
+  return (
+    <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-4">
+      {data.map((project, idx) => (
+        <div
+          key={project.id || idx}
+          onClick={() => navigate(`/main/projects/${project.id}`)}
+          className="group relative bg-card border border-border rounded-xl overflow-hidden hover:border-primary/50 transition-all duration-300 shadow-sm hover:shadow-primary/5 cursor-pointer"
+        >
+          <div className="p-5">
+            <div className="flex justify-between items-start mb-4">
+              <div className="bg-primary/10 p-2 rounded-lg text-primary">
+                <FolderOpen className="w-5 h-5" />
+              </div>
+              <div className="flex items-center gap-2">
+                <div
+                  className={`px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider ${
+                    project.projectStatus === "COMPLETED"
+                      ? "bg-green-500/10 text-green-500"
+                      : project.projectStatus === "IN_PROGRESS"
+                        ? "bg-blue-500/10 text-blue-500"
+                        : "bg-gray-500/10 text-gray-500"
+                  }`}
+                >
+                  {project.projectStatus}
+                </div>
+              </div>
+            </div>
+
+            <div className="mb-4">
+              <h3 className="text-lg font-bold text-foreground mb-1 group-hover:text-primary transition-colors line-clamp-1">
+                {project.projectName}
+              </h3>
+              <div className="flex items-center text-sm text-muted-foreground">
+                <ClipboardCheck className="w-3.5 h-3.5 mr-1.5 text-muted-foreground/70" />
+                {project.type || "General Type"}
+              </div>
+            </div>
+
+            <div className="space-y-2 mb-5">
+              <div className="flex items-center text-sm text-muted-foreground">
+                <Users className="w-4 h-4 mr-2.5 text-muted-foreground/70" />
+                <span className="truncate">
+                  {project.clientName || "No client"}
+                </span>
+              </div>
+              <div className="flex items-center text-sm text-muted-foreground">
+                <span className="w-4 h-4 mr-2.5 flex items-center justify-center font-bold text-[10px] text-muted-foreground/70">
+                  🗓
+                </span>
+                <span>{project.startDate || "No start date"}</span>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-center w-full py-2.5 px-4 bg-muted/30 hover:bg-muted text-foreground text-sm font-medium rounded-lg transition-colors border border-border/50">
+              View Details
+              <ArrowUpRight className="w-4 h-4 ml-2 opacity-50 font-bold" />
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 const ProjectsPage: React.FC = () => {
-  const { data: projects = [], isLoading, isError } = useGetProjectsQuery();
+  const navigate = useNavigate();
+
+  const columns = useMemo(
+    () => [
+      {
+        accessorKey: "projectName",
+        header: () => (
+          <div className="text-left font-semibold">Project Name</div>
+        ),
+        cell: ({ row }: any) => (
+          <span
+            className="font-medium cursor-pointer"
+            onClick={() => navigate(`/main/projects/${row.original.id}`)}
+          >
+            {row.original.projectName}
+          </span>
+        ),
+      },
+      {
+        accessorKey: "clientName",
+        header: () => (
+          <div className="text-left font-semibold">Client Name</div>
+        ),
+        cell: ({ row }: any) => <span>{row.original.clientName}</span>,
+      },
+      {
+        accessorKey: "projectStatus",
+        header: () => <div className="text-left font-semibold">Status</div>,
+        cell: ({ row }: any) => <span>{row.original.projectStatus}</span>,
+      },
+      {
+        accessorKey: "startDate",
+        header: () => <div className="text-left font-semibold">Start Date</div>,
+        cell: ({ row }: any) => <span>{row.original.startDate}</span>,
+      },
+    ],
+    [navigate],
+  );
+  const {
+    data: projects = [],
+    isLoading,
+    isError,
+    refetch,
+  } = useGetProjectsQuery();
   const [createProject, { isLoading: isCreating }] = useCreateProjectMutation();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -52,41 +143,40 @@ const ProjectsPage: React.FC = () => {
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex justify-center flex-col items-center h-[250px] gap-4">
-        <div className="animate-spin rounded-full h-10 w-10 border-t-4 border-[#635bff]" />
-      </div>
-    );
-  }
-
-  if (isError) {
-    return (
-      <div className="p-4 bg-red-100 text-red-700 rounded-md">
-        Failed to fetch projects. Please try again.
-      </div>
-    );
-  }
+  const headerActions = (
+    <Button
+      onClick={() => setIsModalOpen(true)}
+      className="bg-white text-black hover:bg-gray-200"
+    >
+      <Plus className="h-4 w-4 mr-2" /> Add Project
+    </Button>
+  );
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-xl font-bold">Projects</h1>
-          <p className="text-sm text-gray-400 mt-1">
-            {projects.length} of {projects.length} projects
-          </p>
-        </div>
-        <Button
-          onClick={() => setIsModalOpen(true)}
-          className="bg-white text-black hover:bg-gray-200"
-        >
-          <Plus className="h-4 w-4 mr-2" /> Add Project
-        </Button>
+      <div>
+        <h1 className="text-xl font-bold">Projects</h1>
+        <p className="text-sm text-gray-400 mt-1">
+          {projects.length} of {projects.length} projects
+        </p>
       </div>
 
       <div className="w-full">
-        <DataTableLayout columns={columns} data={projects} totalPages={1} />
+        <DataTableLayout
+          data={projects}
+          columns={columns}
+          keyExtractor={(row: any) => row.id}
+          extraTools={{
+            totalPages: 1,
+            currentPage: 1,
+            actionNode: headerActions,
+            isLoading: isLoading,
+            onReload: refetch,
+            toggleViewMode: true,
+            onRowClick: (row: any) => navigate(`/main/projects/${row.id}`),
+            gridComponent: (data: any[]) => <ProjectsGrid data={data} />,
+          }}
+        />
       </div>
 
       <AddProjectModal

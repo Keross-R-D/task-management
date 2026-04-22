@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @Tag(name = "Project APIs", description = "APIs for managing Projects")
 @RequestMapping("/api/projects")
@@ -23,13 +24,14 @@ public interface ProjectApi {
 
     @Operation(summary = "Fetch project by ID")
     @GetMapping("/{id}")
-    ResponseEntity<ProjectResponseDto> getProjectById(@PathVariable("id") Long id);
+    ResponseEntity<ProjectResponseDto> getProjectById(@PathVariable("id") UUID id);
 
     @Operation(summary = "Update an existing project")
     @PutMapping("/{id}")
-    ResponseEntity<ProjectResponseDto> updateProject(@PathVariable("id") Long id, @RequestBody ProjectRequestDto projectDto);
+    ResponseEntity<ProjectResponseDto> updateProject(@PathVariable("id") UUID id,
+            @RequestBody ProjectRequestDto projectDto);
 
     @Operation(summary = "Delete project by ID")
     @DeleteMapping("/{id}")
-    ResponseEntity<Void> deleteProject(@PathVariable("id") Long id);
+    ResponseEntity<Void> deleteProject(@PathVariable("id") UUID id);
 }

@@ -9,32 +9,59 @@ spring:
       enabled: true
 
   # =============================
-  # MySQL Database Configuration
+  # PostgreSQL Database Config
   # =============================
   datasource:
-    url: jdbc:mysql://192.168.3.144:3306/taskmanagement?createDatabaseIfNotExist=true
-    username: app_user
-    password: userpassword123
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:postgresql://192.168.3.144:5432/taskmanagement
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+    # ... keep hikari settings
     hikari:
       connectionTimeout: 20000
-      maximumPoolSize: 20
+      maximumPoolSize: 5
+  minimumIdle: 2
+  idleTimeout: 600000
 
   jpa:
-    database-platform: org.hibernate.dialect.MySQL8Dialect
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
-      ddl-auto: update
+      ddl-auto: create-drop
     show-sql: true
     defer-datasource-initialization: false
     properties:
       hibernate:
         format_sql: true
+      jdbc:
+        time_zone: Asia/Kolkata
 
-  sql:
-    init:
-      schema-locations:
-        - classpath:activiti.engine.schema.sql
-      mode: always
+  # sql:
+  #   init:
+  #     schema-locations:
+  #       - classpath:activiti.engine.schema.sql
+  #     mode: always
+
+  # =============================
+  # MySQL Database Configuration
+  # =============================
+  # datasource:
+  #   url: jdbc:mysql://192.168.3.144:3306/taskmanagement?createDatabaseIfNotExist=true
+  #   username: app_user
+  #   password: userpassword123
+  #   driver-class-name: com.mysql.cj.jdbc.Driver
+  #   hikari:
+  #     connectionTimeout: 20000
+  #     maximumPoolSize: 20
+
+  # jpa:
+  #   database-platform: org.hibernate.dialect.MySQL8Dialect
+  #   hibernate:
+  #     ddl-auto: update
+  #   show-sql: true
+  #   defer-datasource-initialization: false
+  #   properties:
+  #     hibernate:
+  #       format_sql: true
 
   # =============================
   # Redis Configuration

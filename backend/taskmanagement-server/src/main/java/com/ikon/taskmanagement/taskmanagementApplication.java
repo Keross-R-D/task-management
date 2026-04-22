@@ -37,6 +37,7 @@ import com.ikon.sdk.config.IkonSdkConfig;
 public class TaskmanagementApplication {
 
     public static void main(String[] args) {
+        java.util.TimeZone.setDefault(java.util.TimeZone.getTimeZone("Asia/Kolkata"));
         SpringApplication.run(TaskmanagementApplication.class, args);
     }
 }
