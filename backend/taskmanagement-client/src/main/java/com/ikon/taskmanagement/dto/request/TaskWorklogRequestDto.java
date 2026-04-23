@@ -7,7 +7,6 @@ import java.util.UUID;
 @Data
 public class TaskWorklogRequestDto {
     private UUID taskId;
-    private UUID projectId;
     private Map<String, Double> hoursDistribution;
     private String description;
 }   

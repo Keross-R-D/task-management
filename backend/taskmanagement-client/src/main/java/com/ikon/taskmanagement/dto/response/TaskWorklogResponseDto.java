@@ -9,7 +9,6 @@ import java.util.UUID;
 public class TaskWorklogResponseDto {
     private UUID id;
     private UUID taskId;
-    private UUID projectId;
     private Map<String, Double> hoursDistribution;
     private String description;
     private LocalDateTime createdAt;

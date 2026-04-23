@@ -25,7 +25,29 @@ public class TaskWorklogServiceImpl implements TaskWorklogService {
 
     @Override
     public TaskWorklogResponseDto createWorklog(TaskWorklogRequestDto dto) {
-        TaskWorklog entity = worklogMapper.mapToEntity(dto);
+        List<TaskWorklog> existingWorklogs = worklogRepository.findByTaskId(dto.getTaskId());
+        TaskWorklog entity;
+        if (!existingWorklogs.isEmpty()) {
+            entity = existingWorklogs.get(0);
+            java.util.Map<String, Double> existingMap = entity.getHoursDistribution();
+            if (existingMap == null) {
+                existingMap = new java.util.HashMap<>();
+            }
+            if (dto.getHoursDistribution() != null) {
+                for (java.util.Map.Entry<String, Double> entry : dto.getHoursDistribution().entrySet()) {
+                    // As i do not want to add the hours to the existing hours distribution
+                    // existingMap.merge(entry.getKey(), entry.getValue(), Double::sum);
+                    existingMap.put(entry.getKey(), entry.getValue());
+                }
+            }
+            entity.setHoursDistribution(existingMap);
+            if (dto.getDescription() != null && !dto.getDescription().isEmpty()) {
+                entity.setDescription(dto.getDescription());
+            }
+        } else {
+            entity = worklogMapper.mapToEntity(dto);
+        }
+
         TaskWorklog saved = worklogRepository.save(entity);
         updateTaskActualHours(saved.getTaskId());
         return worklogMapper.mapToDto(saved);
@@ -38,17 +60,17 @@ public class TaskWorklogServiceImpl implements TaskWorklogService {
                 .collect(Collectors.toList());
     }
 
-
-
     @Override
     public TaskWorklogResponseDto getWorklogById(UUID id) {
-        TaskWorklog entity = worklogRepository.findById(id).orElseThrow(() -> new RuntimeException("Worklog not found"));
+        TaskWorklog entity = worklogRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Worklog not found"));
         return worklogMapper.mapToDto(entity);
     }
 
     @Override
     public TaskWorklogResponseDto updateWorklog(UUID id, TaskWorklogRequestDto dto) {
-        TaskWorklog entity = worklogRepository.findById(id).orElseThrow(() -> new RuntimeException("Worklog not found"));
+        TaskWorklog entity = worklogRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Worklog not found"));
         worklogMapper.updateEntityFromDto(dto, entity);
         TaskWorklog updated = worklogRepository.save(entity);
         updateTaskActualHours(updated.getTaskId());
@@ -57,12 +79,13 @@ public class TaskWorklogServiceImpl implements TaskWorklogService {
 
     @Override
     public void deleteWorklog(UUID id) {
-        TaskWorklog entity = worklogRepository.findById(id).orElseThrow(() -> new RuntimeException("Worklog not found"));
+        TaskWorklog entity = worklogRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Worklog not found"));
         UUID taskId = entity.getTaskId();
         worklogRepository.deleteById(id);
         updateTaskActualHours(taskId);
     }
-    
+
     private void updateTaskActualHours(UUID taskId) {
         double totalHours = worklogRepository.findByTaskId(taskId).stream()
                 .filter(w -> w.getHoursDistribution() != null)

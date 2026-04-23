@@ -24,9 +24,6 @@ public class TaskWorklog {
     @Column(nullable = false)
     private UUID taskId;
 
-    @Column(nullable = false)
-    private UUID projectId;
-
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb", nullable = false)
     private Map<String, Double> hoursDistribution;
