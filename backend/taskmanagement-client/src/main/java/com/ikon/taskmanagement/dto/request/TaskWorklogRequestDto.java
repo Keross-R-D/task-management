@@ -8,6 +8,8 @@ import java.util.UUID;
 public class TaskWorklogRequestDto {
     private UUID taskId;
     private UUID projectId;
+    private UUID teamMemberId;
+    private Double totalHours;
     private Map<String, Double> hoursDistribution;
     private String description;
 }   

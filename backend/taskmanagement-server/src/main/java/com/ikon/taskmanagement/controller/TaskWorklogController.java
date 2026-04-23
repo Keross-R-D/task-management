@@ -2,13 +2,16 @@ package com.ikon.taskmanagement.controller;
 
 import com.ikon.taskmanagement.api.TaskWorklogApi;
 import com.ikon.taskmanagement.dto.request.TaskWorklogRequestDto;
+import com.ikon.taskmanagement.dto.request.WeeklyTimesheetRequestDto;
 import com.ikon.taskmanagement.dto.response.TaskWorklogResponseDto;
+import com.ikon.taskmanagement.dto.response.WeeklyTimesheetResponseDto;
 import com.ikon.taskmanagement.service.TaskWorklogService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -25,8 +28,23 @@ public class TaskWorklogController implements TaskWorklogApi {
     }
 
     @Override
+    public ResponseEntity<List<WeeklyTimesheetResponseDto>> getWeeklyTimesheet(WeeklyTimesheetRequestDto dto) {
+        return ResponseEntity.ok(worklogService.getWeeklyTimesheet(dto));
+    }
+
+    @Override
     public ResponseEntity<List<TaskWorklogResponseDto>> getWorklogsByTaskId(UUID taskId) {
         return ResponseEntity.ok(worklogService.getWorklogsByTaskId(taskId));
+    }
+
+    @Override
+    public ResponseEntity<Double> getHoursByTaskUserAndDate(
+            UUID taskId,
+            UUID userId,
+            LocalDate startDate,
+            LocalDate endDate) {
+        return ResponseEntity.ok(
+                worklogService.getHoursByTaskUserAndDate(taskId, userId, startDate, endDate));
     }
 
     @Override

@@ -10,6 +10,8 @@ public class TaskWorklogResponseDto {
     private UUID id;
     private UUID taskId;
     private UUID projectId;
+    private UUID teamMemberId;
+    private Double totalHours;
     private Map<String, Double> hoursDistribution;
     private String description;
     private LocalDateTime createdAt;
