@@ -9,7 +9,7 @@ import {
 import React from "react";
 import DashboardPage from "@/pages/dashboard/DashboardPage";
 import ProjectsPage from "@/pages/projects/ProjectsPage";
-import TasksPage from "@/pages/tasks/TasksPage";
+import MyTasksPage from "@/pages/myTasks/MyTaskPage";
 import ResourceUtilisationPage from "@/pages/resource-utilisation/ResourceUtilisationPage";
 import ProjectStatusReportPage from "@/pages/project-status-report/ProjectStatusReportPage";
 import SettingsPage from "@/pages/settings/SettingsPage";
@@ -38,7 +38,7 @@ export const mainRoutes: AppRoute[] = [
     path: "tasks",
     title: "My Tasks",
     icon: ClipboardList,
-    element: <TasksPage />,
+    element: <MyTasksPage />,
   },
   {
     path: "resource-utilisation",
