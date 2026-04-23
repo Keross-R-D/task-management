@@ -1,6 +1,12 @@
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  useCreateSprintMutation,
+  useUpdateSprintMutation,
+} from "@/features/sprints/sprintsApiSlice";
+import { useEffect } from "react";
+import type { Sprint } from "@/features/sprints/sprintsApiSlice";
 
 import {
   Dialog,
@@ -22,7 +28,7 @@ import {
   SelectItem,
   Textarea,
 } from "ikon-react-components-lib";
-
+import { SprintEnum } from "@/enums/sprint.constants";
 
 const sprintSchema = z.object({
   name: z.string().min(2, "Sprint name is required"),
@@ -36,17 +42,24 @@ export type SprintFormValues = z.infer<typeof sprintSchema>;
 
 interface Props {
   open: boolean;
+  projectId: string;
+  epicId: string;
+  sprint?: Sprint | null;
   onClose: () => void;
-  onSubmit: (data: SprintFormValues) => void;
-  isLoading?: boolean;
 }
 
 export default function AddSprintModal({
   open,
+  projectId,
+  epicId,
+  sprint,
   onClose,
-  onSubmit,
-  isLoading,
 }: Props) {
+  const [createSprint, { isLoading: isCreating }] = useCreateSprintMutation();
+  const [updateSprint, { isLoading: isUpdating }] = useUpdateSprintMutation();
+
+  const isLoading = isCreating || isUpdating;
+
   const form = useForm<SprintFormValues>({
     resolver: zodResolver(sprintSchema),
     defaultValues: {
@@ -58,29 +71,77 @@ export default function AddSprintModal({
     },
   });
 
+  useEffect(() => {
+    if (open) {
+      if (sprint) {
+        form.reset({
+          name: sprint.name || "",
+          goal: sprint.goal || "",
+          status: sprint.status || "",
+          startDate: sprint.startDate
+            ? new Date(sprint.startDate).toISOString().split("T")[0]
+            : "",
+          endDate: sprint.endDate
+            ? new Date(sprint.endDate).toISOString().split("T")[0]
+            : "",
+        });
+      } else {
+        form.reset({
+          name: "",
+          goal: "",
+          status: "",
+          startDate: "",
+          endDate: "",
+        });
+      }
+    }
+  }, [sprint, open, form]);
+
   const handleClose = () => {
     form.reset();
     onClose();
   };
 
-  const handleCreate = (data: SprintFormValues) => {
-    onSubmit(data);
-    form.reset();
+  const handleCreateOrUpdate = async (data: SprintFormValues) => {
+    try {
+      if (sprint && sprint.id) {
+        await updateSprint({
+          id: sprint.id,
+          ...data,
+          projectId,
+          epicId,
+        }).unwrap();
+      } else {
+        await createSprint({
+          ...data,
+          projectId,
+          epicId,
+        }).unwrap();
+      }
+      form.reset();
+      onClose();
+    } catch (err) {
+      console.error("Failed to save sprint:", err);
+    }
   };
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-lg">
         <DialogHeader className="my-3">
-          <DialogTitle>Add Sprint</DialogTitle>
+          <DialogTitle>{sprint ? "Edit Sprint" : "Add Sprint"}</DialogTitle>
           <span className="text-gray-400">
-            Create a new sprint within this epic.
+            {sprint
+              ? "Update details for the sprint."
+              : "Create a new sprint within this epic."}
           </span>
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleCreate)} className="space-y-4">
-
+          <form
+            onSubmit={form.handleSubmit(handleCreateOrUpdate)}
+            className="space-y-4"
+          >
             {/* Sprint Name */}
             <FormField
               control={form.control}
@@ -137,9 +198,11 @@ export default function AddSprintModal({
                     </FormControl>
 
                     <SelectContent>
-                      <SelectItem value="PLANNED">Planned</SelectItem>
-                      <SelectItem value="ACTIVE">Active</SelectItem>
-                      <SelectItem value="COMPLETED">Completed</SelectItem>
+                      {Object.values(SprintEnum.Status).map((status) => (
+                        <SelectItem key={status} value={status}>
+                          {status}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
 
@@ -189,7 +252,11 @@ export default function AddSprintModal({
                 Cancel
               </Button>
               <Button type="submit" disabled={isLoading}>
-                {isLoading ? "Creating..." : "Add Sprint"}
+                {isLoading
+                  ? "Saving..."
+                  : sprint
+                    ? "Update Sprint"
+                    : "Add Sprint"}
               </Button>
             </div>
           </form>

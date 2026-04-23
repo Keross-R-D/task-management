@@ -9,7 +9,6 @@ import java.util.UUID;
 public interface TaskWorklogService {
     TaskWorklogResponseDto createWorklog(TaskWorklogRequestDto dto);
     List<TaskWorklogResponseDto> getWorklogsByTaskId(UUID taskId);
-    List<TaskWorklogResponseDto> getWorklogsByTeamMemberId(UUID teamMemberId);
     TaskWorklogResponseDto getWorklogById(UUID id);
     TaskWorklogResponseDto updateWorklog(UUID id, TaskWorklogRequestDto dto);
     void deleteWorklog(UUID id);

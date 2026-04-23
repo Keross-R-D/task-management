@@ -12,14 +12,17 @@ spring:
   # PostgreSQL Database Config
   # =============================
   datasource:
-    url: jdbc:postgresql://192.168.3.144:5432/taskmanagement
+    # url: jdbc:postgresql://192.168.3.144:5432/taskmanagement
+    url: jdbc:postgresql://localhost:5432/task_management
     username: postgres
     password: postgres
     driver-class-name: org.postgresql.Driver
     # ... keep hikari settings
     hikari:
       connectionTimeout: 20000
-      maximumPoolSize: 20
+      maximumPoolSize: 5
+  minimumIdle: 2
+  idleTimeout: 600000
 
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect

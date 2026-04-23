@@ -1,6 +1,13 @@
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  useCreateTaskMutation,
+  useUpdateTaskMutation,
+} from "@/features/tasks/tasksApiSlice";
+import { useEffect } from "react";
+import type { Task } from "@/features/tasks/tasksApiSlice";
+import { TaskEnum } from "@/enums/task.constants";
 
 import {
   Dialog,
@@ -25,50 +32,54 @@ import {
 
 const taskSchema = z.object({
   title: z.string().min(1, "Title is required"),
-  description: z.string().min(4,"Description is required"),
+  description: z.string().min(4, "Description is required"),
 
   type: z.string().min(1, "Type is required"),
   status: z.string().min(1, "Status is required"),
   priority: z.string().min(1, "Priority is required"),
 
- assigneeId: z.string().min(1, "Assignee is required"),
-reporterId: z.string().min(1, "Reporter is required"),
+  assigneeId: z.string().min(1, "Assignee is required"),
+  reporterId: z.string().min(1, "Reporter is required"),
 
-estimatedHours: z
-  .number()
-  .min(1, "Must be greater than 0"),
+  estimatedHours: z.number().min(1, "Must be greater than 0"),
 
-plannedDuration: z
-  .number()
-  .min(1, "Must be greater than 0"),
+  plannedDuration: z.number().min(1, "Must be greater than 0"),
 
-startDate: z.string().min(1, "Start date is required"),
-endDate: z.string().min(1, "End date is required"),
+  startDate: z.string().min(1, "Start date is required"),
+  endDate: z.string().min(1, "End date is required"),
 });
 
 export type TaskFormValues = z.infer<typeof taskSchema>;
 
 interface Props {
   open: boolean;
+  projectId: string;
+  epicId?: string | null;
+  sprintId?: string | null;
+  task?: Task | null;
   onClose: () => void;
-  onSubmit: (data: TaskFormValues) => void;
-  isLoading?: boolean;
 }
 
 export default function AddTaskModal({
   open,
+  projectId,
+  epicId,
+  sprintId,
+  task,
   onClose,
-  onSubmit,
-  isLoading,
 }: Props) {
+  const [createTask, { isLoading: isCreating }] = useCreateTaskMutation();
+  const [updateTask, { isLoading: isUpdating }] = useUpdateTaskMutation();
+  const isLoading = isCreating || isUpdating;
+
   const form = useForm<TaskFormValues>({
     resolver: zodResolver(taskSchema),
     defaultValues: {
       title: "",
       description: "",
-      type: "",       
-      status: "",     
-      priority: "",   
+      type: TaskEnum.Type.TASK,
+      status: TaskEnum.Status.TODO,
+      priority: TaskEnum.Priority.MEDIUM,
       assigneeId: "",
       reporterId: "",
       estimatedHours: undefined,
@@ -78,26 +89,84 @@ export default function AddTaskModal({
     },
   });
 
+  useEffect(() => {
+    if (open) {
+      if (task) {
+        form.reset({
+          title: task.title || "",
+          description: task.description || "",
+          type: task.type || "",
+          status: task.status || "",
+          priority: task.priority || "",
+          assigneeId: task.assigneeId || "",
+          reporterId: task.reporterId || "",
+          estimatedHours: task.estimatedHours || undefined,
+          plannedDuration: task.plannedDuration || undefined,
+          startDate: task.startDate
+            ? new Date(task.startDate).toISOString().split("T")[0]
+            : "",
+          endDate: task.endDate
+            ? new Date(task.endDate).toISOString().split("T")[0]
+            : "",
+        });
+      } else {
+        form.reset({
+          title: "",
+          description: "",
+          type: "",
+          status: "",
+          priority: "",
+          assigneeId: "",
+          reporterId: "",
+          estimatedHours: undefined,
+          plannedDuration: undefined,
+          startDate: "",
+          endDate: "",
+        });
+      }
+    }
+  }, [task, open, form]);
+
   const handleClose = () => {
     form.reset();
     onClose();
   };
 
-  const handleCreate = (data: TaskFormValues) => {
-    onSubmit(data);
-    form.reset();
+  const handleCreateOrUpdate = async (data: TaskFormValues) => {
+    try {
+      if (task && task.id) {
+        await updateTask({
+          id: task.id,
+          ...data,
+          projectId: task.projectId || projectId,
+          epicId: epicId || task.epicId || null,
+          sprintId: sprintId || task.sprintId || null,
+        }).unwrap();
+      } else {
+        await createTask({
+          ...data,
+          projectId,
+          epicId: epicId || null,
+          sprintId: sprintId || null,
+        }).unwrap();
+      }
+      form.reset();
+      onClose();
+    } catch (err) {
+      console.error("Failed to save task:", err);
+    }
   };
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Add Task</DialogTitle>
+          <DialogTitle>{task ? "Edit Task" : "Add Task"}</DialogTitle>
         </DialogHeader>
 
         <Form {...form}>
           <form
-            onSubmit={form.handleSubmit(handleCreate)}
+            onSubmit={form.handleSubmit(handleCreateOrUpdate)}
             className="space-y-4 max-h-[70vh] overflow-y-auto pr-2"
           >
             {/* Title */}
@@ -139,16 +208,21 @@ export default function AddTaskModal({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Type *</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value || ""}>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value || ""}
+                    >
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select Type" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="TASK">Task</SelectItem>
-                        <SelectItem value="BUG">Bug</SelectItem>
-                        <SelectItem value="STORY">Story</SelectItem>
+                        {Object.values(TaskEnum.Type).map((type) => (
+                          <SelectItem key={type} value={type}>
+                            {type}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -163,16 +237,21 @@ export default function AddTaskModal({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Priority *</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value || ""}>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value || ""}
+                    >
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select Priority" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="LOW">Low</SelectItem>
-                        <SelectItem value="MEDIUM">Medium</SelectItem>
-                        <SelectItem value="HIGH">High</SelectItem>
+                        {Object.values(TaskEnum.Priority).map((priority) => (
+                          <SelectItem key={priority} value={priority}>
+                            {priority}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -187,16 +266,21 @@ export default function AddTaskModal({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Status *</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value || ""}>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value || ""}
+                    >
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select Status" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="TODO">To Do</SelectItem>
-                        <SelectItem value="IN_PROGRESS">In Progress</SelectItem>
-                        <SelectItem value="DONE">Done</SelectItem>
+                        {Object.values(TaskEnum.Status).map((status) => (
+                          <SelectItem key={status} value={status}>
+                            {status}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -281,7 +365,9 @@ export default function AddTaskModal({
                         value={field.value ?? ""}
                         onChange={(e) =>
                           field.onChange(
-                            e.target.value === "" ? undefined : e.target.valueAsNumber
+                            e.target.value === ""
+                              ? undefined
+                              : e.target.valueAsNumber,
                           )
                         }
                       />
@@ -303,7 +389,9 @@ export default function AddTaskModal({
                         value={field.value ?? ""}
                         onChange={(e) =>
                           field.onChange(
-                            e.target.value === "" ? undefined : e.target.valueAsNumber
+                            e.target.value === ""
+                              ? undefined
+                              : e.target.valueAsNumber,
                           )
                         }
                       />
@@ -320,7 +408,7 @@ export default function AddTaskModal({
                 Cancel
               </Button>
               <Button type="submit" disabled={isLoading}>
-                {isLoading ? "Adding..." : "Add Task"}
+                {isLoading ? "Saving..." : task ? "Update Task" : "Add Task"}
               </Button>
             </div>
           </form>

@@ -2,8 +2,7 @@
 
 import { useState } from "react";
 import { Input, ComboboxInput } from "ikon-react-components-lib";
-import { IoSearch } from "react-icons/io5";
-import { CiFilter } from "react-icons/ci";
+import { Search, Filter } from "lucide-react";
 
 const statusItems = [
   { label: "All Status", value: "All Status" },
@@ -47,7 +46,7 @@ export default function SearchAndFilter() {
     <div className="w-full flex flex-wrap items-center gap-3 my-4">
       {/* SEARCH */}
       <div className="flex items-center w-[300px] border rounded-lg ps-3">
-        <IoSearch className="mr-2" />
+        <Search className="mr-2" />
         <Input
           placeholder="Search..."
           className="border-none focus-visible:ring-0"
@@ -56,7 +55,7 @@ export default function SearchAndFilter() {
 
       {/* STATUS */}
       <div className="flex items-center w-40 gap-2 ps-2 border rounded-lg">
-        <CiFilter className="text-lg font-bold" />
+        <Filter className="text-lg font-bold" />
         <div className="flex-1">
           <ComboboxInput
             placeholder="All Status"

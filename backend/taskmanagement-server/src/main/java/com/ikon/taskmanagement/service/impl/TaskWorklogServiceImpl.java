@@ -38,12 +38,6 @@ public class TaskWorklogServiceImpl implements TaskWorklogService {
                 .collect(Collectors.toList());
     }
 
-    @Override
-    public List<TaskWorklogResponseDto> getWorklogsByTeamMemberId(UUID teamMemberId) {
-        return worklogRepository.findByTeamMemberId(teamMemberId).stream()
-                .map(worklogMapper::mapToDto)
-                .collect(Collectors.toList());
-    }
 
     @Override
     public TaskWorklogResponseDto getWorklogById(UUID id) {
@@ -70,7 +64,8 @@ public class TaskWorklogServiceImpl implements TaskWorklogService {
     
     private void updateTaskActualHours(UUID taskId) {
         double totalHours = worklogRepository.findByTaskId(taskId).stream()
-                .mapToDouble(TaskWorklog::getTotalHours)
+                .filter(w -> w.getHoursDistribution() != null)
+                .flatMapToDouble(w -> w.getHoursDistribution().values().stream().mapToDouble(Double::doubleValue))
                 .sum();
         Task task = taskRepository.findById(taskId).orElse(null);
         if (task != null) {

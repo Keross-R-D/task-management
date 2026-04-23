@@ -5,10 +5,7 @@ import {
   AccordionContent,
   Button,
 } from "ikon-react-components-lib";
-import { FaBolt, FaClock } from "react-icons/fa";
-
-import { ChevronRight } from "lucide-react";
-import { MdDashboard } from "react-icons/md";
+import { Zap, Clock, LayoutDashboard, ChevronRight } from "lucide-react";
 
 export default function UnAssignedTask() {
   return (
@@ -27,7 +24,7 @@ export default function UnAssignedTask() {
                   <ChevronRight className="h-4 w-4 transition-transform duration-200 group-data-[state=open]:rotate-90 shrink-0" />
 
                   <div className="h-8 w-8 flex items-center justify-center rounded-full  border ">
-                    <MdDashboard className=" text-sm" />
+                    <LayoutDashboard className=" text-sm" />
                   </div>
 
                   <div className="min-w-0">
@@ -57,7 +54,7 @@ export default function UnAssignedTask() {
                 {/* Left Section */}
                 <div className="flex items-center gap-4">
                   <div className="flex items-center gap-2">
-                    <FaBolt className="text-yellow-400 text-md" />
+                    <Zap className="text-yellow-400 text-md" />
                     <span className=" font-semibold text-sm">
                       Nihil aut quia vero
                     </span>
@@ -76,7 +73,7 @@ export default function UnAssignedTask() {
 
                 {/* Right Section */}
                 <div className="group flex items-center gap-2">
-                  <FaClock className="" />
+                  <Clock className="" />
                   <span className=" font-medium">90h</span>
 
                   <span className=" opacity-0 group-hover:opacity-100 transition-opacity duration-200">

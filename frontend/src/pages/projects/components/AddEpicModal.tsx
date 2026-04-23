@@ -1,6 +1,13 @@
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  useCreateEpicMutation,
+  useUpdateEpicMutation,
+} from "@/features/epics/epicsApiSlice";
+import { useEffect } from "react";
+import type { Epic as EpicType } from "@/features/epics/epicsApiSlice";
+import { EpicEnum } from "@/enums/epic.constants";
 
 import {
   Dialog,
@@ -35,17 +42,22 @@ export type EpicFormValues = z.infer<typeof epicSchema>;
 
 interface Props {
   open: boolean;
+  projectId: string;
+  epic?: EpicType | null;
   onClose: () => void;
-  onSubmit: (data: EpicFormValues) => void;
-  isLoading?: boolean;
 }
 
 export default function AddEpicModal({
   open,
+  projectId,
+  epic,
   onClose,
-  onSubmit,
-  isLoading,
 }: Props) {
+  const [createEpic, { isLoading: isCreating }] = useCreateEpicMutation();
+  const [updateEpic, { isLoading: isUpdating }] = useUpdateEpicMutation();
+
+  const isLoading = isCreating || isUpdating;
+
   const form = useForm<EpicFormValues>({
     resolver: zodResolver(epicSchema),
     defaultValues: {
@@ -57,29 +69,73 @@ export default function AddEpicModal({
     },
   });
 
+  useEffect(() => {
+    if (open) {
+      if (epic) {
+        form.reset({
+          name: epic.name || "",
+          description: epic.description || "",
+          status: epic.status || "",
+          startDate: epic.startDate
+            ? new Date(epic.startDate).toISOString().split("T")[0]
+            : "",
+          endDate: epic.endDate
+            ? new Date(epic.endDate).toISOString().split("T")[0]
+            : "",
+        });
+      } else {
+        form.reset({
+          name: "",
+          description: "",
+          status: "",
+          startDate: "",
+          endDate: "",
+        });
+      }
+    }
+  }, [epic, open, form]);
+
   const handleClose = () => {
     form.reset();
     onClose();
   };
 
-  const handleCreate = (data: EpicFormValues) => {
-    onSubmit(data);
-    form.reset();
+  const handleCreateOrUpdate = async (data: EpicFormValues) => {
+    try {
+      if (epic && epic.id) {
+        await updateEpic({
+          id: epic.id,
+          ...data,
+          projectId,
+        }).unwrap();
+      } else {
+        await createEpic({
+          ...data,
+          projectId,
+        }).unwrap();
+      }
+      form.reset();
+      onClose();
+    } catch (err) {
+      console.error("Failed to save epic:", err);
+    }
   };
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-lg">
         <DialogHeader className="my-3">
-          <DialogTitle>Add Epic</DialogTitle>
+          <DialogTitle>{epic ? "Edit Epic" : "Add Epic"}</DialogTitle>
           <span className="text-gray-400">
-            Create a new epic for this project.
+            {epic
+              ? "Update details for the epic."
+              : "Create a new epic for this project."}
           </span>
         </DialogHeader>
 
         <Form {...form}>
           <form
-            onSubmit={form.handleSubmit(handleCreate)}
+            onSubmit={form.handleSubmit(handleCreateOrUpdate)}
             className="space-y-4"
           >
             {/* Name */}
@@ -139,9 +195,11 @@ export default function AddEpicModal({
                     </FormControl>
 
                     <SelectContent>
-                      <SelectItem value="NOT_STARTED">Not Started</SelectItem>
-                      <SelectItem value="IN_PROGRESS">In Progress</SelectItem>
-                      <SelectItem value="COMPLETED">Completed</SelectItem>
+                      {Object.values(EpicEnum.Status).map((status) => (
+                        <SelectItem key={status} value={status}>
+                          {status}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
 
@@ -193,7 +251,7 @@ export default function AddEpicModal({
                 Cancel
               </Button>
               <Button type="submit" disabled={isLoading}>
-                {isLoading ? "Creating..." : "Add Epic"}
+                {isLoading ? "Saving..." : epic ? "Update Epic" : "Add Epic"}
               </Button>
             </div>
           </form>

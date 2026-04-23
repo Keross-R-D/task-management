@@ -1,57 +1,65 @@
-import { apiSlice } from "../api/apiSlice";
+import { apiSlice } from '../api/apiSlice';
 
 export interface Epic {
-  id: number;
+  id: string; // UUID
+  projectId: string; // UUID
   name: string;
-  description: string;
-  status: string;
-  startDate: string;
-  endDate: string;
-  projectId: number; 
-  createdAt: string;
-  updatedAt: string;
+  description?: string;
+  status: string; // TODO, IN_PROGRESS, DONE
+  startDate?: string;
+  endDate?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
-export interface CreateEpicRequest {
-  name: string;
-  description: string;
-  status: string;
-  startDate: string;
-  endDate: string;
- projectId: string;
-}
+export type CreateEpicRequest = Omit<Epic, 'id' | 'createdAt' | 'updatedAt'>;
+export type UpdateEpicRequest = Partial<CreateEpicRequest> & { id: string };
 
-export const epicApiSlice = apiSlice.injectEndpoints({
+export const epicsApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-
-    getEpics: builder.query<Epic[], number | void>({
-      query: (projectId) => ({
-        apiUrl: projectId ? `/epics/project/${projectId}` : "/epics",
-      }),
-      providesTags: (result) =>
+    getEpicsByProject: builder.query<Epic[], string>({
+      query: (projectId) => ({ apiUrl: `/epics/project/${projectId}` }),
+      providesTags: (result, _error, projectId) =>
         result
           ? [
-              ...result.map(({ id }) => ({ type: "Epic" as const, id })),
-              { type: "Epic", id: "LIST" },
-            ]
-          : [{ type: "Epic", id: "LIST" }],
+            ...result.map(({ id }) => ({ type: 'Epic' as const, id })),
+            { type: 'Epic', id: `LIST_${projectId}` },
+          ]
+          : [{ type: 'Epic', id: `LIST_${projectId}` }],
     }),
-
     createEpic: builder.mutation<Epic, CreateEpicRequest>({
       query: (epic) => ({
-        apiUrl: "/epics",
+        apiUrl: '/epics',
         config: {
-          method: "POST",
+          method: 'POST',
           data: epic,
         },
       }),
-      invalidatesTags: [{ type: "Epic", id: "LIST" }],
+      invalidatesTags: (_result, _error, arg) => [{ type: 'Epic', id: `LIST_${arg.projectId}` }],
     }),
-
+    updateEpic: builder.mutation<Epic, UpdateEpicRequest>({
+      query: ({ id, ...patch }) => ({
+        apiUrl: `/epics/${id}`,
+        config: {
+          method: 'PUT',
+          data: patch,
+        },
+      }),
+      invalidatesTags: (_result, _error, arg) => [{ type: 'Epic', id: arg.id }],
+    }),
+    deleteEpic: builder.mutation<void, string>({
+      query: (id) => ({
+        apiUrl: `/epics/${id}`,
+        config: { method: 'DELETE' },
+      }),
+      invalidatesTags: ['Epic'],
+    }),
   }),
 });
 
 export const {
-  useGetEpicsQuery,
+  useGetEpicsByProjectQuery,
   useCreateEpicMutation,
-} = epicApiSlice;
+  useUpdateEpicMutation,
+  useDeleteEpicMutation,
+} = epicsApiSlice;

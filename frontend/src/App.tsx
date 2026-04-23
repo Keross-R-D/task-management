@@ -2,7 +2,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { MainLayout } from '@/layouts/MainLayout';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { mainRoutes } from '@/routes';
-import ProjectDetailPage from './pages/projects/ProjectDetailPage';
+import ProjectDetailsPage from '@/pages/projects/ProjectDetailsPage';
 
 function App() {
   return (
@@ -14,7 +14,7 @@ function App() {
           {mainRoutes.map((route) => (
             <Route key={route.path} path={route.path} element={route.element} />
           ))}
-          <Route path="projects/:id" element={<ProjectDetailPage />} />
+          <Route path="projects/:projectId" element={<ProjectDetailsPage />} />
           <Route path="*" element={<div>Page Not Found</div>} />
         </Route>
       </Route>

@@ -21,10 +21,6 @@ public class TaskWorklogMapper {
         if (dto == null || entity == null) return;
         entity.setTaskId(dto.getTaskId());
         entity.setProjectId(dto.getProjectId());
-        entity.setTeamMemberId(dto.getTeamMemberId());
-        entity.setStartDate(dto.getStartDate());
-        entity.setEndDate(dto.getEndDate());
-        entity.setTotalHours(dto.getTotalHours());
         if (dto.getHoursDistribution() != null) {
             entity.setHoursDistribution(new HashMap<>(dto.getHoursDistribution()));
         }
@@ -37,10 +33,6 @@ public class TaskWorklogMapper {
         dto.setId(entity.getId());
         dto.setTaskId(entity.getTaskId());
         dto.setProjectId(entity.getProjectId());
-        dto.setTeamMemberId(entity.getTeamMemberId());
-        dto.setStartDate(entity.getStartDate());
-        dto.setEndDate(entity.getEndDate());
-        dto.setTotalHours(entity.getTotalHours());
         if (entity.getHoursDistribution() != null) {
             dto.setHoursDistribution(new HashMap<>(entity.getHoursDistribution()));
         }

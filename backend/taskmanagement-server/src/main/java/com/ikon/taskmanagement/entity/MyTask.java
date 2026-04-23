@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Entity
-@Table(name = "tasks")
+@Table(name = "myTasks")
 @Data
 @EntityListeners(AuditingEntityListener.class)
 public class MyTask {
