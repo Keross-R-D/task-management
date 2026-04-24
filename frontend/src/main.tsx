@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { Provider } from 'react-redux';
 import { BrowserRouter } from 'react-router-dom';
 import { store } from '@/app/store';
-import { setIkonConfig, ProviderWrapper } from 'ikon-react-components-lib';
+import { setIkonConfig, ProviderWrapper, Toaster } from 'ikon-react-components-lib';
 import App from './App.tsx';
 import { LoginPage } from './pages/auth/LoginPage.tsx';
 import './index.css';
@@ -26,6 +26,7 @@ createRoot(document.getElementById('root')!).render(
       ) : (
         <ProviderWrapper>
           <App />
+          <Toaster richColors={true} position="top-center" />
         </ProviderWrapper>
       )}
     </Provider>

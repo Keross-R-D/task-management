@@ -49,7 +49,7 @@ export const mytasksApiSlice = apiSlice.injectEndpoints({
     endpoints: (builder) => ({
         getMyTasks: builder.query<TasksResponse, void>({
             query: () => ({
-                apiUrl: "/myTasks?sort=createdAt,desc",
+                apiUrl: "/myTasks?sort=createdAt,asc",
             }),
             providesTags: ["Task"],
         }),
