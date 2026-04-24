@@ -10,7 +10,7 @@ import { Plus, NotepadText, ListTodo, LoaderCircle, SquareCheckBig, Trash2, More
 import EditMyTaskModal from "./components/EditMyTaskModal";
 
 // TYPES
-type Task = {
+export type Task = {
     id: string;
     name: string;
     estimatedHours: number,
@@ -208,14 +208,32 @@ const TasksPage: React.FC = () => {
                 const priority = row.original.priority;
 
                 const styles: Record<Task["priority"], string> = {
-                    Low: "text-green-400",
-                    Medium: "text-yellow-400",
-                    High: "text-red-400",
+                    Low: "text-green-500",
+                    Medium: "text-yellow-500",
+                    High: "text-red-500",
                 };
 
                 return (
                     <span className={`font-semibold ${styles[priority]}`}>
                         {priority}
+                    </span>
+                );
+            },
+        },
+
+        {
+            accessorKey: "assignee",
+            header: "Assignee",
+            cell: ({ row }: { row: { original: Task } }) => {
+                const assignee = row.original.assignee.split(' ')
+                    .map(word =>
+                        word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+                    )
+                    .join(' ');
+
+                return (
+                    <span className="flex gap-1 items-center font-semibold bg-muted w-fit rounded-md px-1.5 py-1">
+                        {assignee}
                     </span>
                 );
             },
@@ -488,7 +506,11 @@ const TasksPage: React.FC = () => {
                                 </span>
 
                                 <div className="flex items-center gap-2 mt-3 text-sm text-muted-foreground">
-                                    <CircleUser className="h-3 w-3" />Assigned to: <span className="font-medium">{task.assignee || "Unassigned"}</span>
+                                    <CircleUser className="h-3 w-3" />Assigned to: <span className="font-medium">{task.assignee.split(' ')
+                                    .map(word =>
+                                        word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+                                    )
+                                    .join(' ') || "Unassigned"}</span>
                                 </div>
                             </div>
                         </div>

@@ -3,6 +3,7 @@ import { MainLayout } from '@/layouts/MainLayout';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { mainRoutes } from '@/routes';
 import ProjectDetailsPage from '@/pages/projects/ProjectDetailsPage';
+import ProjectStatusDetailPage from './pages/project-status-report/components/ProjectStatusDetailPage';
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
             <Route key={route.path} path={route.path} element={route.element} />
           ))}
           <Route path="projects/:projectId" element={<ProjectDetailsPage />} />
+          <Route path="project-status-report/:id" element={<ProjectStatusDetailPage />} />
           <Route path="*" element={<div>Page Not Found</div>} />
         </Route>
       </Route>
