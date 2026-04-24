@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Entity
-@Table(name = "myTasks")
+@Table(name = "mytasks")
 @Data
 @EntityListeners(AuditingEntityListener.class)
 public class MyTask {
@@ -41,7 +41,7 @@ public class MyTask {
     private String taskStatus;
 
     @Column
-    private Integer estimatedHours;
+    private Double estimatedHours;
 
     @ElementCollection
     @CollectionTable(name = "task_assignees", joinColumns = @JoinColumn(name = "task_id"))

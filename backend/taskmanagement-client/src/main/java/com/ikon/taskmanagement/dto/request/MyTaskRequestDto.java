@@ -13,7 +13,7 @@ public class MyTaskRequestDto {
     private String taskType;
     private String taskPriority;
     private String taskStatus;
-    private Integer estimatedHours;
+    private Double estimatedHours;
 
     private List<UUID> assigneeIds;
     
