@@ -3,6 +3,7 @@ export const SprintEnum = {
     PLANNED: "PLANNED",
     ACTIVE: "ACTIVE",
     COMPLETED: "COMPLETED",
+    CANCELLED: "CANCELLED",
   },
 } as const;
 

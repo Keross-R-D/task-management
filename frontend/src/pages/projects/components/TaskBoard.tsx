@@ -63,6 +63,20 @@ function statusColor(status: string) {
   }
 }
 
+function columnBorderColor(status: string) {
+  switch (status) {
+    case "blocked":
+      return "border-t-red-500";
+    case "in_progress":
+      return "border-t-blue-500";
+    case "done":
+      return "border-t-green-500";
+    case "todo":
+    default:
+      return "border-t-gray-500";
+  }
+}
+
 function priorityColor(priority: string) {
   switch (priority?.toUpperCase()) {
     case TaskEnum.Priority.CRITICAL:
@@ -103,7 +117,7 @@ function DraggableItem({ item, column }: DraggableItemProps) {
   return (
     <>
       <div ref={setNodeRef} style={style} {...listeners} {...attributes}>
-        <Card className="mb-3 cursor-pointer border rounded-2xl shadow-sm hover:shadow-md transition py-2 m-4">
+        <Card className="mb-3 cursor-pointer border rounded-2xl shadow-sm hover:shadow-md transition py-2 m-4 bg-[#ffffff]/70  dark:bg-[#0a0a0a]/70 blue-dark:bg-[#0f172b]/70">
           <CardContent className="space-y-3">
             {/* Top Row */}
             <div className="flex items-start justify-between">
@@ -195,11 +209,17 @@ function Column({ id, label, items }: ColumnProps) {
   const { setNodeRef } = useDroppable({ id });
 
   return (
-    <div ref={setNodeRef} className="rounded-xl border w-full min-h-[400px]">
+    <div
+      ref={setNodeRef}
+      className={`rounded-lg border border-t-1 ${columnBorderColor(id)} w-full min-h-[400px] bg-[#fafafa]/90  dark:bg-[#171717]/90 blue-dark:bg-[#1b2336]/90`}
+    >
       <div className="flex items-start px-4 pt-4 pb-2 justify-between">
         <h3 className="font-semibold mb-3">{label}</h3>
-        <span className="text-xs">
-          {items.length} task{items.length !== 1 ? "s" : ""}
+        <span
+          className="text-sm p-1 px-2 rounded-4xl  bg-[#f4f4f5] dark:bg-[#111111] blue-dark:bg-[#141c2b]"
+        >
+          {items.length}
+          {items.length !== 1 ? "" : ""}
         </span>
       </div>
       <hr className="mb-3" />
@@ -269,7 +289,7 @@ export default function TaskBoard({ tasks }: TaskBoardProps) {
     const payload = {
       title: movedItem.title,
       description: movedItem.description,
-      status: destCol.toUpperCase(), 
+      status: destCol.toUpperCase(),
       priority: movedItem.priority,
       estimatedHours: movedItem.estimatedHours,
       plannedDuration: movedItem.plannedDuration,

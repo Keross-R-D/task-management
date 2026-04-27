@@ -152,6 +152,7 @@ function TaskRow({ task }: { task: Task }) {
         sprintId={task.sprintId}
         onClose={() => setIsEditOpen(false)}
       />
+
       <LogTimeModal
         open={isLogTimeOpen}
         task={task}
@@ -161,7 +162,7 @@ function TaskRow({ task }: { task: Task }) {
   );
 }
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import AddSprintModal from "./AddSprintModal";
 import AddTaskModal from "./AddTaskModal";
 import AddEpicModal from "./AddEpicModal";
@@ -171,9 +172,15 @@ interface EpicComponentProps {
   epics: EpicType[];
   sprints: Sprint[];
   tasks: Task[];
+  isFiltering: boolean; // ← new prop
 }
 
-export default function Epic({ epics, sprints, tasks }: EpicComponentProps) {
+export default function Epic({
+  epics,
+  sprints,
+  tasks,
+  isFiltering,
+}: EpicComponentProps) {
   const [addSprintEpicId, setAddSprintEpicId] = useState<string | null>(null);
   const [addTaskData, setAddTaskData] = useState<{
     sprintId: string;
@@ -182,6 +189,30 @@ export default function Epic({ epics, sprints, tasks }: EpicComponentProps) {
   } | null>(null);
   const [editEpic, setEditEpic] = useState<EpicType | null>(null);
   const [editSprint, setEditSprint] = useState<Sprint | null>(null);
+
+  // ── Controlled accordion state ──
+  const [openEpics, setOpenEpics] = useState<string[]>([]);
+  const [openSprints, setOpenSprints] = useState<string[]>([]);
+
+  // ── IDs that have matching tasks ──
+  const activeSprintIds = useMemo(
+    () => new Set(tasks.map((t) => t.sprintId).filter(Boolean)),
+    [tasks],
+  );
+  const activeEpicIds = useMemo(
+    () => new Set(tasks.map((t) => t.epicId).filter(Boolean)),
+    [tasks],
+  );
+
+  const derivedOpenEpics = useMemo(() => {
+    if (!isFiltering) return [];
+    return [...activeEpicIds].map((id) => `epic-${id}`);
+  }, [activeEpicIds, isFiltering]);
+
+  const derivedOpenSprints = useMemo(() => {
+    if (!isFiltering) return [];
+    return [...activeSprintIds].map((id) => `sprint-${id}`);
+  }, [activeSprintIds, isFiltering]);
 
   if (epics.length === 0) {
     return (
@@ -193,7 +224,12 @@ export default function Epic({ epics, sprints, tasks }: EpicComponentProps) {
 
   return (
     <div className="w-full rounded-xl my-4">
-      <Accordion type="multiple" className="w-full space-y-3">
+      <Accordion
+        type="multiple"
+        value={isFiltering ? derivedOpenEpics : openEpics}
+        onValueChange={setOpenEpics} // ← user can still manually toggle
+        className="w-full space-y-3"
+      >
         {epics.map((epic) => {
           const epicSprints = sprints.filter((s) => s.epicId === epic.id);
 
@@ -203,10 +239,9 @@ export default function Epic({ epics, sprints, tasks }: EpicComponentProps) {
                 value={`epic-${epic.id}`}
                 className="rounded-xl overflow-hidden"
               >
-                {/* EPIC HEADER */}
+                {/* EPIC HEADER — unchanged */}
                 <AccordionTrigger className="group hover:no-underline hover:bg-[#272b2f]/50 px-3 py-3 [&[data-state]>svg]:hidden">
                   <div className="flex items-center justify-between w-full min-w-0 cursor-pointer">
-                    {/* LEFT */}
                     <div className="flex items-center gap-3 min-w-0">
                       <ChevronRight className="h-4 w-4 transition-transform duration-200 group-data-[state=open]:rotate-90 shrink-0" />
                       <div className="h-8 w-8 flex items-center justify-center rounded-full border">
@@ -221,8 +256,6 @@ export default function Epic({ epics, sprints, tasks }: EpicComponentProps) {
                         </p>
                       </div>
                     </div>
-
-                    {/* RIGHT */}
                     <div className="flex items-center gap-3 shrink-0">
                       <span className="text-xs px-2 py-1 rounded-md border">
                         {epicSprints.length} sprint
@@ -272,7 +305,7 @@ export default function Epic({ epics, sprints, tasks }: EpicComponentProps) {
                 </AccordionTrigger>
                 <hr className="border" />
 
-                {/* EPIC CONTENT → Sprints */}
+                {/* SPRINTS — now type="multiple" and controlled */}
                 <AccordionContent className="px-2 pb-2 py-2 overflow-hidden">
                   {epicSprints.length === 0 ? (
                     <p className="text-sm text-muted-foreground py-4 text-center">
@@ -280,14 +313,16 @@ export default function Epic({ epics, sprints, tasks }: EpicComponentProps) {
                     </p>
                   ) : (
                     <Accordion
-                      type="single"
-                      collapsible
+                      type="multiple" // ← was "single", now "multiple" so all matching sprints open
+                      value={isFiltering ? derivedOpenSprints : openSprints}
+                      onValueChange={setOpenSprints}
                       className="w-full space-y-2"
                     >
                       {epicSprints.map((sprint) => {
                         const sprintTasks = tasks.filter(
                           (t) => t.sprintId === sprint.id,
                         );
+
                         return (
                           <div key={sprint.id} className="border rounded-xl">
                             <AccordionItem
@@ -296,25 +331,20 @@ export default function Epic({ epics, sprints, tasks }: EpicComponentProps) {
                             >
                               <AccordionTrigger className="group hover:no-underline hover:bg-[#272b2f]/50 px-3 py-3 [&[data-state]>svg]:hidden">
                                 <div className="flex items-center justify-between w-full min-w-0 cursor-pointer">
-                                  {/* LEFT */}
-                                  <div className="flex items-center gap-3 min-w-0">
+                                  <div className="flex items-center gap-3 min-w-0 flex-wrap">
                                     <ChevronRight className="h-4 w-4 transition-transform duration-200 group-data-[state=open]:rotate-90 shrink-0" />
-                                    <div className="flex items-center gap-3 min-w-0 flex-wrap">
-                                      <LayoutDashboard className="text-sm text-blue-400" />
-                                      <span className="font-medium truncate">
-                                        {sprint.name}
-                                      </span>
-                                      <span className="text-xs px-2 py-1 rounded-md border shrink-0">
-                                        {sprint.status}
-                                      </span>
-                                      <span className="text-sm truncate">
-                                        ({formatDate(sprint.startDate)} -{" "}
-                                        {formatDate(sprint.endDate)})
-                                      </span>
-                                    </div>
+                                    <LayoutDashboard className="text-sm text-blue-400" />
+                                    <span className="font-medium truncate">
+                                      {sprint.name}
+                                    </span>
+                                    <span className="text-xs px-2 py-1 rounded-md border shrink-0">
+                                      {sprint.status}
+                                    </span>
+                                    <span className="text-sm truncate">
+                                      ({formatDate(sprint.startDate)} -{" "}
+                                      {formatDate(sprint.endDate)})
+                                    </span>
                                   </div>
-
-                                  {/* RIGHT */}
                                   <div className="flex items-center gap-3 shrink-0">
                                     <span className="text-sm">
                                       {sprintTasks.length} task
@@ -384,7 +414,6 @@ export default function Epic({ epics, sprints, tasks }: EpicComponentProps) {
                                   </div>
                                 </div>
                               </AccordionTrigger>
-
                               <hr />
                               <AccordionContent className="px-3 pb-0">
                                 {sprintTasks.length === 0 ? (
@@ -410,7 +439,7 @@ export default function Epic({ epics, sprints, tasks }: EpicComponentProps) {
         })}
       </Accordion>
 
-      {/* Modals */}
+      {/* Modals — unchanged */}
       {addSprintEpicId && (
         <AddSprintModal
           open={!!addSprintEpicId}
@@ -421,7 +450,6 @@ export default function Epic({ epics, sprints, tasks }: EpicComponentProps) {
           epicId={addSprintEpicId}
         />
       )}
-
       {addTaskData && (
         <AddTaskModal
           open={!!addTaskData}
@@ -431,14 +459,12 @@ export default function Epic({ epics, sprints, tasks }: EpicComponentProps) {
           sprintId={addTaskData.sprintId}
         />
       )}
-
       <AddEpicModal
         open={!!editEpic}
         epic={editEpic}
         projectId={editEpic?.projectId || ""}
         onClose={() => setEditEpic(null)}
       />
-
       <AddSprintModal
         open={!!editSprint}
         sprint={editSprint}

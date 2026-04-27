@@ -6,7 +6,10 @@
 
 @import "shadcn/tailwind.css";
 
+
 @custom-variant dark (&:is(.dark *));
+
+@custom-variant blue-dark (&:is(.blue-dark *));
 
 /* App level styles */
 /* @theme {
