@@ -2,6 +2,7 @@ package com.ikon.taskmanagement.controller;
 
 import com.ikon.taskmanagement.api.TaskApi;
 import com.ikon.taskmanagement.dto.request.TaskRequestDto;
+import com.ikon.taskmanagement.dto.request.UpdateTaskStatusDto;
 import com.ikon.taskmanagement.dto.response.TaskResponseDto;
 import com.ikon.taskmanagement.service.TaskService;
 import lombok.RequiredArgsConstructor;
@@ -58,5 +59,10 @@ public class TaskController implements TaskApi {
     public ResponseEntity<Void> deleteTask(UUID id) {
         taskService.deleteTask(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @Override
+    public ResponseEntity<TaskResponseDto> patchTaskStatus(UUID id, UpdateTaskStatusDto dto) {
+        return ResponseEntity.ok(taskService.patchTaskStatus(id, dto));
     }
 }

@@ -1,6 +1,7 @@
 package com.ikon.taskmanagement.dto.response;
 
 import lombok.Data;
+import com.ikon.taskmanagement.enums.SprintStatus;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -14,7 +15,7 @@ public class SprintResponseDto {
     private String goal;
     private LocalDate startDate;
     private LocalDate endDate;
-    private String status;
+    private SprintStatus status;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

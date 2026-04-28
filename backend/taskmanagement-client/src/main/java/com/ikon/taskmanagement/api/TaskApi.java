@@ -1,6 +1,7 @@
 package com.ikon.taskmanagement.api;
 
 import com.ikon.taskmanagement.dto.request.TaskRequestDto;
+import com.ikon.taskmanagement.dto.request.UpdateTaskStatusDto;
 import com.ikon.taskmanagement.dto.response.TaskResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -45,4 +46,8 @@ public interface TaskApi {
     @Operation(summary = "Delete task by ID")
     @DeleteMapping("/{id}")
     ResponseEntity<Void> deleteTask(@PathVariable("id") UUID id);
+
+    @Operation(summary = "Update task status")
+    @PatchMapping("/{id}/status")
+    ResponseEntity<TaskResponseDto> patchTaskStatus(@PathVariable("id") UUID id, @RequestBody UpdateTaskStatusDto dto);
 }

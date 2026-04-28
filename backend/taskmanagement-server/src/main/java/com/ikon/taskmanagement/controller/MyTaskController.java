@@ -45,7 +45,7 @@ public class MyTaskController implements MyTaskApi {
             UpdateTaskStatusDto dto) {
 
         return ResponseEntity.ok(
-                myTaskService.updateTaskStatus(id, dto.getTaskStatus()));
+                myTaskService.updateTaskStatus(id, dto.getTaskStatus().name()));
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.ikon.taskmanagement.api;
 
 import com.ikon.taskmanagement.dto.request.SprintRequestDto;
+import com.ikon.taskmanagement.dto.request.UpdateSprintStatusDto;
 import com.ikon.taskmanagement.dto.response.SprintResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -37,4 +38,8 @@ public interface SprintApi {
     @Operation(summary = "Delete sprint by ID")
     @DeleteMapping("/{id}")
     ResponseEntity<Void> deleteSprint(@PathVariable("id") UUID id);
+
+    @Operation(summary = "Update sprint status")
+    @PatchMapping("/{id}/status")
+    ResponseEntity<SprintResponseDto> patchSprintStatus(@PathVariable("id") UUID id, @RequestBody UpdateSprintStatusDto dto);
 }
