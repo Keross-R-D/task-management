@@ -1,6 +1,7 @@
 package com.ikon.taskmanagement.service;
 
 import com.ikon.taskmanagement.dto.request.TaskRequestDto;
+import com.ikon.taskmanagement.dto.request.UpdateTaskStatusDto;
 import com.ikon.taskmanagement.dto.response.TaskResponseDto;
 
 import java.util.List;
@@ -14,5 +15,6 @@ public interface TaskService {
     List<TaskResponseDto> getProjectBacklog(UUID projectId);
     TaskResponseDto getTaskById(UUID id);
     TaskResponseDto updateTask(UUID id, TaskRequestDto dto);
+    TaskResponseDto patchTaskStatus(UUID id, UpdateTaskStatusDto dto);
     void deleteTask(UUID id);
 }

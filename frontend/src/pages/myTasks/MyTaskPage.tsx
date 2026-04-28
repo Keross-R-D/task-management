@@ -6,7 +6,7 @@ import AddMyTaskModal from "./components/AddMyTaskModal";
 import StatsCard from "./components/StatsCard";
 import { userMap } from "@/features/myTasks/mytasksApiSlice";
 
-import { Plus, NotepadText, ListTodo, LoaderCircle, SquareCheckBig, Trash2, MoreHorizontal, Ban, ArrowDown, ArrowUp, Flame, CheckCircle2, Clock, Pencil, User, CircleUser, FolderCheck } from "lucide-react";
+import { Plus, NotepadText, ListTodo, LoaderCircle, SquareCheckBig, Trash2, MoreHorizontal, Ban, ArrowDown, ArrowUp, Flame, CheckCircle2, Clock, Pencil, CircleUser } from "lucide-react";
 import EditMyTaskModal from "./components/EditMyTaskModal";
 
 // TYPES
@@ -22,7 +22,7 @@ type Task = {
 
 type CreateTaskPayload = {
     title: string;
-    description: string;
+    description?: string;
     type: string;
     priority: string;
     status: string;
@@ -61,7 +61,7 @@ const formatPriority = (priority: string): Task["priority"] => {
 };
 
 //formatting status
-const formatType = (type: string): string => {
+const formatType = (type: string): Task["type"] => {
     switch (type) {
         case "TASK":
             return "Task";
@@ -163,7 +163,7 @@ const TasksPage: React.FC = () => {
     const done = tasks.filter(t => t.status === "Done").length;
 
     // DataTable columns
-    const columns = [
+    const columns: any = [
         {
             accessorKey: "name",
             header: () => (

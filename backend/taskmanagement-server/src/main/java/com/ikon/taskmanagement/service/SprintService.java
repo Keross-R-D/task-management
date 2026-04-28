@@ -1,6 +1,7 @@
 package com.ikon.taskmanagement.service;
 
 import com.ikon.taskmanagement.dto.request.SprintRequestDto;
+import com.ikon.taskmanagement.dto.request.UpdateSprintStatusDto;
 import com.ikon.taskmanagement.dto.response.SprintResponseDto;
 
 import java.util.List;
@@ -12,5 +13,6 @@ public interface SprintService {
     List<SprintResponseDto> getSprintsByProjectId(UUID projectId);
     SprintResponseDto getSprintById(UUID id);
     SprintResponseDto updateSprint(UUID id, SprintRequestDto dto);
+    SprintResponseDto patchSprintStatus(UUID id, UpdateSprintStatusDto dto);
     void deleteSprint(UUID id);
 }

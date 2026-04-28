@@ -21,7 +21,7 @@ export interface TasksResponse {
 
 type CreateTaskPayload = {
     title: string;
-    description: string;
+    description?: string;
     type: string;
     priority: string;
     status: string;
@@ -66,7 +66,7 @@ export const mytasksApiSlice = apiSlice.injectEndpoints({
                 method: "POST",
                 data: {
                     taskTitle: data.title,
-                    taskDescription: data.description,
+                    taskDescription: data.description || "",
                     taskType: data.type.toUpperCase(),
                     taskPriority: data.priority.toUpperCase(),
                     taskStatus: statusMap[data.status],
@@ -99,7 +99,7 @@ export const mytasksApiSlice = apiSlice.injectEndpoints({
                 method: "PUT", // or PATCH (depends on backend)
                 data: {
                     taskTitle: data.title,
-                    taskDescription: data.description,
+                    taskDescription: data.description || "",
                     taskType: data.type.toUpperCase(),
                     taskPriority: data.priority.toUpperCase(),
                     taskStatus: statusMap[data.status],

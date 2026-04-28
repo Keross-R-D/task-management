@@ -6,6 +6,8 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import com.ikon.taskmanagement.enums.EpicStatus;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -28,8 +30,9 @@ public class Epic {
     @Column(columnDefinition = "TEXT")
     private String description;
 
+    @Enumerated(EnumType.STRING)
     @Column
-    private String status = "TODO";
+    private EpicStatus status = EpicStatus.PLANNED;
 
     @Column
     private LocalDate startDate;
