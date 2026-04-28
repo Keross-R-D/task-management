@@ -228,7 +228,7 @@ export default function Epic({
         type="multiple"
         value={isFiltering ? derivedOpenEpics : openEpics}
         onValueChange={setOpenEpics} // ← user can still manually toggle
-        className="w-full space-y-3"
+        className="w-full space-y-3 max-h-[400px] overflow-y-auto scrollbar-thin"
       >
         {epics.map((epic) => {
           const epicSprints = sprints.filter((s) => s.epicId === epic.id);
@@ -306,7 +306,7 @@ export default function Epic({
                 <hr className="border" />
 
                 {/* SPRINTS — now type="multiple" and controlled */}
-                <AccordionContent className="px-2 pb-2 py-2 overflow-hidden">
+                <AccordionContent className="px-3 py-2 max-h-[300px] overflow-y-auto scrollbar-thin">
                   {epicSprints.length === 0 ? (
                     <p className="text-sm text-muted-foreground py-4 text-center">
                       No sprints in this epic
@@ -415,7 +415,7 @@ export default function Epic({
                                 </div>
                               </AccordionTrigger>
                               <hr />
-                              <AccordionContent className="px-3 pb-0">
+                              <AccordionContent className="px-3 pb-0 max-h-[300px] overflow-y-auto scrollbar-thin">
                                 {sprintTasks.length === 0 ? (
                                   <p className="text-sm text-muted-foreground py-4 text-center">
                                     No tasks in this sprint

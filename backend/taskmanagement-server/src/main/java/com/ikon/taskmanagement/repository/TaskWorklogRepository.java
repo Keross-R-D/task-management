@@ -47,7 +47,7 @@ public interface TaskWorklogRepository extends JpaRepository<TaskWorklog, UUID> 
                """, nativeQuery = true)
      List<Object[]> getWeeklyTimesheetDataWithFilters(
                @Param("projectId") UUID projectId,
-               @Param("teamMemberIds") List<UUID> teamMemberIds,
+               @Param("teamMemberIds") UUID teamMemberIds,
                @Param("startDate") LocalDate startDate,
                @Param("endDate") LocalDate endDate);
 }

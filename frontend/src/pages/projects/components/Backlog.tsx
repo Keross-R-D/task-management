@@ -202,7 +202,7 @@ export default function Backlog({ tasks }: BacklogProps) {
             <hr />
 
             {/* BACKLOG CONTENT */}
-            <AccordionContent className="px-2 pb-2 py-2 overflow-hidden">
+            <AccordionContent className="px-2 py-2 max-h-[300px] overflow-y-auto scrollbar-thin">
               {tasks.length === 0 ? (
                 <p className="text-sm text-muted-foreground py-4 text-center">
                   No backlog tasks

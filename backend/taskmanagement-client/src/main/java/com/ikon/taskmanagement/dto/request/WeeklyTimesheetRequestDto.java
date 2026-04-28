@@ -8,8 +8,8 @@ import java.util.UUID;
 
 @Data
 public class WeeklyTimesheetRequestDto {
-     private UUID projectId;
-    private List<UUID> teamMemberIds;
+    private UUID projectId;
+    private UUID teamMemberIds;
     private LocalDate startDate;
     private LocalDate endDate;
 }

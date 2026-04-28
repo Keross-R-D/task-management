@@ -32,8 +32,10 @@ const DEFAULT_FILTERS: FilterState = {
   type: "ALL",
   sprintState: "ALL",
 };
+import AddTaskBulkUploadModal from "./components/AddTaskBulkUploadModal";
 
 export default function ProjectDetailPage() {
+  const [bulkOpen, setBulkOpen] = useState(false);
   const { projectId = "" } = useParams();
 
   // ── RTK Query hooks ──
@@ -157,7 +159,7 @@ export default function ProjectDetailPage() {
             </TabsList>
 
             <div className="flex md:justify-end gap-3">
-              <Button variant="outline">
+              <Button variant="outline" onClick={() => setBulkOpen(true)}>
                 <Upload size={16} className="mr-2" />
                 Bulk Upload
               </Button>
@@ -210,6 +212,11 @@ export default function ProjectDetailPage() {
         open={open}
         projectId={projectId}
         onClose={() => setOpen(false)}
+      />
+      <AddTaskBulkUploadModal
+        open={bulkOpen}
+        projectId={projectId}
+        onClose={() => setBulkOpen(false)}
       />
     </div>
   );

@@ -50,7 +50,7 @@ public class TaskWorklogServiceImpl implements TaskWorklogService {
     public List<WeeklyTimesheetResponseDto> getWeeklyTimesheet(WeeklyTimesheetRequestDto dto) {
 
         UUID projectId = dto.getProjectId();
-        List<UUID> teamMemberIds = dto.getTeamMemberIds();
+        UUID teamMemberIds = dto.getTeamMemberIds();
         LocalDate startDate = dto.getStartDate();
         LocalDate endDate = dto.getEndDate();
 
