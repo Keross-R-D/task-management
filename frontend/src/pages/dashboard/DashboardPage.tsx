@@ -1,24 +1,76 @@
-import React from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import StatsCard from "../myTasks/components/StatsCard";
-import { ArrowDown, ArrowUp, Ban, CalendarClock, ChartPie, CheckCircle2, CircleUser, Clock, Flame, FolderKanban, LayoutList, ListTodo, LoaderCircle, NotepadText, SquareCheckBig, TrendingUp } from "lucide-react";
+import { ArrowDown, ArrowUp, Ban, CalendarClock, ChartPie, CheckCircle2, CircleUser, Clock, Flame, FolderKanban, LayoutList, ListTodo, LoaderCircle, NotepadText, SquareCheckBig, TrendingUp, Users } from "lucide-react";
 import { Card, CardContent, CardTitle, DataTableLayout, EChart, Progress, Separator } from "ikon-react-components-lib";
+import ProjectCard from "./components/ProjectCard";
 import { useNavigate } from "react-router-dom";
 import { useGetMyTasksQuery, userMap } from "@/features/myTasks/mytasksApiSlice";
+import { useGetProjectsQuery } from "@/features/projects/projectsApiSlice";
+import type { Task as ProjectTask } from "@/features/tasks/tasksApiSlice";
+import { useLazyGetTasksByProjectQuery } from "@/features/tasks/tasksApiSlice";
+
+//Types
+type Task = {
+    id: string;
+    name: string;
+    actualHours: number,
+    estimatedHours: number,
+    status: "Todo" | "In progress" | "Done" | "Blocked";
+    priority: "Low" | "Medium" | "High";
+    type: "Task" | "Bug" | "Improvement",
+    assignee: string
+};
+
+type ProjectTaskWithProject = ProjectTask & {
+  projectName: string;
+};
 
 const DashboardPage: React.FC = () => {
   const navigate = useNavigate();
+  const { data: projects = [], isLoading: isProjectLoading } = useGetProjectsQuery();
   const { data, isLoading, isError } = useGetMyTasksQuery();
+  const [ getTasksByProject ] = useLazyGetTasksByProjectQuery();
+  const [ projectTasks, setProjectTasks ] = useState<ProjectTaskWithProject[]>([]);
 
-  //Type
-  type Task = {
-      id: string;
-      name: string;
-      estimatedHours: number,
-      status: "Todo" | "In progress" | "Done" | "Blocked";
-      priority: "Low" | "Medium" | "High";
-      type: "Task" | "Bug" | "Improvement",
-      assignee: string
-  };
+  //Project tasks data
+  useEffect(() => {
+    if (!projects.length) return;
+
+    const loadProjectTasks = async () => {
+      const results = await Promise.all(
+        projects.map(async (project) => {
+          const tasks = await getTasksByProject(String(project.id)).unwrap();
+          return tasks.map(t => ({
+            ...t,
+            projectName: project.projectName
+          }));
+        })
+      );
+
+      setProjectTasks(results.flat());
+    };
+
+    loadProjectTasks();
+  }, [projects, getTasksByProject]);
+
+  //Bar chart data
+  const chartData = useMemo(() => {
+    const map: Record<string, { estimated: number; actual: number }> = {};
+
+    projectTasks.forEach((t) => {
+      if (!map[t.projectName]) {
+        map[t.projectName] = { estimated: 0, actual: 0 };
+      }
+      map[t.projectName].estimated += t.estimatedHours || 0;
+      map[t.projectName].actual += t.actualHours || 0;
+    });
+
+    return Object.entries(map).map(([name, values]) => ({
+      name,
+      estimated: values.estimated,
+      actual: values.actual,
+    }));
+  }, [projectTasks]);
   
   //formatting status
   const formatStatus = (status: string): Task["status"] => {
@@ -78,59 +130,81 @@ const DashboardPage: React.FC = () => {
         id: task.id,
         name: task.taskTitle,
         status: formatStatus(task.taskStatus),
+        actualHours: 0, //Dummy data for now
         estimatedHours: task.estimatedHours,
         priority: formatPriority(task.taskPriority),
         type: formatType(task.taskType),
         assignee: mapAssignee(task.assigneeIds)
-    })) || [];
+  })) || [];
 
-  const total = tasks.length;
+  const formattedProjectTasks = projectTasks.map((task) => ({
+    id: task.id,
+    name: task.title,
+    status: formatStatus(task.status.toUpperCase()),
+    actualHours: task.actualHours,
+    estimatedHours: task.estimatedHours,
+    priority: formatPriority(task.priority.toUpperCase()),
+    type: formatType(task.type.toUpperCase()),
+    assignee: task.assigneeId || "",
+  }));
 
-  const todo = tasks.filter(t => t.status === "Todo").length;
+  //Calculations
+  const allTasks = [...tasks, ...formattedProjectTasks];
 
-  const inProgress = tasks.filter(t => t.status === "In progress").length;
+  const total = allTasks.length;
 
-  const done = tasks.filter(t => t.status === "Done").length;
+  const todo = allTasks.filter(t => t.status === "Todo").length;
 
-  const blocked = tasks.filter(t => t.status === "Blocked").length;
+  const inProgress = allTasks.filter(t => t.status === "In progress").length;
 
-  const low = tasks.filter(t => t.priority === "Low").length;
+  const done = allTasks.filter(t => t.status === "Done").length;
 
-  const medium = tasks.filter(t => t.priority === "Medium").length;
+  const blocked = allTasks.filter(t => t.status === "Blocked").length;
 
-  const high = tasks.filter(t => t.priority === "High").length;
+  const low = allTasks.filter(t => t.priority === "Low").length;
+
+  const medium = allTasks.filter(t => t.priority === "Medium").length;
+
+  const high = allTasks.filter(t => t.priority === "High").length;
+
+  const taskPercentage = total === 0 ? 0 : Math.round((done / total) * 100);
+
+  const totalEstimatedHours = allTasks.reduce(
+    (sum, t) => sum + (t.estimatedHours || 0),
+    0
+  );
+
+  const totalActualHours = allTasks.reduce(
+    (sum, t) => sum + (t.actualHours || 0),
+    0
+  );
+
+  const hoursPercentage = totalEstimatedHours === 0 ? 0 : Math.round((totalActualHours / totalEstimatedHours) * 100);
 
   //Bar chart options
   const optionBar = {
-    tooltip: {
-      trigger: "axis",
-    },
-    legend: {
-      data: ["Estimated", "Actual"],
-    },
+    tooltip: { trigger: "axis" },
+    legend: { data: ["Estimated", "Actual"] },
+
     xAxis: {
       type: "category",
-      data: ["Project 1", "Project 2"],
+      data: chartData.map((p) => p.name),
     },
-    yAxis: {
-      type: "value",
-    },
+
+    yAxis: { type: "value" },
+
     series: [
       {
         name: "Estimated",
         type: "bar",
-        data: [90, 15],
-        itemStyle: {
-          color: "#2a3441",
-        },
+        data: chartData.map((p) => p.estimated),
+        itemStyle: { color: "#2a3441" },
       },
       {
         name: "Actual",
         type: "bar",
-        data: [20, 10],
-        itemStyle: {
-          color: "#6366f1",
-        },
+        data: chartData.map((p) => p.actual),
+        itemStyle: { color: "#6366f1" },
       },
     ],
   };
@@ -191,7 +265,7 @@ const DashboardPage: React.FC = () => {
     ],
   };
 
-  //Task DataTable columns
+  //Recent Task DataTable columns
   const columns = [
     {
       accessorKey: "name",
@@ -258,7 +332,7 @@ const DashboardPage: React.FC = () => {
     },
   ];
 
-  //Task grid view
+  //Recent Task grid view
   const renderGrid = (data: Task[]) => {
     const statusIcons: Record<Task["status"], React.ReactNode> = {
         Todo: <ListTodo className="h-3.5 w-3.5" />,
@@ -334,7 +408,7 @@ const DashboardPage: React.FC = () => {
           </div>
       </div>
       <div className="grid mt-5 mb-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-          <StatsCard title="Total" description="Total projects" value={0} color="text-indigo-500" bg="bg-indigo-500/10" Icon={LayoutList} />
+          <StatsCard title="Total" description="Total projects" value={projects.length} color="text-indigo-500" bg="bg-indigo-500/10" Icon={LayoutList} />
 
           <StatsCard title="Active" description="Active Projects" value={0} color="text-amber-500" bg="bg-amber-500/10" Icon={FolderKanban} />
 
@@ -357,20 +431,20 @@ const DashboardPage: React.FC = () => {
                 <div className="col-span-1">
                   <span className="font-semibold text-lg">Task Completion</span>
                   <div className="flex justify-between text-sm mb-1">
-                    <span className="text-muted-foreground">2 / 8</span>
-                    <span className="font-medium">25%</span>
+                    <span className="text-muted-foreground">{done} / {total}</span>
+                    <span className="font-medium">{taskPercentage} %</span>
                   </div>
-                  <Progress value={25} />
+                  <Progress value={taskPercentage} />
                 </div>
 
                 {/* Hours Logged */}
                 <div className="col-span-1">
                   <span className="font-semibold text-lg">Hours Logged</span>
                   <div className="flex justify-between text-sm mb-1">
-                    <span className="text-muted-foreground">0 / 203</span>
-                    <span className="font-medium">10%</span>
+                    <span className="text-muted-foreground">{totalActualHours} / {totalEstimatedHours}</span>
+                    <span className="font-medium">{hoursPercentage} %</span>
                   </div>
-                  <Progress value={10} />
+                  <Progress value={hoursPercentage} />
                 </div>
             </div>
             <div className="flex items-center justify-center text-muted-foreground">
@@ -422,7 +496,7 @@ const DashboardPage: React.FC = () => {
       </div>
 
       <div className="grid sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-1 xl:grid-cols-3 gap-6">
-        {/* Effort By Project */}
+        {/* Recent Tasks */}
         <Card className="lg:col-span-2 p-4">
           <div className="flex justify-between">
             <CardTitle className="flex gap-2 items-center text-lg font-semibold"><CalendarClock className="text-indigo-500"/>Recent Tasks</CardTitle>
@@ -434,7 +508,7 @@ const DashboardPage: React.FC = () => {
             </button>
           </div>
           <div>
-            <DataTableLayout data={tasks} columns={columns}
+            <DataTableLayout data={allTasks} columns={columns}
               extraTools={{
                 totalPages: 2,
                 toggleViewMode: true,
@@ -448,21 +522,47 @@ const DashboardPage: React.FC = () => {
           </CardContent>
         </Card>
 
-        {/* Task Distribution */}
-        <Card className="p-4">
-          <div className="flex justify-between">
-            <CardTitle className="flex gap-2 items-center text-lg font-semibold"><FolderKanban className="text-amber-500"/>Projects</CardTitle>
-            <button
-              onClick={() => navigate("/main/projects")}
-              className="flex items-center gap-2 cursor-pointer text-indigo-500 hover:text-indigo-600"
-            >
-              View All
-            </button>
-          </div>
-          <CardContent className="p-2 space-y-4">
-            
-          </CardContent>
-        </Card>
+        <div className="grid xl:grid-cols-3 gap-6">
+          {/* Projects */}
+          <Card className="p-4 xl:col-span-3">
+            <div className="flex justify-between">
+              <CardTitle className="flex gap-2 items-center text-lg font-semibold"><FolderKanban className="text-amber-500"/>Projects</CardTitle>
+              <button
+                onClick={() => navigate("/main/projects")}
+                className="flex items-center gap-2 cursor-pointer text-indigo-500 hover:text-indigo-600"
+              >
+                View All
+              </button>
+            </div>
+            <CardContent className="p-2 space-y-4">
+              {isProjectLoading ? (
+                <p className="text-sm text-muted-foreground">Loading...</p>
+              ) : projects.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No projects found</p>
+              ) : (
+                projects.map((project) => (
+                  <ProjectCard
+                    key={project.id}
+                    id={String(project.id)}
+                    name={project.projectName}
+                    status={project.projectStatus}
+                  />
+                ))
+              )}
+            </CardContent>
+          </Card>
+          <Card className="p-4 xl:col-span-3">
+            <div className="flex justify-between">
+              <CardTitle className="flex gap-2 items-center text-lg font-semibold"><Users className="text-indigo-500"/>Team Workload</CardTitle>
+              <button
+                  onClick={() => navigate("/main/resource-utilisation")}
+                  className="flex items-center gap-2 cursor-pointer text-indigo-500 hover:text-indigo-600"
+                >
+                  Details
+                </button>
+              </div>
+          </Card>
+        </div>
       </div>
     </div>
   );

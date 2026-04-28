@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import { DataTableLayout, Button, LoadingSpinner } from "ikon-react-components-lib";
+import { DataTableLayout, Button } from "ikon-react-components-lib";
 import {
   Plus,
   Users,
@@ -149,20 +149,6 @@ const ProjectsPage: React.FC = () => {
       <Plus className="h-4 w-4 mr-2" /> Add Project
     </Button>
   );
-
-  if (isLoading) {
-      return (
-          <LoadingSpinner className="size-8" />
-      );
-  }
-
-  if (isError) {
-      return (
-          <div className="p-4 bg-red-100 text-red-700 rounded-md">
-              Failed to fetch projects. Please try again.
-          </div>
-      );
-  }
 
   return (
     <div className="flex flex-col gap-6">
