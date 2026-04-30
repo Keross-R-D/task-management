@@ -121,20 +121,20 @@ const DashboardPage: React.FC = () => {
   );
   
   //Map assignee
-  const mapAssignee = (ids: string[] = []) => {
-      if (!ids || ids.length === 0) return "";
-      return reverseUserMap[ids[0]] || "";
+  const mapAssignee = (id?: string) => {
+      if (!id) return "";
+      return reverseUserMap[id] || "";
   };
 
   const tasks = data?.content?.map((task) => ({
         id: task.id,
         name: task.taskTitle,
         status: formatStatus(task.taskStatus),
-        actualHours: 0, //Dummy data for now
+        actualHours: task.actualHours, //Dummy data for now
         estimatedHours: task.estimatedHours,
         priority: formatPriority(task.taskPriority),
         type: formatType(task.taskType),
-        assignee: mapAssignee(task.assigneeIds)
+        assignee: mapAssignee(task.assigneeId)
   })) || [];
 
   const formattedProjectTasks = projectTasks.map((task) => ({

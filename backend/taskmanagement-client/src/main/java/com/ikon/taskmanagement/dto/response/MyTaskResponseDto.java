@@ -3,7 +3,6 @@ package com.ikon.taskmanagement.dto.response;
 import lombok.Data;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -16,8 +15,9 @@ public class MyTaskResponseDto {
     private String taskPriority;
     private String taskStatus;
     private Double estimatedHours;
+    private Double actualHours;
 
-    private List<UUID> assigneeIds;
+    private UUID assigneeId;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

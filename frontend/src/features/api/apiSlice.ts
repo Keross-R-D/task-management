@@ -5,6 +5,6 @@ import { axiosBaseQueryWithReauth } from './axiosBaseQuery';
 export const apiSlice = createApi({
   reducerPath: 'api',
   baseQuery: axiosBaseQueryWithReauth({ baseUrl: 'http://localhost:8071/api' }), // Pointing local Spring Boot App Port 8071
-  tagTypes: ['Project', 'Task', 'Epic', 'Sprint', 'Worklog'],
+  tagTypes: ['Project', 'Task', 'Epic', 'Sprint', 'Worklog', 'MyTask', 'MyTaskWorklog'],
   endpoints: () => ({}),
 });
