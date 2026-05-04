@@ -113,10 +113,10 @@ const TasksPage: React.FC = () => {
     // const [page, setPage] = useState(0);
     // const [pageSize, setPageSize] = useState(10);
     // const { data, isLoading, isError } = useGetTasksQuery({ page, size: pageSize });
-    const [ logTask, setLogTask ] = useState<Task | null>(null);
-    const [ isLogOpen, setIsLogOpen ] = useState(false);
-    const [ viewTask, setViewTask ] = useState<Task | null>(null);
-    const [ isViewOpen, setIsViewOpen ] = useState(false);
+    const [logTask, setLogTask] = useState<Task | null>(null);
+    const [isLogOpen, setIsLogOpen] = useState(false);
+    const [viewTask, setViewTask] = useState<Task | null>(null);
+    const [isViewOpen, setIsViewOpen] = useState(false);
     const { data, isLoading, isError } = useGetMyTasksQuery();
     const [updateTask] = useUpdateMyTaskMutation();
     const [createTask] = useCreateMyTaskMutation();
@@ -324,7 +324,7 @@ const TasksPage: React.FC = () => {
                                     View Logs
                                 </button>
 
-                                <Separator className="my-1"/>
+                                <Separator className="my-1" />
 
                                 <button
                                     onClick={() => handleStatusChange(task.id, "TO_DO")}
@@ -358,7 +358,7 @@ const TasksPage: React.FC = () => {
                                     <Ban className="h-4 w-4" /> Set Blocked
                                 </button>
 
-                                <Separator className="my-1"/>
+                                <Separator className="my-1" />
 
                                 <button
                                     onClick={(e) => {
@@ -498,7 +498,7 @@ const TasksPage: React.FC = () => {
                                                 View Logs
                                             </button>
 
-                                            <Separator className="my-1"/>
+                                            <Separator className="my-1" />
 
                                             <button
                                                 onClick={() => handleStatusChange(task.id, "TO_DO")}
@@ -528,7 +528,7 @@ const TasksPage: React.FC = () => {
                                                 <Ban className="h-4 w-4" /> Set Blocked
                                             </button>
 
-                                            <Separator className="my-1"/>
+                                            <Separator className="my-1" />
 
                                             <button
                                                 onClick={(e) => {
@@ -588,10 +588,10 @@ const TasksPage: React.FC = () => {
 
                                 <div className="flex items-center gap-2 mt-3 text-sm text-muted-foreground">
                                     <CircleUser className="h-3 w-3" />Assigned to: <span className="font-medium">{task.assignee.split(' ')
-                                    .map(word =>
-                                        word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-                                    )
-                                    .join(' ') || "Unassigned"}</span>
+                                        .map(word =>
+                                            word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+                                        )
+                                        .join(' ') || "Unassigned"}</span>
                                 </div>
                             </div>
                         </div>
@@ -681,19 +681,19 @@ const TasksPage: React.FC = () => {
                 open={isLogOpen}
                 task={
                     logTask
-                    ? {
-                        id: logTask.id,
-                        taskTitle: logTask.name,
-                        taskDescription: "",
-                        taskType: reverseTypeMap[logTask.type],
-                        taskPriority: reversePriorityMap[logTask.priority],
-                        taskStatus: reverseStatusMap[logTask.status],
-                        estimatedHours: logTask.estimatedHours,
-                        assigneeId: null,
-                        createdAt: "",
-                        updatedAt: "",
+                        ? {
+                            id: logTask.id,
+                            taskTitle: logTask.name,
+                            taskDescription: "",
+                            taskType: reverseTypeMap[logTask.type],
+                            taskPriority: reversePriorityMap[logTask.priority],
+                            taskStatus: reverseStatusMap[logTask.status],
+                            estimatedHours: logTask.estimatedHours,
+                            assigneeId: null,
+                            createdAt: "",
+                            updatedAt: "",
                         }
-                    : null
+                        : null
                 }
                 onClose={() => {
                     setIsLogOpen(false);
@@ -705,19 +705,19 @@ const TasksPage: React.FC = () => {
                 open={isViewOpen}
                 task={
                     viewTask
-                    ? {
-                        id: viewTask.id,
-                        taskTitle: viewTask.name,
-                        taskDescription: "",
-                        taskType: reverseTypeMap[viewTask.type],
-                        taskPriority: reversePriorityMap[viewTask.priority],
-                        taskStatus: reverseStatusMap[viewTask.status],
-                        estimatedHours: viewTask.estimatedHours,
-                        assigneeId: null,
-                        createdAt: "",
-                        updatedAt: "",
+                        ? {
+                            id: viewTask.id,
+                            taskTitle: viewTask.name,
+                            taskDescription: "",
+                            taskType: reverseTypeMap[viewTask.type],
+                            taskPriority: reversePriorityMap[viewTask.priority],
+                            taskStatus: reverseStatusMap[viewTask.status],
+                            estimatedHours: viewTask.estimatedHours,
+                            assigneeId: null,
+                            createdAt: "",
+                            updatedAt: "",
                         }
-                    : null
+                        : null
                 }
                 onClose={() => {
                     setIsViewOpen(false);

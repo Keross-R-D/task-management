@@ -28,9 +28,14 @@ public interface TaskWorklogApi {
 
     @Operation(summary = "Update a worklog")
     @PutMapping("/{id}")
-    ResponseEntity<TaskWorklogResponseDto> updateWorklog(@PathVariable("id") UUID id, @RequestBody TaskWorklogRequestDto dto);
+    ResponseEntity<TaskWorklogResponseDto> updateWorklog(@PathVariable("id") UUID id,
+            @RequestBody TaskWorklogRequestDto dto);
 
     @Operation(summary = "Delete a worklog")
     @DeleteMapping("/{id}")
     ResponseEntity<Void> deleteWorklog(@PathVariable("id") UUID id);
+
+    @Operation(summary = "Fetch all worklogs for a project")
+    @GetMapping("/project/{projectId}")
+    ResponseEntity<List<TaskWorklogResponseDto>> getWorklogsByProjectId(@PathVariable("projectId") UUID projectId);
 }

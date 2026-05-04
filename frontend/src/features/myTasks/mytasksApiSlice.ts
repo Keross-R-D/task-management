@@ -49,17 +49,17 @@ const mapUserToUUID = (user: string) => userMap[user];
 export const mytasksApiSlice = apiSlice.injectEndpoints({
     endpoints: (builder) => ({
         getMyTasks: builder.query<TasksResponse, void>({
-        query: () => ({ apiUrl: "/myTasks?sort=createdAt,asc" }),
-        providesTags: (result) =>
-            result
-            ? [
-                ...result.content.map(({ id }) => ({
-                    type: "MyTask" as const,
-                    id,
-                })),
-                { type: "MyTask", id: "LIST" },
-                ]
-            : [{ type: "MyTask", id: "LIST" }],
+            query: () => ({ apiUrl: "/myTasks?sort=createdAt,asc" }),
+            providesTags: (result) =>
+                result
+                    ? [
+                        ...result.content.map(({ id }) => ({
+                            type: "MyTask" as const,
+                            id,
+                        })),
+                        { type: "MyTask", id: "LIST" },
+                    ]
+                    : [{ type: "MyTask", id: "LIST" }],
         }),
         // getTasks: builder.query<TasksResponse, { page: number; size: number }>({
         //     query: ({ page, size }) => ({
@@ -68,54 +68,54 @@ export const mytasksApiSlice = apiSlice.injectEndpoints({
         //     providesTags: ["MyTask"],
         // }),
         createMyTask: builder.mutation<Task, CreateTaskPayload>({
-        query: (data) => ({
+            query: (data) => ({
                 apiUrl: "/myTasks",
                 config: {
-                method: "POST",
-                data: {
-                    taskTitle: data.title,
-                    taskDescription: data.description || "",
-                    taskType: data.type.toUpperCase(),
-                    taskPriority: data.priority.toUpperCase(),
-                    taskStatus: statusMap[data.status],
-                    estimatedHours: data.estimatedHours,
-                    assigneeId: data.assignee
-                    ? mapUserToUUID(data.assignee)
-                    : null,
-                },
+                    method: "POST",
+                    data: {
+                        taskTitle: data.title,
+                        taskDescription: data.description || "",
+                        taskType: data.type.toUpperCase(),
+                        taskPriority: data.priority.toUpperCase(),
+                        taskStatus: statusMap[data.status],
+                        estimatedHours: data.estimatedHours,
+                        assigneeId: data.assignee
+                            ? mapUserToUUID(data.assignee)
+                            : null,
+                    },
                 },
             }),
             invalidatesTags: ["MyTask"],
         }),
         updateMyTaskStatus: builder.mutation<Task,
-        { id: string; status: string }>({
-            query: ({ id, status }) => ({
-                apiUrl: `/myTasks/${id}`,
-                config: {
-                method: "PATCH",
-                data: {
-                    taskStatus: status,
-                },
-                },
+            { id: string; status: string }>({
+                query: ({ id, status }) => ({
+                    apiUrl: `/myTasks/${id}`,
+                    config: {
+                        method: "PATCH",
+                        data: {
+                            taskStatus: status,
+                        },
+                    },
+                }),
+                invalidatesTags: ["MyTask"],
             }),
-            invalidatesTags: ["MyTask"],
-        }),
         updateMyTask: builder.mutation<Task, { id: string; data: CreateTaskPayload }>({
             query: ({ id, data }) => ({
                 apiUrl: `/myTasks/${id}`,
                 config: {
-                method: "PUT", // or PATCH (depends on backend)
-                data: {
-                    taskTitle: data.title,
-                    taskDescription: data.description || "",
-                    taskType: data.type.toUpperCase(),
-                    taskPriority: data.priority.toUpperCase(),
-                    taskStatus: statusMap[data.status],
-                    estimatedHours: data.estimatedHours,
-                    assigneeId: data.assignee
-                    ? mapUserToUUID(data.assignee)
-                    : null,
-                },
+                    method: "PUT", // or PATCH (depends on backend)
+                    data: {
+                        taskTitle: data.title,
+                        taskDescription: data.description || "",
+                        taskType: data.type.toUpperCase(),
+                        taskPriority: data.priority.toUpperCase(),
+                        taskStatus: statusMap[data.status],
+                        estimatedHours: data.estimatedHours,
+                        assigneeId: data.assignee
+                            ? mapUserToUUID(data.assignee)
+                            : null,
+                    },
                 },
             }),
             invalidatesTags: ["MyTask"],
@@ -124,7 +124,7 @@ export const mytasksApiSlice = apiSlice.injectEndpoints({
             query: (id) => ({
                 apiUrl: `/myTasks/${id}`,
                 config: {
-                method: "DELETE",
+                    method: "DELETE",
                 },
             }),
             invalidatesTags: ["MyTask"],

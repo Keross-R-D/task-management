@@ -64,13 +64,13 @@ const ProjectStatusDetailPage: React.FC = () => {
     const getStatusClass = (status: string) => {
         switch (status) {
             case "on_time":
-            return "bg-green-500/10 text-green-500 border border-green-500/60";
+                return "bg-green-500/10 text-green-500 border border-green-500/60";
             case "slight_delay":
-            return "bg-yellow-500/10 text-yellow-500 border border-yellow-500/60";
+                return "bg-yellow-500/10 text-yellow-500 border border-yellow-500/60";
             case "delay":
-            return "bg-red-500/10 text-red-500 border border-red-500/60";
+                return "bg-red-500/10 text-red-500 border border-red-500/60";
             default:
-            return "bg-gray-500/10 text-gray-500 border border-gray-500/60";
+                return "bg-gray-500/10 text-gray-500 border border-gray-500/60";
         }
     };
 
@@ -105,55 +105,55 @@ const ProjectStatusDetailPage: React.FC = () => {
             accessorKey: "sprintName",
             header: () => <div className="font-semibold">Sprint Name</div>,
             cell: ({ row }: { row: { original: OverdueTask } }) => (
-            <div className="text-left text-sm">
-                {row.original.sprintName}
-            </div>
+                <div className="text-left text-sm">
+                    {row.original.sprintName}
+                </div>
             ),
         },
         {
             accessorKey: "plannedStartDate",
             header: () => <div className="font-semibold">Planned Start Date</div>,
             cell: ({ row }: { row: { original: OverdueTask } }) => (
-            <div className="text-left">{row.original.plannedStartDate}</div>
+                <div className="text-left">{row.original.plannedStartDate}</div>
             ),
         },
         {
             accessorKey: "plannedEndDate",
             header: () => <div className="font-semibold">Planned End Date</div>,
             cell: ({ row }: { row: { original: OverdueTask } }) => (
-            <div className="text-left">{row.original.plannedEndDate}</div>
+                <div className="text-left">{row.original.plannedEndDate}</div>
             ),
         },
         {
             accessorKey: "overdueDays",
             header: () => <div className="font-semibold">Overdue (in days)</div>,
             cell: ({ row }: { row: { original: OverdueTask } }) => {
-            const days = row.original.overdueDays;
+                const days = row.original.overdueDays;
 
-            let color = "bg-green-500/10 text-green-500";
-            if (days > 0) color = "bg-red-500/10 text-red-500";
+                let color = "bg-green-500/10 text-green-500";
+                if (days > 0) color = "bg-red-500/10 text-red-500";
 
-            return (
-                <div className={`px-2 py-1 text-left w-fit rounded text-sm ${color}`}>
-                {days} days
-                </div>
-            );
+                return (
+                    <div className={`px-2 py-1 text-left w-fit rounded text-sm ${color}`}>
+                        {days} days
+                    </div>
+                );
             },
         },
         {
             accessorKey: "progress",
             header: () => <div className="font-semibold">Progress</div>,
             cell: ({ row }: { row: { original: OverdueTask } }) => {
-            const value = row.original.progress;
+                const value = row.original.progress;
 
-            return (
-                <div className="flex items-center gap-2">
-                    <div className="w-24">
-                        <Progress value={value} />
+                return (
+                    <div className="flex items-center gap-2">
+                        <div className="w-24">
+                            <Progress value={value} />
+                        </div>
+                        <span className="text-sm">{value}%</span>
                     </div>
-                    <span className="text-sm">{value}%</span>
-                </div>
-            );
+                );
             },
         },
     ];
@@ -176,8 +176,8 @@ const ProjectStatusDetailPage: React.FC = () => {
 
         const overdueDays =
             sprint.status !== "COMPLETED" && endDate < today
-            ? Math.floor((today.getTime() - endDate.getTime()) / (1000 * 60 * 60 * 24))
-            : 0;
+                ? Math.floor((today.getTime() - endDate.getTime()) / (1000 * 60 * 60 * 24))
+                : 0;
 
         return {
             id: sprint.id,
@@ -203,7 +203,7 @@ const ProjectStatusDetailPage: React.FC = () => {
         // Date-based delay
         if (today > end) {
             const diffDays = Math.floor(
-            (today.getTime() - end.getTime()) / (1000 * 60 * 60 * 24)
+                (today.getTime() - end.getTime()) / (1000 * 60 * 60 * 24)
             );
 
             if (diffDays <= 7) return "slight_delay";
@@ -246,7 +246,7 @@ const ProjectStatusDetailPage: React.FC = () => {
     const isInRange = (date: Date, start: Date, end: Date) =>
         date >= start && date <= end;
 
-        const currentWeekSprints = sprints.filter((sprint) => {
+    const currentWeekSprints = sprints.filter((sprint) => {
         const start = new Date(sprint.startDate);
         const end = new Date(sprint.endDate);
 
@@ -289,9 +289,9 @@ const ProjectStatusDetailPage: React.FC = () => {
             accessorKey: "sprintName",
             header: () => <div className="font-semibold">Sprint Name</div>,
             cell: ({ row }: any) => (
-            <div className="text-left text-sm font-medium">
-                {row.original.sprintName}
-            </div>
+                <div className="text-left text-sm font-medium">
+                    {row.original.sprintName}
+                </div>
             ),
         },
     ];
@@ -299,7 +299,7 @@ const ProjectStatusDetailPage: React.FC = () => {
     const renderProgressCell = (value: number) => (
         <div className="flex items-center gap-2">
             <div className="w-24">
-            <Progress value={value} />
+                <Progress value={value} />
             </div>
             <span className="text-sm">{value}%</span>
         </div>
@@ -332,9 +332,9 @@ const ProjectStatusDetailPage: React.FC = () => {
             accessorKey: "plannedEndDate",
             header: () => <div className="font-semibold">Planned End Date</div>,
             cell: ({ row }: any) => (
-            <div className="text-left">
-                {row.original.plannedEndDate}
-            </div>
+                <div className="text-left">
+                    {row.original.plannedEndDate}
+                </div>
             ),
         },
     ];
@@ -359,14 +359,14 @@ const ProjectStatusDetailPage: React.FC = () => {
 
                         <CardContent className="space-y-3 text-sm">
 
-                            <p className="flex items-center gap-2"><span className="flex items-center gap-1 font-bold"><FolderKanban className="h-4"/> Project:</span> {computedData.projectName}</p>
+                            <p className="flex items-center gap-2"><span className="flex items-center gap-1 font-bold"><FolderKanban className="h-4" /> Project:</span> {computedData.projectName}</p>
 
-                            <p className="flex items-center gap-2"><span className="flex items-center gap-1 font-bold"><Calendar className="h-4"/> Start Date:</span> {formatDate(new Date(computedData.startDate))}</p>
+                            <p className="flex items-center gap-2"><span className="flex items-center gap-1 font-bold"><Calendar className="h-4" /> Start Date:</span> {formatDate(new Date(computedData.startDate))}</p>
 
-                            <p className="flex items-center gap-2"><span className="flex items-center gap-1 font-bold"><Calendar className="h-4"/> End Date:</span> {formatDate(new Date(computedData.endDate))}</p>
+                            <p className="flex items-center gap-2"><span className="flex items-center gap-1 font-bold"><Calendar className="h-4" /> End Date:</span> {formatDate(new Date(computedData.endDate))}</p>
 
                             <p className="flex items-center gap-2">
-                                <ChartColumn className="h-4"/>
+                                <ChartColumn className="h-4" />
                                 <span className=" flex items-center gap-1font-bold">Status:</span>{" "}
                                 <span className="text-sm">
                                     {computedData.status.replace("_", " ")}
@@ -374,19 +374,19 @@ const ProjectStatusDetailPage: React.FC = () => {
                             </p>
 
                             <p className="flex items-center gap-2">
-                                <Target className="h-4"/>
+                                <Target className="h-4" />
                                 <span className="flex items-center gap-1 font-bold">Progress:</span>{" "}
                                 <span>{computedData.progress}%</span>
                             </p>
 
                             <div className="flex items-center gap-2">
-                                <Clock className="h-4"/>
+                                <Clock className="h-4" />
                                 <span className="flex items-center gap-1 font-bold">Hours:</span>{" "}
                                 {computedData.actualHours}h / {computedData.estimatedHours}h
                             </div>
 
                             <div className="pt-2">
-                            <hr/>
+                                <hr />
                             </div>
 
                             {/* Legend */}
@@ -404,23 +404,23 @@ const ProjectStatusDetailPage: React.FC = () => {
                             <CardTitle className="text-2xl">Executive Summary Report</CardTitle>
 
                             <span className="text-sm">
-                            From: {formatDate(previousWeek.start)} To: {formatDate(upcomingWeek.end)}
+                                From: {formatDate(previousWeek.start)} To: {formatDate(upcomingWeek.end)}
                             </span>
                         </CardHeader>
 
                         <CardContent className="space-y-4 text-sm">
 
                             <div className="space-y-2">
-                            <p> 
-                                {overdueTasks.length === 0 ? <span className="flex gap-2 font-semibold text-green-400"><CircleCheck className="h-5"/> All sprint(s) are running on time.</span> : <span className="flex gap-2 font-semibold text-red-400"><CircleAlert className="h-5"/> {overdueTasks.length} sprint(s) are running out of time.</span>}
-                            </p>
-                            <p className="flex gap-2 font-semibold text-yellow-400">
-                                <TriangleAlert className="h-5"/> No risk(s) are associated with the project.
-                            </p>
-                            <p className="flex gap-2 font-semibold text-blue-400">
-                                <Info className="h-5"/>
-                                {computedData.remainingTasks === 0 ? <span>All tasks have been completed.</span> : <span>{computedData.remainingTasks} task(s) remaining out of {computedData.tasksTotal} total.</span>}
-                            </p>
+                                <p>
+                                    {overdueTasks.length === 0 ? <span className="flex gap-2 font-semibold text-green-400"><CircleCheck className="h-5" /> All sprint(s) are running on time.</span> : <span className="flex gap-2 font-semibold text-red-400"><CircleAlert className="h-5" /> {overdueTasks.length} sprint(s) are running out of time.</span>}
+                                </p>
+                                <p className="flex gap-2 font-semibold text-yellow-400">
+                                    <TriangleAlert className="h-5" /> No risk(s) are associated with the project.
+                                </p>
+                                <p className="flex gap-2 font-semibold text-blue-400">
+                                    <Info className="h-5" />
+                                    {computedData.remainingTasks === 0 ? <span>All tasks have been completed.</span> : <span>{computedData.remainingTasks} task(s) remaining out of {computedData.tasksTotal} total.</span>}
+                                </p>
                             </div>
 
                             {/* Stats */}
@@ -428,21 +428,21 @@ const ProjectStatusDetailPage: React.FC = () => {
 
                                 <div className="text-center">
                                     <p className="text-2xl font-bold">
-                                    {computedData.tasksTotal}
+                                        {computedData.tasksTotal}
                                     </p>
                                     <p className="text-sm text-gray-400">Total Tasks</p>
                                 </div>
 
                                 <div className="text-center">
                                     <p className="text-2xl font-bold text-green-500">
-                                    {computedData.tasksDone}
+                                        {computedData.tasksDone}
                                     </p>
                                     <p className="text-sm text-gray-400">Completed</p>
                                 </div>
 
                                 <div className="text-center">
                                     <p className="text-2xl font-bold text-yellow-500">
-                                    {computedData.remainingTasks}
+                                        {computedData.remainingTasks}
                                     </p>
                                     <p className="text-sm text-gray-400">Remaining</p>
                                 </div>
@@ -457,14 +457,14 @@ const ProjectStatusDetailPage: React.FC = () => {
                 <div className="mt-4 mb-4">
                     <Card>
                         <CardHeader>
-                        <CardTitle className="font-medium">Overdue Tasks</CardTitle>
+                            <CardTitle className="font-medium">Overdue Tasks</CardTitle>
                         </CardHeader>
                         <CardContent className="text-center text-gray-400">
                             <DataTableLayout
                                 columns={overdueTasksColumns}
                                 data={overdueTasks}
                                 extraTools={{
-                                    totalPages:1,
+                                    totalPages: 1,
                                     isLoading: isLoading,
                                     fileName: "Overdue Tasks Report"
                                 }}
@@ -475,30 +475,30 @@ const ProjectStatusDetailPage: React.FC = () => {
 
                 <div className="grid grid-cols-1 xl:grid-cols-3! gap-6">
                     <Card>
-                    <CardHeader>
-                        <CardTitle className="font-medium">Current Week</CardTitle>
-                    </CardHeader>
-                    <CardContent className="text-center text-gray-400">
-                        <DataTableLayout data={currentWeekData} columns={currentWeekColumns} extraTools={{totalPages:1, fileName: "Current Week Report"}}/>
-                    </CardContent>
+                        <CardHeader>
+                            <CardTitle className="font-medium">Current Week</CardTitle>
+                        </CardHeader>
+                        <CardContent className="text-center text-gray-400">
+                            <DataTableLayout data={currentWeekData} columns={currentWeekColumns} extraTools={{ totalPages: 1, fileName: "Current Week Report" }} />
+                        </CardContent>
                     </Card>
 
                     <Card>
-                    <CardHeader>
-                        <CardTitle className="font-medium">Previous Week</CardTitle>
-                    </CardHeader>
-                    <CardContent className="text-center text-gray-400">
-                        <DataTableLayout data={previousWeekData} columns={previousWeekColumns} extraTools={{totalPages:1, fileName: "Previous Week Report"}}/>
-                    </CardContent>
+                        <CardHeader>
+                            <CardTitle className="font-medium">Previous Week</CardTitle>
+                        </CardHeader>
+                        <CardContent className="text-center text-gray-400">
+                            <DataTableLayout data={previousWeekData} columns={previousWeekColumns} extraTools={{ totalPages: 1, fileName: "Previous Week Report" }} />
+                        </CardContent>
                     </Card>
 
                     <Card>
-                    <CardHeader>
-                        <CardTitle className="font-medium">Upcoming Week</CardTitle>
-                    </CardHeader>
-                    <CardContent className="text-center text-gray-400">
-                        <DataTableLayout data={upcomingWeekData} columns={upcomingWeekColumns} extraTools={{totalPages:1, fileName: "Upcoming Week Report"}}/>
-                    </CardContent>
+                        <CardHeader>
+                            <CardTitle className="font-medium">Upcoming Week</CardTitle>
+                        </CardHeader>
+                        <CardContent className="text-center text-gray-400">
+                            <DataTableLayout data={upcomingWeekData} columns={upcomingWeekColumns} extraTools={{ totalPages: 1, fileName: "Upcoming Week Report" }} />
+                        </CardContent>
                     </Card>
                 </div>
             </div>

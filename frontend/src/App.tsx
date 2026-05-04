@@ -9,7 +9,7 @@ function App() {
   return (
     <Routes>
       <Route path="/" element={<Navigate to="/main/projects" replace />} />
-      
+
       <Route element={<ProtectedRoute />}>
         <Route path="/main" element={<MainLayout />}>
           {mainRoutes.map((route) => (

@@ -44,4 +44,9 @@ public class TaskWorklogController implements TaskWorklogApi {
         worklogService.deleteWorklog(id);
         return ResponseEntity.noContent().build();
     }
+
+    @Override
+    public ResponseEntity<List<TaskWorklogResponseDto>> getWorklogsByProjectId(UUID projectId) {
+        return ResponseEntity.ok(worklogService.getWorklogsByProjectId(projectId));
+    }
 }

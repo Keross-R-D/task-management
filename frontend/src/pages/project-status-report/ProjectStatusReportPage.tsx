@@ -21,9 +21,9 @@ type ProjectSummary = {
 const ProjectStatusReportPage: React.FC = () => {
   const navigate = useNavigate();
   const { data: projects = [], isLoading } = useGetProjectsQuery();
-  const [ getTasksByProject ] = useLazyGetTasksByProjectQuery();
+  const [getTasksByProject] = useLazyGetTasksByProjectQuery();
 
-  const [ projectData, setProjectData ] = React.useState<ProjectSummary[]>([]);
+  const [projectData, setProjectData] = React.useState<ProjectSummary[]>([]);
 
   React.useEffect(() => {
     if (!projects.length) return;
@@ -81,7 +81,7 @@ const ProjectStatusReportPage: React.FC = () => {
       header: () => <div className="font-semibold">Project Name</div>,
       cell: ({ row }: { row: { original: ProjectSummary } }) => (
         <div className="font-medium cursor-pointer"
-            onClick={() => navigate(`/main/project-status-report/${row.original.id}`)}>{row.original.projectName}</div>
+          onClick={() => navigate(`/main/project-status-report/${row.original.id}`)}>{row.original.projectName}</div>
       ),
     },
     {
@@ -167,21 +167,21 @@ const ProjectStatusReportPage: React.FC = () => {
 
   return (
     <div className="flex flex-col gap-6 p-4">
-        <div className="mb-3">
-          <h1 className="text-2xl font-bold">Project Status Report</h1>
-          <p className="text-muted-foreground">Detailed performance and variance analysis. Click on a project name to view its full status report.</p>
-        </div>
-        {/* Project status DataTable */}
-        <div className="w-full">
-          <DataTableLayout 
-            data={projectData}
-            columns={projectColumns}
-            extraTools={{
-              totalPages: 1,
-              isLoading: isLoading
-            }} 
-          />
-        </div>
+      <div className="mb-3">
+        <h1 className="text-2xl font-bold">Project Status Report</h1>
+        <p className="text-muted-foreground">Detailed performance and variance analysis. Click on a project name to view its full status report.</p>
+      </div>
+      {/* Project status DataTable */}
+      <div className="w-full">
+        <DataTableLayout
+          data={projectData}
+          columns={projectColumns}
+          extraTools={{
+            totalPages: 1,
+            isLoading: isLoading
+          }}
+        />
+      </div>
     </div>
   );
 };

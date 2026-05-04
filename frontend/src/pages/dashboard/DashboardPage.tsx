@@ -11,14 +11,14 @@ import { useLazyGetTasksByProjectQuery } from "@/features/tasks/tasksApiSlice";
 
 //Types
 type Task = {
-    id: string;
-    name: string;
-    actualHours: number,
-    estimatedHours: number,
-    status: "Todo" | "In progress" | "Done" | "Blocked";
-    priority: "Low" | "Medium" | "High";
-    type: "Task" | "Bug" | "Improvement",
-    assignee: string
+  id: string;
+  name: string;
+  actualHours: number,
+  estimatedHours: number,
+  status: "Todo" | "In progress" | "Done" | "Blocked";
+  priority: "Low" | "Medium" | "High";
+  type: "Task" | "Bug" | "Improvement",
+  assignee: string
 };
 
 type ProjectTaskWithProject = ProjectTask & {
@@ -29,8 +29,8 @@ const DashboardPage: React.FC = () => {
   const navigate = useNavigate();
   const { data: projects = [], isLoading: isProjectLoading } = useGetProjectsQuery();
   const { data, isLoading, isError } = useGetMyTasksQuery();
-  const [ getTasksByProject ] = useLazyGetTasksByProjectQuery();
-  const [ projectTasks, setProjectTasks ] = useState<ProjectTaskWithProject[]>([]);
+  const [getTasksByProject] = useLazyGetTasksByProjectQuery();
+  const [projectTasks, setProjectTasks] = useState<ProjectTaskWithProject[]>([]);
 
   //Project tasks data
   useEffect(() => {
@@ -71,70 +71,70 @@ const DashboardPage: React.FC = () => {
       actual: values.actual,
     }));
   }, [projectTasks]);
-  
+
   //formatting status
   const formatStatus = (status: string): Task["status"] => {
-      switch (status) {
-          case "TO_DO":
-              return "Todo";
-          case "IN_PROGRESS":
-              return "In progress";
-          case "DONE":
-              return "Done";
-          case "BLOCKED":
-              return "Blocked";
-          default:
-              return "Todo";
-      }
+    switch (status) {
+      case "TO_DO":
+        return "Todo";
+      case "IN_PROGRESS":
+        return "In progress";
+      case "DONE":
+        return "Done";
+      case "BLOCKED":
+        return "Blocked";
+      default:
+        return "Todo";
+    }
   };
-  
+
   //formatting priority
   const formatPriority = (priority: string): Task["priority"] => {
-      switch (priority) {
-          case "LOW":
-              return "Low";
-          case "MEDIUM":
-              return "Medium";
-          case "HIGH":
-              return "High";
-          default:
-              return "Low";
-      }
+    switch (priority) {
+      case "LOW":
+        return "Low";
+      case "MEDIUM":
+        return "Medium";
+      case "HIGH":
+        return "High";
+      default:
+        return "Low";
+    }
   };
-  
+
   //formatting status
   const formatType = (type: string): string => {
-      switch (type) {
-          case "TASK":
-              return "Task";
-          case "BUG":
-              return "Bug";
-          case "IMPROVEMENT":
-              return "Improvement";
-          default:
-              return "Task";
-      }
+    switch (type) {
+      case "TASK":
+        return "Task";
+      case "BUG":
+        return "Bug";
+      case "IMPROVEMENT":
+        return "Improvement";
+      default:
+        return "Task";
+    }
   };
-  
+
   const reverseUserMap: Record<string, string> = Object.fromEntries(
-      Object.entries(userMap).map(([key, value]) => [value, key])
+    Object.entries(userMap).map(([key, value]) => [value, key])
   );
-  
+
   //Map assignee
   const mapAssignee = (id?: string) => {
-      if (!id) return "";
-      return reverseUserMap[id] || "";
+    if (!id) return "";
+    return reverseUserMap[id] || "";
   };
 
   const tasks = data?.content?.map((task) => ({
-        id: task.id,
-        name: task.taskTitle,
-        status: formatStatus(task.taskStatus),
-        actualHours: task.actualHours, //Dummy data for now
-        estimatedHours: task.estimatedHours,
-        priority: formatPriority(task.taskPriority),
-        type: formatType(task.taskType),
-        assignee: mapAssignee(task.assigneeId)
+    id: task.id,
+    name: task.taskTitle,
+    status: formatStatus(task.taskStatus),
+    actualHours: task.actualHours, //Dummy data for now
+    estimatedHours: task.estimatedHours,
+    priority: formatPriority(task.taskPriority),
+    type: formatType(task.taskType),
+    assignee: mapAssignee(task.assigneeId)
   })) || [];
 
   const formattedProjectTasks = projectTasks.map((task) => ({
@@ -278,56 +278,56 @@ const DashboardPage: React.FC = () => {
       accessorKey: "status",
       header: "Status",
       cell: ({ row }: { row: { original: Task } }) => {
-          const status = row.original.status;
+        const status = row.original.status;
 
-          const styles: Record<Task["status"], string> = {
-              Todo: "bg-blue-500/10 text-blue-500",
-              "In progress": "bg-yellow-500/10 text-yellow-500",
-              Done: "bg-green-500/10 text-green-500",
-              Blocked: "bg-red-500/10 text-red-500",
-          };
+        const styles: Record<Task["status"], string> = {
+          Todo: "bg-blue-500/10 text-blue-500",
+          "In progress": "bg-yellow-500/10 text-yellow-500",
+          Done: "bg-green-500/10 text-green-500",
+          Blocked: "bg-red-500/10 text-red-500",
+        };
 
-          return (
-              <span className={`px-2 py-1 rounded-md text-sm font-medium ${styles[status]}`}>
-                  {status}
-              </span>
-          );
+        return (
+          <span className={`px-2 py-1 rounded-md text-sm font-medium ${styles[status]}`}>
+            {status}
+          </span>
+        );
       },
     },
     {
       accessorKey: "priority",
       header: "Priority",
       cell: ({ row }: { row: { original: Task } }) => {
-          const priority = row.original.priority;
+        const priority = row.original.priority;
 
-          const styles: Record<Task["priority"], string> = {
-              Low: "text-green-500",
-              Medium: "text-yellow-500",
-              High: "text-red-500",
-          };
+        const styles: Record<Task["priority"], string> = {
+          Low: "text-green-500",
+          Medium: "text-yellow-500",
+          High: "text-red-500",
+        };
 
-          return (
-              <span className={`font-semibold ${styles[priority]}`}>
-                  {priority}
-              </span>
-          );
+        return (
+          <span className={`font-semibold ${styles[priority]}`}>
+            {priority}
+          </span>
+        );
       },
     },
     {
       accessorKey: "assignee",
       header: "Assignee",
       cell: ({ row }: { row: { original: Task } }) => {
-          const assignee = row.original.assignee.split(' ')
-              .map(word =>
-                word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-              )
-              .join(' ');
+        const assignee = row.original.assignee.split(' ')
+          .map(word =>
+            word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+          )
+          .join(' ');
 
-          return (
-              <span className="flex gap-1 items-center font-semibold bg-muted w-fit rounded-md px-1.5 py-1">
-                  {assignee}
-              </span>
-          );
+        return (
+          <span className="flex gap-1 items-center font-semibold bg-muted w-fit rounded-md px-1.5 py-1">
+            {assignee}
+          </span>
+        );
       },
     },
   ];
@@ -335,36 +335,36 @@ const DashboardPage: React.FC = () => {
   //Recent Task grid view
   const renderGrid = (data: Task[]) => {
     const statusIcons: Record<Task["status"], React.ReactNode> = {
-        Todo: <ListTodo className="h-3.5 w-3.5" />,
-        "In progress": <Clock className="h-3.5 w-3.5" />,
-        Done: <CheckCircle2 className="h-3.5 w-3.5" />,
-        Blocked: <Ban className="h-3.5 w-3.5" />,
+      Todo: <ListTodo className="h-3.5 w-3.5" />,
+      "In progress": <Clock className="h-3.5 w-3.5" />,
+      Done: <CheckCircle2 className="h-3.5 w-3.5" />,
+      Blocked: <Ban className="h-3.5 w-3.5" />,
     };
 
     const priorityIcons: Record<Task["priority"], React.ReactNode> = {
-        Low: <ArrowDown className="h-4 w-4" />,
-        Medium: <ArrowUp className="h-4 w-4" />,
-        High: <Flame className="h-4 w-4" />,
+      Low: <ArrowDown className="h-4 w-4" />,
+      Medium: <ArrowUp className="h-4 w-4" />,
+      High: <Flame className="h-4 w-4" />,
     };
 
     const statusStyles: Record<Task["status"], string> = {
-        Todo: "text-indigo-500",
-        "In progress": "text-yellow-500",
-        Done: "text-green-500",
-        Blocked: "text-red-500",
+      Todo: "text-indigo-500",
+      "In progress": "text-yellow-500",
+      Done: "text-green-500",
+      Blocked: "text-red-500",
     };
 
     const statusBorderStyles: Record<Task["status"], string> = {
-        Todo: "border-t-indigo-500",
-        "In progress": "border-t-yellow-500",
-        Done: "border-t-green-500",
-        Blocked: "border-t-red-500",
+      Todo: "border-t-indigo-500",
+      "In progress": "border-t-yellow-500",
+      Done: "border-t-green-500",
+      Blocked: "border-t-red-500",
     };
 
     const priorityStyles: Record<Task["priority"], string> = {
-        Low: "bg-green-500/10 text-green-500",
-        Medium: "bg-yellow-500/10 text-yellow-500",
-        High: "bg-red-500/10 text-red-500",
+      Low: "bg-green-500/10 text-green-500",
+      Medium: "bg-yellow-500/10 text-yellow-500",
+      High: "bg-red-500/10 text-red-500",
     };
 
     return (
@@ -388,10 +388,10 @@ const DashboardPage: React.FC = () => {
 
             <div className="flex items-center gap-2 mt-3 text-sm text-muted-foreground">
               <CircleUser className="h-3 w-3" />Assigned to: <span className="font-medium">{task.assignee.split(' ')
-              .map(word =>
-                word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-              )
-              .join(' ') || "Unassigned"}</span>
+                .map(word =>
+                  word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+                )
+                .join(' ') || "Unassigned"}</span>
             </div>
           </div>
         ))}
@@ -402,50 +402,50 @@ const DashboardPage: React.FC = () => {
   return (
     <div className="p-4">
       <div className="flex justify-between items-center">
-          <div>
-              <h1 className="text-2xl font-bold">DashBoard</h1>
-              <p className="text-muted-foreground">Welcome back. Here's what's happening across your projects.</p>
-          </div>
+        <div>
+          <h1 className="text-2xl font-bold">DashBoard</h1>
+          <p className="text-muted-foreground">Welcome back. Here's what's happening across your projects.</p>
+        </div>
       </div>
       <div className="grid mt-5 mb-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-          <StatsCard title="Total" description="Total projects" value={projects.length} color="text-indigo-500" bg="bg-indigo-500/10" Icon={LayoutList} />
+        <StatsCard title="Total" description="Total projects" value={projects.length} color="text-indigo-500" bg="bg-indigo-500/10" Icon={LayoutList} />
 
-          <StatsCard title="Active" description="Active Projects" value={0} color="text-amber-500" bg="bg-amber-500/10" Icon={FolderKanban} />
+        <StatsCard title="Active" description="Active Projects" value={0} color="text-amber-500" bg="bg-amber-500/10" Icon={FolderKanban} />
 
-          <StatsCard title="Total" description="Total tasks" value={total} color="text-indigo-500" bg="bg-indigo-500/10" Icon={NotepadText} />
+        <StatsCard title="Total" description="Total tasks" value={total} color="text-indigo-500" bg="bg-indigo-500/10" Icon={NotepadText} />
 
-          <StatsCard title="To Do" description="Pending tasks" value={todo} color="text-blue-500" bg="bg-blue-500/10" Icon={ListTodo} />
+        <StatsCard title="To Do" description="Pending tasks" value={todo} color="text-blue-500" bg="bg-blue-500/10" Icon={ListTodo} />
 
-          <StatsCard title="In Progress" description="Ongoing tasks" value={inProgress} color="text-yellow-500" bg="bg-yellow-500/10" Icon={LoaderCircle} />
+        <StatsCard title="In Progress" description="Ongoing tasks" value={inProgress} color="text-yellow-500" bg="bg-yellow-500/10" Icon={LoaderCircle} />
 
-          <StatsCard title="Done" description="Completed tasks" value={done} color="text-green-500" bg="bg-green-500/10" Icon={SquareCheckBig} />
+        <StatsCard title="Done" description="Completed tasks" value={done} color="text-green-500" bg="bg-green-500/10" Icon={SquareCheckBig} />
       </div>
 
       <div className="grid sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-1 xl:grid-cols-3 gap-6 mb-4">
         {/* Effort By Project */}
         <Card className="lg:col-span-2 p-4">
-          <CardTitle className="flex gap-2 items-center text-lg font-semibold"><TrendingUp className="text-indigo-500"/>Effort By Projects</CardTitle>
+          <CardTitle className="flex gap-2 items-center text-lg font-semibold"><TrendingUp className="text-indigo-500" />Effort By Projects</CardTitle>
           <CardContent className="p-2 space-y-4">
             <div className="grid lg:grid-cols-2 gap-6 space-y-3">
-                {/* Task Completion */}
-                <div className="col-span-1">
-                  <span className="font-semibold text-lg">Task Completion</span>
-                  <div className="flex justify-between text-sm mb-1">
-                    <span className="text-muted-foreground">{done} / {total}</span>
-                    <span className="font-medium">{taskPercentage} %</span>
-                  </div>
-                  <Progress value={taskPercentage} />
+              {/* Task Completion */}
+              <div className="col-span-1">
+                <span className="font-semibold text-lg">Task Completion</span>
+                <div className="flex justify-between text-sm mb-1">
+                  <span className="text-muted-foreground">{done} / {total}</span>
+                  <span className="font-medium">{taskPercentage} %</span>
                 </div>
+                <Progress value={taskPercentage} />
+              </div>
 
-                {/* Hours Logged */}
-                <div className="col-span-1">
-                  <span className="font-semibold text-lg">Hours Logged</span>
-                  <div className="flex justify-between text-sm mb-1">
-                    <span className="text-muted-foreground">{totalActualHours} / {totalEstimatedHours}</span>
-                    <span className="font-medium">{hoursPercentage} %</span>
-                  </div>
-                  <Progress value={hoursPercentage} />
+              {/* Hours Logged */}
+              <div className="col-span-1">
+                <span className="font-semibold text-lg">Hours Logged</span>
+                <div className="flex justify-between text-sm mb-1">
+                  <span className="text-muted-foreground">{totalActualHours} / {totalEstimatedHours}</span>
+                  <span className="font-medium">{hoursPercentage} %</span>
                 </div>
+                <Progress value={hoursPercentage} />
+              </div>
             </div>
             <div className="flex items-center justify-center text-muted-foreground">
               {/* You can place chart / icon here */}
@@ -459,7 +459,7 @@ const DashboardPage: React.FC = () => {
 
         {/* Task Distribution */}
         <Card className="p-4">
-          <CardTitle className="flex gap-2 items-center text-lg font-semibold"><ChartPie className="text-blue-500"/>Task Distribution</CardTitle>
+          <CardTitle className="flex gap-2 items-center text-lg font-semibold"><ChartPie className="text-blue-500" />Task Distribution</CardTitle>
           <CardContent className="p-2 space-y-4">
             <EChart
               option={optionPie}
@@ -499,7 +499,7 @@ const DashboardPage: React.FC = () => {
         {/* Recent Tasks */}
         <Card className="lg:col-span-2 p-4">
           <div className="flex justify-between">
-            <CardTitle className="flex gap-2 items-center text-lg font-semibold"><CalendarClock className="text-indigo-500"/>Recent Tasks</CardTitle>
+            <CardTitle className="flex gap-2 items-center text-lg font-semibold"><CalendarClock className="text-indigo-500" />Recent Tasks</CardTitle>
             <button
               onClick={() => navigate("/main/tasks")}
               className="flex items-center gap-2 cursor-pointer text-indigo-500 hover:text-indigo-600"
@@ -518,7 +518,7 @@ const DashboardPage: React.FC = () => {
             />
           </div>
           <CardContent className="p-2 space-y-4">
-            
+
           </CardContent>
         </Card>
 
@@ -526,7 +526,7 @@ const DashboardPage: React.FC = () => {
           {/* Projects */}
           <Card className="p-4 xl:col-span-3">
             <div className="flex justify-between">
-              <CardTitle className="flex gap-2 items-center text-lg font-semibold"><FolderKanban className="text-amber-500"/>Projects</CardTitle>
+              <CardTitle className="flex gap-2 items-center text-lg font-semibold"><FolderKanban className="text-amber-500" />Projects</CardTitle>
               <button
                 onClick={() => navigate("/main/projects")}
                 className="flex items-center gap-2 cursor-pointer text-indigo-500 hover:text-indigo-600"
@@ -553,14 +553,14 @@ const DashboardPage: React.FC = () => {
           </Card>
           <Card className="p-4 xl:col-span-3">
             <div className="flex justify-between">
-              <CardTitle className="flex gap-2 items-center text-lg font-semibold"><Users className="text-indigo-500"/>Team Workload</CardTitle>
+              <CardTitle className="flex gap-2 items-center text-lg font-semibold"><Users className="text-indigo-500" />Team Workload</CardTitle>
               <button
-                  onClick={() => navigate("/main/resource-utilisation")}
-                  className="flex items-center gap-2 cursor-pointer text-indigo-500 hover:text-indigo-600"
-                >
-                  Details
-                </button>
-              </div>
+                onClick={() => navigate("/main/resource-utilisation")}
+                className="flex items-center gap-2 cursor-pointer text-indigo-500 hover:text-indigo-600"
+              >
+                Details
+              </button>
+            </div>
           </Card>
         </div>
       </div>

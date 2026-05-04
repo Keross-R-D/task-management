@@ -103,7 +103,10 @@ export const tasksApiSlice = apiSlice.injectEndpoints({
 
 export const {
   useGetTasksByProjectQuery,
+<<<<<<< HEAD
   useLazyGetTasksByProjectQuery,
+=======
+>>>>>>> main
   useGetTasksBacklogQuery,
   useGetTasksBySprintQuery,
   useCreateTaskMutation,
