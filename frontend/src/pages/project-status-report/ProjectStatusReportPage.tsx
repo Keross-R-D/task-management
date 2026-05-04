@@ -1,3 +1,5 @@
+import { useGetProjectsQuery } from "@/features/projects/projectsApiSlice";
+import { useLazyGetTasksByProjectQuery } from "@/features/tasks/tasksApiSlice";
 import { DataTableLayout, Progress } from "ikon-react-components-lib";
 import React from "react";
 import { useNavigate } from "react-router-dom";
@@ -18,6 +20,60 @@ type ProjectSummary = {
 
 const ProjectStatusReportPage: React.FC = () => {
   const navigate = useNavigate();
+  const { data: projects = [], isLoading } = useGetProjectsQuery();
+  const [ getTasksByProject ] = useLazyGetTasksByProjectQuery();
+
+  const [ projectData, setProjectData ] = React.useState<ProjectSummary[]>([]);
+
+  React.useEffect(() => {
+    if (!projects.length) return;
+
+    const loadData = async () => {
+      const results = await Promise.all(
+        projects.map(async (project) => {
+          const tasks = await getTasksByProject(String(project.id)).unwrap();
+
+          const tasksTotal = tasks.length;
+
+          const tasksDone = tasks.filter(
+            (t) => t.status === "DONE"
+          ).length;
+
+          const estimatedHours = tasks.reduce(
+            (sum, t) => sum + (t.estimatedHours || 0),
+            0
+          );
+
+          const actualHours = tasks.reduce(
+            (sum, t) => sum + (t.actualHours || 0),
+            0
+          );
+
+          const progress = tasksTotal > 0 ? Math.round((tasksDone / tasksTotal) * 100) : 0;
+
+          const variance = estimatedHours - actualHours;
+
+          return {
+            id: String(project.id),
+            projectName: project.projectName,
+            status: project.projectStatus,
+            progress,
+            tasksDone,
+            tasksTotal,
+            estimatedHours,
+            actualHours,
+            variance,
+            startDate: project.startDate,
+            endDate: project.endDate,
+          };
+        })
+      );
+
+      setProjectData(results);
+    };
+
+    loadData();
+  }, [projects, getTasksByProject]);
 
   const projectColumns = [
     {
@@ -109,61 +165,6 @@ const ProjectStatusReportPage: React.FC = () => {
     },
   ];
 
-  const projectData: ProjectSummary[] = [
-    {
-      id: "1",
-      projectName: "Project 1",
-      status: "NOT_STARTED",
-      progress: 100,
-      tasksDone: 2,
-      tasksTotal: 2,
-      estimatedHours: 87,
-      actualHours: 0,
-      variance: 87,
-      startDate: "Feb 2, 2026",
-      endDate: "Dec 31, 2026",
-    },
-    {
-      id: "2",
-      projectName: "Project 2",
-      status: "NOT_STARTED",
-      progress: 0,
-      tasksDone: 0,
-      tasksTotal: 2,
-      estimatedHours: 16,
-      actualHours: 0,
-      variance: 16,
-      startDate: "Dec 12, 2026",
-      endDate: "Dec 12, 2027",
-    },
-    {
-      id: "3",
-      projectName: "Project 3",
-      status: "NOT_STARTED",
-      progress: 0,
-      tasksDone: 0,
-      tasksTotal: 0,
-      estimatedHours: 0,
-      actualHours: 0,
-      variance: 0,
-      startDate: "Jul 25, 2008",
-      endDate: "Sep 6, 1990",
-    },
-    {
-      id: "4",
-      projectName: "Project 4",
-      status: "NOT_STARTED",
-      progress: 0,
-      tasksDone: 0,
-      tasksTotal: 0,
-      estimatedHours: 0,
-      actualHours: 0,
-      variance: 0,
-      startDate: "Oct 31, 2023",
-      endDate: "Jan 7, 1995",
-    },
-  ];
-
   return (
     <div className="flex flex-col gap-6 p-4">
         <div className="mb-3">
@@ -176,7 +177,8 @@ const ProjectStatusReportPage: React.FC = () => {
             data={projectData}
             columns={projectColumns}
             extraTools={{
-              totalPages: 1
+              totalPages: 1,
+              isLoading: isLoading
             }} 
           />
         </div>
