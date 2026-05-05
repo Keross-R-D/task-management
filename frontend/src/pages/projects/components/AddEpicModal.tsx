@@ -1,11 +1,8 @@
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  useCreateEpicMutation,
-  useUpdateEpicMutation,
-} from "@/features/epics/epicsApiSlice";
-import { useEffect } from "react";
+import { useCreateEpicMutation, useUpdateEpicMutation } from "@/features/epics/epicsApiSlice";
+import React, { useEffect } from "react";
 import type { Epic as EpicType } from "@/features/epics/epicsApiSlice";
 import { EpicEnum } from "@/enums/epic.constants";
 
@@ -30,7 +27,7 @@ import {
   Textarea,
 } from "ikon-react-components-lib";
 
-const epicSchema = z.object({
+const baseEpicSchema = z.object({
   name: z.string().min(3, "Epic name is required"),
   description: z.string().min(5, "Description is required"),
   status: z.string().min(4, "Status is required"),
@@ -38,12 +35,14 @@ const epicSchema = z.object({
   endDate: z.string().min(1, "End date is required"),
 });
 
-export type EpicFormValues = z.infer<typeof epicSchema>;
+export type EpicFormValues = z.infer<typeof baseEpicSchema>;
 
 interface Props {
   open: boolean;
   projectId: string;
   epic?: EpicType | null;
+  projectStartDate?: string;
+  projectEndDate?: string;
   onClose: () => void;
 }
 
@@ -51,6 +50,8 @@ export default function AddEpicModal({
   open,
   projectId,
   epic,
+  projectStartDate,
+  projectEndDate,
   onClose,
 }: Props) {
   const [createEpic, { isLoading: isCreating }] = useCreateEpicMutation();
@@ -58,8 +59,23 @@ export default function AddEpicModal({
 
   const isLoading = isCreating || isUpdating;
 
+  const dynamicSchema = React.useMemo(() => {
+    return baseEpicSchema.superRefine((data, ctx) => {
+      if (data.startDate && data.endDate && new Date(data.startDate) > new Date(data.endDate)) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Start Date must not be later than End Date", path: ["startDate"] });
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: "End Date must not be earlier than Start Date", path: ["endDate"] });
+      }
+      if (projectStartDate && data.startDate && new Date(data.startDate) < new Date(projectStartDate)) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: `Cannot be earlier than project start date (${projectStartDate})`, path: ["startDate"] });
+      }
+      if (projectEndDate && data.endDate && new Date(data.endDate) > new Date(projectEndDate)) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: `Cannot be later than project end date (${projectEndDate})`, path: ["endDate"] });
+      }
+    });
+  }, [projectStartDate, projectEndDate]);
+
   const form = useForm<EpicFormValues>({
-    resolver: zodResolver(epicSchema),
+    resolver: zodResolver(dynamicSchema),
     defaultValues: {
       name: "",
       description: "",

@@ -2,6 +2,8 @@ package com.ikon.taskmanagement.dto.response;
 
 import lombok.Data;
 
+import com.ikon.taskmanagement.enums.ProjectStatus;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -15,7 +17,7 @@ public class ProjectResponseDto {
     private UUID managerId;
     private LocalDate startDate;
     private LocalDate endDate;
-    private String projectStatus;
+    private ProjectStatus projectStatus;
     private String type;
     private List<UUID> teamMemberIds;
     private LocalDateTime createdAt;

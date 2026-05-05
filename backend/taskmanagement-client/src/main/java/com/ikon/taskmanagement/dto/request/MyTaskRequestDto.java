@@ -15,6 +15,5 @@ public class MyTaskRequestDto {
     private String taskStatus;
     private Double estimatedHours;
 
-    private List<UUID> assigneeIds;
-    
+    private UUID assigneeId;
 }

@@ -50,4 +50,6 @@ public interface TaskWorklogRepository extends JpaRepository<TaskWorklog, UUID> 
                @Param("teamMemberIds") UUID teamMemberIds,
                @Param("startDate") LocalDate startDate,
                @Param("endDate") LocalDate endDate);
+
+    List<TaskWorklog> findByTaskIdIn(List<UUID> taskIds);
 }

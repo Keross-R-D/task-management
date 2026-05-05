@@ -38,7 +38,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests((authorize) -> {
                     authorize
 
-                            .requestMatchers("/actuator/health", "/actuator/health/**", "/api/projects/**", "/api/myTasks/**","/api/epics/**").permitAll()
+                            .requestMatchers("/actuator/health", "/actuator/health/**", "/api/projects/**", "/api/myTasks/**","/api/tasks/**","/api/epics/**").permitAll()
 
                             .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                             .anyRequest().authenticated();

@@ -1,8 +1,9 @@
 export const EpicEnum = {
   Status: {
-    NOT_STARTED: "NOT_STARTED",
-    IN_PROGRESS: "IN_PROGRESS",
+    PLANNED: "PLANNED",
+    ACTIVE: "ACTIVE",
     COMPLETED: "COMPLETED",
+    CANCELED: "CANCELED",
   },
 } as const;
 

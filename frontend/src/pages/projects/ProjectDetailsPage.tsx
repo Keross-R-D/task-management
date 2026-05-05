@@ -22,6 +22,7 @@ import {
   useGetTasksByProjectQuery,
   useGetTasksBacklogQuery,
 } from "@/features/tasks/tasksApiSlice";
+import { useGetProjectsQuery } from "@/features/projects/projectsApiSlice";
 import { useParams } from "react-router-dom";
 import { filterTasks } from "@/utils/taskFilters";
 
@@ -47,6 +48,8 @@ export default function ProjectDetailPage() {
     useGetTasksByProjectQuery(projectId, { skip: !projectId });
   const { data: backlogTasks = [], isLoading: backlogLoading } =
     useGetTasksBacklogQuery(projectId, { skip: !projectId });
+  const { data: projects = [] } = useGetProjectsQuery();
+  const project = projects.find(p => String(p.id) === projectId);
 
   // ── Epic modal state ──
   const [open, setOpen] = useState(false);
@@ -203,7 +206,7 @@ export default function ProjectDetailPage() {
 
           {/* RESOURCE TAB */}
           <TabsContent value="resource">
-            <ResourceUtilization />
+            <ResourceUtilization tasks={allTasks} />
           </TabsContent>
         </Tabs>
       </div>
@@ -212,6 +215,8 @@ export default function ProjectDetailPage() {
         open={open}
         projectId={projectId}
         onClose={() => setOpen(false)}
+        projectStartDate={project?.startDate}
+        projectEndDate={project?.endDate}
       />
       <AddTaskBulkUploadModal
         open={bulkOpen}

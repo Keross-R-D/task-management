@@ -1,8 +1,9 @@
 export const ProjectEnum = {
   Status: {
-    NOT_STARTED: "NOT_STARTED",
+    PLANNED: "PLANNED",
     IN_PROGRESS: "IN_PROGRESS",
     COMPLETED: "COMPLETED",
+    ON_HOLD: "ON_HOLD",
   },
 
   Type: {
@@ -17,4 +18,3 @@ export type ProjectStatus =
 
 export type ProjectType =
   typeof ProjectEnum.Type[keyof typeof ProjectEnum.Type];
-

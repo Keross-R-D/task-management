@@ -32,6 +32,19 @@ const projectSchema = z.object({
   endDate: z.string().min(1, "End date is required"),
   projectStatus: z.string().min(1, "Status is required"),
   type: z.string().min(1, "Type is required"),
+}).superRefine((data, ctx) => {
+  if (data.startDate && data.endDate && new Date(data.startDate) > new Date(data.endDate)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Start Date must not be later than End Date",
+      path: ["startDate"],
+    });
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "End Date must not be earlier than Start Date",
+      path: ["endDate"],
+    });
+  }
 });
 
 export type ProjectFormValues = z.infer<typeof projectSchema>;

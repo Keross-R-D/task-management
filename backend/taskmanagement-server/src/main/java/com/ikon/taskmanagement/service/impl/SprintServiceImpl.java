@@ -1,6 +1,7 @@
 package com.ikon.taskmanagement.service.impl;
 
 import com.ikon.taskmanagement.dto.request.SprintRequestDto;
+import com.ikon.taskmanagement.dto.request.UpdateSprintStatusDto;
 import com.ikon.taskmanagement.dto.response.SprintResponseDto;
 import com.ikon.taskmanagement.entity.Sprint;
 import com.ikon.taskmanagement.mapper.SprintMapper;
@@ -51,6 +52,14 @@ public class SprintServiceImpl implements SprintService {
     public SprintResponseDto updateSprint(UUID id, SprintRequestDto dto) {
         Sprint entity = sprintRepository.findById(id).orElseThrow(() -> new RuntimeException("Sprint not found"));
         sprintMapper.updateEntityFromDto(dto, entity);
+        Sprint updated = sprintRepository.save(entity);
+        return sprintMapper.mapToDto(updated);
+    }
+
+    @Override
+    public SprintResponseDto patchSprintStatus(UUID id, UpdateSprintStatusDto dto) {
+        Sprint entity = sprintRepository.findById(id).orElseThrow(() -> new RuntimeException("Sprint not found"));
+        entity.setStatus(dto.getStatus());
         Sprint updated = sprintRepository.save(entity);
         return sprintMapper.mapToDto(updated);
     }

@@ -28,7 +28,7 @@ public class MyTaskMapper {
         task.setTaskPriority(dto.getTaskPriority());
         task.setTaskStatus(dto.getTaskStatus());
         task.setEstimatedHours(dto.getEstimatedHours());
-        task.setAssigneeIds(dto.getAssigneeIds());
+        task.setAssigneeId(dto.getAssigneeId());
     }
 
     public MyTaskResponseDto mapToDto(MyTask task) {
@@ -45,7 +45,8 @@ public class MyTaskMapper {
         dto.setTaskPriority(task.getTaskPriority());
         dto.setTaskStatus(task.getTaskStatus());
         dto.setEstimatedHours(task.getEstimatedHours());
-        dto.setAssigneeIds(task.getAssigneeIds());
+        dto.setActualHours(task.getActualHours());
+        dto.setAssigneeId(task.getAssigneeId());
         dto.setCreatedAt(task.getCreatedAt());
         dto.setUpdatedAt(task.getUpdatedAt());
 

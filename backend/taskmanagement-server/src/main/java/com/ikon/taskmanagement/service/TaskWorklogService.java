@@ -25,4 +25,6 @@ public interface TaskWorklogService {
     TaskWorklogResponseDto updateWorklog(UUID id, TaskWorklogRequestDto dto);
 
     void deleteWorklog(UUID id);
+
+    List<TaskWorklogResponseDto> getWorklogsByProjectId(UUID projectId);
 }

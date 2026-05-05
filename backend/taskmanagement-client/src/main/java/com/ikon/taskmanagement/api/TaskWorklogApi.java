@@ -51,4 +51,8 @@ public interface TaskWorklogApi {
         @Operation(summary = "Delete a worklog")
         @DeleteMapping("/{id}")
         ResponseEntity<Void> deleteWorklog(@PathVariable("id") UUID id);
+
+        @Operation(summary = "Fetch all worklogs for a project")
+        @GetMapping("/project/{projectId}")
+        ResponseEntity<List<TaskWorklogResponseDto>> getWorklogsByProjectId(@PathVariable("projectId") UUID projectId);
 }

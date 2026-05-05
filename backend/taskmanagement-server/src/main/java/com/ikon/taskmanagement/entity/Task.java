@@ -6,6 +6,8 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import com.ikon.taskmanagement.enums.TaskStatus;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -37,8 +39,9 @@ public class Task {
     @Column
     private String type = "task";
 
+    @Enumerated(EnumType.STRING)
     @Column
-    private String status = "todo";
+    private TaskStatus status = TaskStatus.TO_DO;
 
     @Column
     private String priority = "medium";

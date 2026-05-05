@@ -137,4 +137,17 @@ public class TaskWorklogServiceImpl implements TaskWorklogService {
             taskRepository.save(task);
         }
     }
+
+    @Override
+    public List<TaskWorklogResponseDto> getWorklogsByProjectId(UUID projectId) {
+        List<UUID> taskIds = taskRepository.findByProjectId(projectId).stream()
+                .map(Task::getId)
+                .collect(Collectors.toList());
+        if (taskIds.isEmpty()) {
+            return List.of();
+        }
+        return worklogRepository.findByTaskIdIn(taskIds).stream()
+                .map(worklogMapper::mapToDto)
+                .collect(Collectors.toList());
+    }
 }

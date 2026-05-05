@@ -1,11 +1,8 @@
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  useCreateTaskMutation,
-  useUpdateTaskMutation,
-} from "@/features/tasks/tasksApiSlice";
-import { useEffect } from "react";
+import { useCreateTaskMutation, useUpdateTaskMutation } from "@/features/tasks/tasksApiSlice";
+import React, { useEffect } from "react";
 import type { Task } from "@/features/tasks/tasksApiSlice";
 import { TaskEnum } from "@/enums/task.constants";
 
@@ -30,7 +27,7 @@ import {
   Textarea,
 } from "ikon-react-components-lib";
 
-const taskSchema = z.object({
+const baseTaskSchema = z.object({
   title: z.string().min(1, "Title is required"),
   description: z.string().min(4, "Description is required"),
 
@@ -49,7 +46,7 @@ const taskSchema = z.object({
   endDate: z.string().min(1, "End date is required"),
 });
 
-export type TaskFormValues = z.infer<typeof taskSchema>;
+export type TaskFormValues = z.infer<typeof baseTaskSchema>;
 
 interface Props {
   open: boolean;
@@ -57,6 +54,8 @@ interface Props {
   epicId?: string | null;
   sprintId?: string | null;
   task?: Task | null;
+  sprintStartDate?: string;
+  sprintEndDate?: string;
   onClose: () => void;
 }
 
@@ -66,14 +65,32 @@ export default function AddTaskModal({
   epicId,
   sprintId,
   task,
+  sprintStartDate,
+  sprintEndDate,
   onClose,
 }: Props) {
   const [createTask, { isLoading: isCreating }] = useCreateTaskMutation();
   const [updateTask, { isLoading: isUpdating }] = useUpdateTaskMutation();
+  
   const isLoading = isCreating || isUpdating;
 
+  const dynamicSchema = React.useMemo(() => {
+    return baseTaskSchema.superRefine((data, ctx) => {
+      if (data.startDate && data.endDate && new Date(data.startDate) > new Date(data.endDate)) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Start Date must not be later than End Date", path: ["startDate"] });
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: "End Date must not be earlier than Start Date", path: ["endDate"] });
+      }
+      if (sprintStartDate && data.startDate && new Date(data.startDate) < new Date(sprintStartDate)) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: `Cannot be earlier than Sprint start date (${sprintStartDate})`, path: ["startDate"] });
+      }
+      if (sprintEndDate && data.endDate && new Date(data.endDate) > new Date(sprintEndDate)) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: `Cannot be later than Sprint end date (${sprintEndDate})`, path: ["endDate"] });
+      }
+    });
+  }, [sprintStartDate, sprintEndDate]);
+
   const form = useForm<TaskFormValues>({
-    resolver: zodResolver(taskSchema),
+    resolver: zodResolver(dynamicSchema),
     defaultValues: {
       title: "",
       description: "",
