@@ -12,25 +12,34 @@ export function filterTasks(
   sprintMap?: Map<string, Sprint>,
 ): Task[] {
   return tasks.filter((task) => {
-    // 🔍 Search
+    // Search
     if (filters.search) {
       const q = filters.search.toLowerCase();
       if (!task.title?.toLowerCase().includes(q)) return false;
     }
 
-    // 📌 Status
-    if (filters.status !== "ALL" && task.status !== filters.status)
+    // Status — normalize both sides to UPPER
+    if (
+      filters.status !== "ALL" &&
+      task.status?.toUpperCase() !== filters.status.toUpperCase()
+    )
       return false;
 
-    // ⚡ Priority
-    if (filters.priority !== "ALL" && task.priority !== filters.priority)
+    // Priority — normalize both sides to UPPER
+    if (
+      filters.priority !== "ALL" &&
+      task.priority?.toUpperCase() !== filters.priority.toUpperCase()
+    )
       return false;
 
-    // 🧩 Type
-    if (filters.type !== "ALL" && task.type !== filters.type)
+    // Type — normalize both sides to UPPER
+    if (
+      filters.type !== "ALL" &&
+      task.type?.toUpperCase() !== filters.type.toUpperCase()
+    )
       return false;
 
-    // 🏃 Sprint State
+    // Sprint State
     if (filters.sprintState !== "ALL" && task.sprintId) {
       let sprint: Sprint | undefined;
 
@@ -40,7 +49,11 @@ export function filterTasks(
         sprint = sprints.find((s) => s.id === task.sprintId);
       }
 
-      if (!sprint || sprint.status !== filters.sprintState) return false;
+      if (
+        !sprint ||
+        sprint.status?.toUpperCase() !== filters.sprintState.toUpperCase()
+      )
+        return false;
     }
 
     return true;

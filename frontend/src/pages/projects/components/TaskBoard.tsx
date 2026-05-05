@@ -19,12 +19,10 @@ import {
 import {
   MoreHorizontal,
   Edit2,
-  Pencil,
   Timer,
   Trash2,
   CheckSquare,
   Clock,
-  CalendarDays,
 } from "lucide-react";
 
 import { useUpdateTaskMutation } from "@/features/tasks/tasksApiSlice";
@@ -49,19 +47,19 @@ type ColumnProps = {
 };
 
 /* ================= HELPERS ================= */
-// ── Helper: status badge color ──
-function statusColor(status: string) {
-  switch (status?.toUpperCase()) {
-    case TaskEnum.Status.BLOCKED:
-      return "bg-red-600/20 text-red-400";
-    case TaskEnum.Status.IN_PROGRESS:
-      return "bg-blue-600/20 text-blue-400";
-    case TaskEnum.Status.DONE:
-      return "bg-green-600/20 text-green-400";
-    default:
-      return "bg-gray-600/20 text-gray-400";
-  }
-}
+// // ── Helper: status badge color ──
+// function statusColor(status: string) {
+//   switch (status?.toUpperCase()) {
+//     case TaskEnum.Status.BLOCKED:
+//       return "bg-red-600/20 text-red-400";
+//     case TaskEnum.Status.IN_PROGRESS:
+//       return "bg-blue-600/20 text-blue-400";
+//     case TaskEnum.Status.DONE:
+//       return "bg-green-600/20 text-green-400";
+//     default:
+//       return "bg-gray-600/20 text-gray-400";
+//   }
+// }
 
 function columnBorderColor(status: string) {
   switch (status) {
@@ -237,7 +235,7 @@ interface TaskBoardProps {
 }
 
 export default function TaskBoard({ tasks }: TaskBoardProps) {
-  const [updateTask, { isLoading: isUpdating }] = useUpdateTaskMutation();
+  const [updateTask] = useUpdateTaskMutation();
   // Group tasks by status
   const groupedTasks = useMemo(() => {
     const groups: Record<string, Task[]> = {};
