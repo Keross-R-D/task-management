@@ -60,7 +60,7 @@ export default function SearchAndFilter({
         <Search className="mr-2" />
         <Input
           placeholder="Search tasks..."
-          className="border-none focus-visible:ring-0"
+          className="border-none focus-visible:ring-0 dark:bg-[#0a0a0a]"
           value={filters.search}
           onChange={(e) => {
             onChange({ ...filters, search: e.target.value });

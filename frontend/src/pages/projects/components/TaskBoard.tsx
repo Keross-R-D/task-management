@@ -6,6 +6,7 @@ import {
   closestCenter,
   useDroppable,
   useDraggable,
+  DragOverlay, // ✅ added
 } from "@dnd-kit/core";
 
 import type { DragEndEvent } from "@dnd-kit/core";
@@ -21,49 +22,23 @@ import {
   Edit2,
   Timer,
   Trash2,
-  CheckSquare,
+ 
   Clock,
+  Zap,
 } from "lucide-react";
 
-import { useUpdateTaskMutation } from "@/features/tasks/tasksApiSlice";
-
-
 import { TaskEnum } from "@/enums/task.constants";
-import { type Task, useUpdateTaskStatusMutation, useDeleteTaskMutation } from "@/features/tasks/tasksApiSlice";
+import {
+  type Task,
+  useUpdateTaskStatusMutation,
+  useDeleteTaskMutation,
+} from "@/features/tasks/tasksApiSlice";
 
 import AddTaskModal from "./AddTaskModal";
 import LogTimeModal from "./LogTimeModal";
-import type { Sprint as SprintType } from "@/features/sprints/sprintsApiSlice";
 
-/* ================= TYPES ================= */
-
-type DraggableItemProps = {
-  item: Task;
-  column: string;
-  sprints?: SprintType[];
-};
-
-type ColumnProps = {
-  id: string;
-  label: string;
-  items: Task[];
-  sprints?: SprintType[];
-};
 
 /* ================= HELPERS ================= */
-// // ── Helper: status badge color ──
-// function statusColor(status: string) {
-//   switch (status?.toUpperCase()) {
-//     case TaskEnum.Status.BLOCKED:
-//       return "bg-red-600/20 text-red-400";
-//     case TaskEnum.Status.IN_PROGRESS:
-//       return "bg-blue-600/20 text-blue-400";
-//     case TaskEnum.Status.DONE:
-//       return "bg-green-600/20 text-green-400";
-//     default:
-//       return "bg-gray-600/20 text-gray-400";
-//   }
-// }
 
 function columnBorderColor(status: string) {
   switch (status) {
@@ -101,22 +76,30 @@ const COLUMN_CONFIG = [
 
 /* ================= COMPONENTS ================= */
 
-function DraggableItem({ item, column, sprints }: DraggableItemProps) {
+function DraggableItem({ item, column, sprints }: any) {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isLogTimeOpen, setIsLogTimeOpen] = useState(false);
   const [updateTaskStatus] = useUpdateTaskStatusMutation();
   const [deleteTask] = useDeleteTaskMutation();
 
-  const { attributes, listeners, setNodeRef, transform } = useDraggable({
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    isDragging, // ✅ added
+  } = useDraggable({
     id: item.id,
     data: { column },
   });
 
-  const style = {
-    transform: transform
-      ? `translate(${transform.x}px, ${transform.y}px)`
-      : undefined,
-  };
+  const style = isDragging
+    ? { opacity: 0 } // ✅ hide original while dragging
+    : {
+        transform: transform
+          ? `translate(${transform.x}px, ${transform.y}px)`
+          : undefined,
+      };
 
   return (
     <>
@@ -126,7 +109,7 @@ function DraggableItem({ item, column, sprints }: DraggableItemProps) {
             {/* Top Row */}
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-2">
-                <CheckSquare className="h-4 w-4" />
+                <Zap className="text-yellow-400 h-4 w-4 shrink-0" />
                 <h3 className="text-sm font-semibold">{item.title}</h3>
               </div>
 
@@ -168,7 +151,10 @@ function DraggableItem({ item, column, sprints }: DraggableItemProps) {
                     className="cursor-pointer"
                     onPointerDown={(e) => {
                       e.stopPropagation();
-                      updateTaskStatus({ id: item.id, taskStatus: "IN_PROGRESS" });
+                      updateTaskStatus({
+                        id: item.id,
+                        taskStatus: "IN_PROGRESS",
+                      });
                     }}
                   >
                     Set In Progress
@@ -186,7 +172,10 @@ function DraggableItem({ item, column, sprints }: DraggableItemProps) {
                     className="cursor-pointer"
                     onPointerDown={(e) => {
                       e.stopPropagation();
-                      updateTaskStatus({ id: item.id, taskStatus: "BLOCKED" });
+                      updateTaskStatus({
+                        id: item.id,
+                        taskStatus: "BLOCKED",
+                      });
                     }}
                   >
                     Set Blocked
@@ -209,7 +198,9 @@ function DraggableItem({ item, column, sprints }: DraggableItemProps) {
             <div className="grid gap-2">
               <div className="flex items-center gap-2 text-xs">
                 <span
-                  className={`${priorityColor(item.priority)} px-2 py-0.5 rounded-xl font-medium text-xs`}
+                  className={`${priorityColor(
+                    item.priority
+                  )} px-2 py-0.5 rounded-xl font-medium text-xs`}
                 >
                   {item.priority?.toUpperCase()}
                 </span>
@@ -250,26 +241,30 @@ function DraggableItem({ item, column, sprints }: DraggableItemProps) {
   );
 }
 
-function Column({ id, label, items, sprints }: ColumnProps) {
+function Column({ id, label, items, sprints }: any) {
   const { setNodeRef } = useDroppable({ id });
 
   return (
     <div
       ref={setNodeRef}
-      className={`rounded-lg border border-t-1 ${columnBorderColor(id)} w-full min-h-[400px] bg-[#fafafa]/90  dark:bg-[#171717]/90 blue-dark:bg-[#1b2336]/90`}
+      className={`rounded-lg border border-t-1 ${columnBorderColor(
+        id
+      )} w-full min-h-[400px] bg-[#fafafa]/90  dark:bg-[#171717]/90 blue-dark:bg-[#1b2336]/90`}
     >
       <div className="flex items-start px-4 pt-4 pb-2 justify-between">
         <h3 className="font-semibold mb-3">{label}</h3>
-        <span
-          className="text-sm p-1 px-2 rounded-4xl  bg-[#f4f4f5] dark:bg-[#111111] blue-dark:bg-[#141c2b]"
-        >
+        <span className="text-sm p-1 px-2 rounded-4xl bg-[#f4f4f5] dark:bg-[#111111] blue-dark:bg-[#141c2b]">
           {items.length}
-          {items.length !== 1 ? "" : ""}
         </span>
       </div>
       <hr className="mb-3" />
-      {items.map((item) => (
-        <DraggableItem key={item.id} item={item} column={id} sprints={sprints} />
+      {items.map((item: Task) => (
+        <DraggableItem
+          key={item.id}
+          item={item}
+          column={id}
+          sprints={sprints}
+        />
       ))}
     </div>
   );
@@ -277,20 +272,17 @@ function Column({ id, label, items, sprints }: ColumnProps) {
 
 /* ================= MAIN ================= */
 
-interface TaskBoardProps {
-  tasks: Task[];
-  sprints?: SprintType[];
-}
+export default function TaskBoard({ tasks, sprints = [] }: any) {
+  const [updateTaskStatus] = useUpdateTaskStatusMutation();
 
-export default function TaskBoard({ tasks, sprints = [] }: TaskBoardProps) {
-  // Group tasks by status
-  const [updateTask] = useUpdateTaskMutation();
+  const [activeTask, setActiveTask] = useState<Task | null>(null); // ✅ added
+
   const groupedTasks = useMemo(() => {
-    const groups: Record<string, Task[]> = {};
+    const groups: any = {};
     COLUMN_CONFIG.forEach((col) => {
       groups[col.key] = [];
     });
-    tasks.forEach((task) => {
+    tasks.forEach((task: Task) => {
       const key = task.status?.toLowerCase() || "todo";
       if (groups[key]) {
         groups[key].push(task);
@@ -302,16 +294,14 @@ export default function TaskBoard({ tasks, sprints = [] }: TaskBoardProps) {
   }, [tasks]);
 
   const [columns, setColumns] = useState(groupedTasks);
-  const [updateTaskStatus] = useUpdateTaskStatusMutation();
 
-  // Re-sync when tasks change
   useMemo(() => {
     setColumns(groupedTasks);
   }, [groupedTasks]);
 
-  const findColumn = (id: string): string | undefined => {
+  const findColumn = (id: string) => {
     return Object.keys(columns).find((col) =>
-      columns[col].some((item) => item.id === id),
+      columns[col].some((item: Task) => item.id === id)
     );
   };
 
@@ -325,60 +315,37 @@ export default function TaskBoard({ tasks, sprints = [] }: TaskBoardProps) {
     if (!sourceCol || !destCol) return;
     if (sourceCol === destCol) return;
 
-    const movedItem = columns[sourceCol].find((i) => i.id === active.id);
+    const movedItem = columns[sourceCol].find(
+      (i: Task) => i.id === active.id
+    );
     if (!movedItem) return;
-    setColumns((prev) => ({
+
+    setColumns((prev: any) => ({
       ...prev,
-      [sourceCol]: prev[sourceCol].filter((i) => i.id !== active.id),
+      [sourceCol]: prev[sourceCol].filter(
+        (i: Task) => i.id !== active.id
+      ),
       [destCol]: [...prev[destCol], movedItem],
     }));
 
-    const payload = {
-      title: movedItem.title,
-      description: movedItem.description,
-      status: destCol.toUpperCase(),
-      priority: movedItem.priority,
-      estimatedHours: movedItem.estimatedHours,
-      plannedDuration: movedItem.plannedDuration,
-      startDate: movedItem.startDate,
-      endDate: movedItem.endDate,
-      projectId: movedItem.projectId,
-      epicId: movedItem.epicId,
-      sprintId: movedItem.sprintId,
-      assigneeId: movedItem.assigneeId,
-      reporterId: movedItem.reporterId,
-      type: movedItem.type,
-    };
-
-    try {
-      await updateTask({
-        id: movedItem.id,
-        ...payload,
-      }).unwrap();
-    } catch (err) {
-      console.error("Failed to update task status", err);
-      setColumns((prev) => ({
-        ...prev,
-        [destCol]: prev[destCol].filter((i) => i.id !== active.id),
-        [sourceCol]: [...prev[sourceCol], movedItem],
-      }));
-    }
-    // Persist status change using mutation Hook
-    const statusMap: Record<string, string> = {
-      todo: "TO_DO",
-      in_progress: "IN_PROGRESS",
-      done: "DONE",
-      blocked: "BLOCKED",
-    };
-
     updateTaskStatus({
       id: movedItem.id,
-      taskStatus: statusMap[destCol] || "TO_DO",
+      taskStatus: destCol.toUpperCase(),
     });
   };
 
   return (
-    <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+    <DndContext
+      collisionDetection={closestCenter}
+      onDragStart={(event) => {
+        const task = tasks.find((t: Task) => t.id === event.active.id);
+        setActiveTask(task || null);
+      }}
+      onDragEnd={(event) => {
+        handleDragEnd(event);
+        setActiveTask(null);
+      }}
+    >
       <div className="flex gap-6 overflow-x-auto">
         {COLUMN_CONFIG.map((col) => (
           <Column
@@ -390,6 +357,17 @@ export default function TaskBoard({ tasks, sprints = [] }: TaskBoardProps) {
           />
         ))}
       </div>
+
+     
+      <DragOverlay>
+        {activeTask ? (
+          <DraggableItem
+            item={activeTask}
+            column={activeTask.status?.toLowerCase() || "todo"}
+            sprints={sprints}
+          />
+        ) : null}
+      </DragOverlay>
     </DndContext>
   );
 }

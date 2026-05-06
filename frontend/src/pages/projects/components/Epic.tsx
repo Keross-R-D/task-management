@@ -28,9 +28,21 @@ import {
 } from "lucide-react";
 
 import { TaskEnum } from "@/enums/task.constants";
-import { useDeleteEpicMutation, type Epic as EpicType } from "@/features/epics/epicsApiSlice";
-import { useDeleteSprintMutation, useUpdateSprintStatusMutation, type Sprint } from "@/features/sprints/sprintsApiSlice";
-import { useDeleteTaskMutation, useUpdateTaskStatusMutation, useUpdateTaskMutation, type Task } from "@/features/tasks/tasksApiSlice";
+import {
+  useDeleteEpicMutation,
+  type Epic as EpicType,
+} from "@/features/epics/epicsApiSlice";
+import {
+  useDeleteSprintMutation,
+  useUpdateSprintStatusMutation,
+  type Sprint,
+} from "@/features/sprints/sprintsApiSlice";
+import {
+  useDeleteTaskMutation,
+  useUpdateTaskStatusMutation,
+  useUpdateTaskMutation,
+  type Task,
+} from "@/features/tasks/tasksApiSlice";
 
 // ── Helper: status badge color ──
 function statusColor(status: string) {
@@ -62,11 +74,23 @@ function priorityColor(priority: string) {
 function formatDate(dateStr?: string) {
   if (!dateStr) return "";
   const d = new Date(dateStr);
-  return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  return d.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
 }
 
 // ── Task Row ──
-function TaskRow({ task, sprintStartDate, sprintEndDate }: { task: Task; sprintStartDate?: string; sprintEndDate?: string }) {
+function TaskRow({
+  task,
+  sprintStartDate,
+  sprintEndDate,
+}: {
+  task: Task;
+  sprintStartDate?: string;
+  sprintEndDate?: string;
+}) {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isLogTimeOpen, setIsLogTimeOpen] = useState(false);
   const [isViewTimeLogsOpen, setIsViewTimeLogsOpen] = useState(false);
@@ -145,11 +169,17 @@ function TaskRow({ task, sprintStartDate, sprintEndDate }: { task: Task; sprintS
               >
                 <Timer className="inline mr-2" /> Log Time
               </DropdownMenuItem>
-              <DropdownMenuItem className="rounded-md cursor-pointer" onClick={() => setIsViewTimeLogsOpen(true)}>
+              <DropdownMenuItem
+                className="rounded-md cursor-pointer"
+                onClick={() => setIsViewTimeLogsOpen(true)}
+              >
                 <History className="inline mr-2" /> View Time Logs
               </DropdownMenuItem>
               {task.sprintId ? (
-                <DropdownMenuItem className="rounded-md cursor-pointer" onClick={() => updateTask({ id: task.id, sprintId: null })}>
+                <DropdownMenuItem
+                  className="rounded-md cursor-pointer"
+                  onClick={() => updateTask({ id: task.id, sprintId: null })}
+                >
                   <Play className="inline mr-2" /> Move to Backlog
                 </DropdownMenuItem>
               ) : (
@@ -159,8 +189,8 @@ function TaskRow({ task, sprintStartDate, sprintEndDate }: { task: Task; sprintS
               )}
               <hr className="my-1" />
               {taskStatuses
-                .filter(status => status.value !== task.status)
-                .map(status => (
+                .filter((status) => status.value !== task.status)
+                .map((status) => (
                   <DropdownMenuItem
                     key={status.value}
                     className="cursor-pointer"
@@ -170,7 +200,10 @@ function TaskRow({ task, sprintStartDate, sprintEndDate }: { task: Task; sprintS
                   </DropdownMenuItem>
                 ))}
               <hr className="py-1 font-bold" />
-              <DropdownMenuItem className="cursor-pointer text-red-600" onClick={() => deleteTask(task.id)}>
+              <DropdownMenuItem
+                className="cursor-pointer text-red-600"
+                onClick={() => deleteTask(task.id)}
+              >
                 <Trash2 className="inline mr-2" /> Delete Task
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -188,8 +221,17 @@ function TaskRow({ task, sprintStartDate, sprintEndDate }: { task: Task; sprintS
         sprintEndDate={sprintEndDate}
         onClose={() => setIsEditOpen(false)}
       />
-      <LogTimeModal open={isLogTimeOpen} task={task} onClose={() => setIsLogTimeOpen(false)} />
-      <ViewTimeLogsModal open={isViewTimeLogsOpen} task={task} onClose={() => setIsViewTimeLogsOpen(false)} onLogMoreTime={() => setIsLogTimeOpen(true)} />
+      <LogTimeModal
+        open={isLogTimeOpen}
+        task={task}
+        onClose={() => setIsLogTimeOpen(false)}
+      />
+      <ViewTimeLogsModal
+        open={isViewTimeLogsOpen}
+        task={task}
+        onClose={() => setIsViewTimeLogsOpen(false)}
+        onLogMoreTime={() => setIsLogTimeOpen(true)}
+      />
     </>
   );
 }
@@ -218,9 +260,7 @@ const sprintActions: Record<
     icon: typeof Play;
   }[]
 > = {
-  PLANNED: [
-    { label: "Start Sprint", status: "ACTIVE", icon: Play },
-  ],
+  PLANNED: [{ label: "Start Sprint", status: "ACTIVE", icon: Play }],
 
   ACTIVE: [
     { label: "Complete Sprint", status: "COMPLETED", icon: Play },
@@ -232,11 +272,14 @@ const sprintActions: Record<
     { label: "Cancel Sprint", status: "CANCELLED", icon: X },
   ],
 
-  CANCELLED: [
-    { label: "Start Sprint", status: "ACTIVE", icon: Play },
-  ],
+  CANCELLED: [{ label: "Start Sprint", status: "ACTIVE", icon: Play }],
 };
-export default function Epic({ epics, sprints, tasks,isFiltering, }: EpicComponentProps) {
+export default function Epic({
+  epics,
+  sprints,
+  tasks,
+  isFiltering,
+}: EpicComponentProps) {
   const [addSprintEpicId, setAddSprintEpicId] = useState<string | null>(null);
   const [addTaskData, setAddTaskData] = useState<{
     sprintId: string;
@@ -296,10 +339,10 @@ export default function Epic({ epics, sprints, tasks,isFiltering, }: EpicCompone
             <div key={epic.id} className="border rounded-xl">
               <AccordionItem
                 value={`epic-${epic.id}`}
-                className="rounded-xl overflow-hidden"
+                className="rounded-xl overflow-hidden group"
               >
                 {/* EPIC HEADER — unchanged */}
-                <AccordionTrigger className="group hover:no-underline hover:bg-[#272b2f]/50 px-3 py-3 [&[data-state]>svg]:hidden">
+                <AccordionTrigger className="hover:no-underline hover:bg-[#272b2f]/50 px-3 py-3 [&[data-state]>svg]:hidden">
                   <div className="flex items-center justify-between w-full min-w-0 cursor-pointer">
                     <div className="flex items-center gap-3 min-w-0">
                       <ChevronRight className="h-4 w-4 transition-transform duration-200 group-data-[state=open]:rotate-90 shrink-0" />
@@ -366,10 +409,10 @@ export default function Epic({ epics, sprints, tasks,isFiltering, }: EpicCompone
                     </div>
                   </div>
                 </AccordionTrigger>
-                <hr className="border" />
+                <div className="h-px bg-border hidden group-data-[state=open]:block" />
 
                 {/* SPRINTS — now type="multiple" and controlled */}
-                <AccordionContent className="px-3 py-2 max-h-[300px] overflow-y-auto scrollbar-thin">
+                <AccordionContent className="px-3 py-2 max-h-[300px] overflow-y-auto scrollbar-thin ">
                   {epicSprints.length === 0 ? (
                     <p className="text-sm text-muted-foreground py-4 text-center">
                       No sprints in this epic
@@ -390,12 +433,12 @@ export default function Epic({ epics, sprints, tasks,isFiltering, }: EpicCompone
                           <div key={sprint.id} className="border rounded-xl">
                             <AccordionItem
                               value={`sprint-${sprint.id}`}
-                              className="border rounded-lg"
+                              className="border rounded-lg group/item"
                             >
-                              <AccordionTrigger className="group hover:no-underline hover:bg-[#272b2f]/50 px-3 py-3 [&[data-state]>svg]:hidden">
+                              <AccordionTrigger className="hover:no-underline hover:bg-[#272b2f]/50 px-3 py-3 [&[data-state]>svg]:hidden">
                                 <div className="flex items-center justify-between w-full min-w-0 cursor-pointer">
                                   <div className="flex items-center gap-3 min-w-0 flex-wrap">
-                                    <ChevronRight className="h-4 w-4 transition-transform duration-200 group-data-[state=open]:rotate-90 shrink-0" />
+                                    <ChevronRight className="h-4 w-4 transition-transform duration-200 group-data-[state=open]/item:rotate-90 shrink-0" />
                                     <LayoutDashboard className="text-sm text-blue-400" />
                                     <span className="font-medium truncate">
                                       {sprint.name}
@@ -422,7 +465,10 @@ export default function Epic({ epics, sprints, tasks,isFiltering, }: EpicCompone
                                           />
                                         </div>
                                       </DropdownMenuTrigger>
-                                      <DropdownMenuContent align="end" className="border rounded-lg">
+                                      <DropdownMenuContent
+                                        align="end"
+                                        className="border rounded-lg"
+                                      >
                                         <DropdownMenuItem
                                           className="rounded-md cursor-pointer"
                                           onClick={(e) => {
@@ -448,7 +494,9 @@ export default function Epic({ epics, sprints, tasks,isFiltering, }: EpicCompone
                                           Edit Sprint
                                         </DropdownMenuItem>
                                         <hr className="my-1" />
-                                        {sprintActions[sprint.status as SprintStatus]?.map(action => {
+                                        {sprintActions[
+                                          sprint.status as SprintStatus
+                                        ]?.map((action) => {
                                           const Icon = action.icon;
 
                                           return (
@@ -469,22 +517,41 @@ export default function Epic({ epics, sprints, tasks,isFiltering, }: EpicCompone
                                           );
                                         })}
                                         <hr className="py-1 font-bold" />
-                                        <DropdownMenuItem className="text-red-600 cursor-pointer" onClick={(e) => { e.stopPropagation(); deleteSprint(sprint.id) }}>
-                                          <Trash2 className="inline mr-2" /> Delete Sprint
+                                        <DropdownMenuItem
+                                          className="text-red-600 cursor-pointer"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            deleteSprint(sprint.id);
+                                          }}
+                                        >
+                                          <Trash2 className="inline mr-2" />{" "}
+                                          Delete Sprint
                                         </DropdownMenuItem>
                                       </DropdownMenuContent>
                                     </DropdownMenu>
                                   </div>
                                 </div>
                               </AccordionTrigger>
-                              <hr />
+                              {(isFiltering
+                                ? derivedOpenSprints
+                                : openSprints
+                              ).includes(`sprint-${sprint.id}`) && (
+                                <div className="h-px bg-border" />
+                              )}
                               <AccordionContent className="px-3 pb-0 max-h-[300px] overflow-y-auto scrollbar-thin">
                                 {sprintTasks.length === 0 ? (
                                   <p className="text-sm text-muted-foreground py-4 text-center">
                                     No tasks in this sprint
                                   </p>
                                 ) : (
-                                  sprintTasks.map((task) => <TaskRow key={task.id} task={task} sprintStartDate={sprint.startDate} sprintEndDate={sprint.endDate} />)
+                                  sprintTasks.map((task) => (
+                                    <TaskRow
+                                      key={task.id}
+                                      task={task}
+                                      sprintStartDate={sprint.startDate}
+                                      sprintEndDate={sprint.endDate}
+                                    />
+                                  ))
                                 )}
                               </AccordionContent>
                             </AccordionItem>
@@ -520,8 +587,12 @@ export default function Epic({ epics, sprints, tasks,isFiltering, }: EpicCompone
           projectId={addTaskData.projectId}
           epicId={addTaskData.epicId}
           sprintId={addTaskData.sprintId}
-          sprintStartDate={sprints.find((s) => s.id === addTaskData?.sprintId)?.startDate}
-          sprintEndDate={sprints.find((s) => s.id === addTaskData?.sprintId)?.endDate}
+          sprintStartDate={
+            sprints.find((s) => s.id === addTaskData?.sprintId)?.startDate
+          }
+          sprintEndDate={
+            sprints.find((s) => s.id === addTaskData?.sprintId)?.endDate
+          }
         />
       )}
       <AddEpicModal
@@ -535,7 +606,9 @@ export default function Epic({ epics, sprints, tasks,isFiltering, }: EpicCompone
         sprint={editSprint}
         projectId={editSprint?.projectId || ""}
         epicId={editSprint?.epicId || ""}
-        epicStartDate={epics.find((e) => e.id === editSprint?.epicId)?.startDate}
+        epicStartDate={
+          epics.find((e) => e.id === editSprint?.epicId)?.startDate
+        }
         epicEndDate={epics.find((e) => e.id === editSprint?.epicId)?.endDate}
         onClose={() => setEditSprint(null)}
       />
