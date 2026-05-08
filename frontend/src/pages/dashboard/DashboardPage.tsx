@@ -241,10 +241,10 @@ const DashboardPage: React.FC = () => {
           },
         },
         data: [
-          { value: todo, name: "Todo", itemStyle: { color: "#9ca3af" } },
+          { value: todo, name: "Todo", itemStyle: { color: "#3b82f6" } },
           { value: done, name: "Done", itemStyle: { color: "#22c55e" } },
-          { value: inProgress, name: "In Progress", itemStyle: { color: "#6366f1" } },
-          { value: blocked, name: "Blocked", itemStyle: { color: "red" } }
+          { value: inProgress, name: "In Progress", itemStyle: { color: "#9ca3af" } },
+          { value: blocked, name: "Blocked", itemStyle: { color: "#ef4444" } }
         ],
       },
     ],
@@ -426,25 +426,25 @@ const DashboardPage: React.FC = () => {
         <Card className="lg:col-span-2 p-4">
           <CardTitle className="flex gap-2 items-center text-lg font-semibold"><TrendingUp className="text-indigo-500"/>Effort By Projects</CardTitle>
           <CardContent className="p-2 space-y-4">
-            <div className="grid lg:grid-cols-2 gap-6 space-y-3">
+            <div className="grid lg:grid-cols-2 gap-6 space-y-2">
                 {/* Task Completion */}
                 <div className="col-span-1">
-                  <span className="font-semibold text-lg">Task Completion</span>
-                  <div className="flex justify-between text-sm mb-1">
-                    <span className="text-muted-foreground">{done} / {total}</span>
-                    <span className="font-medium">{taskPercentage} %</span>
+                  <span className="font-semibold text-muted-foreground text-lg">Task Completion</span>
+                  <div className="flex justify-between mb-1">
+                    <span className="font-medium"><span className="text-xl">{done}</span> <span className="text-muted-foreground text-lg">/ {total}</span></span>
+                    <span className="font-medium text-lg text-green-500">{taskPercentage} %</span>
                   </div>
-                  <Progress value={taskPercentage} />
+                  <Progress value={taskPercentage} className="[&>div]:bg-green-500"/>
                 </div>
 
                 {/* Hours Logged */}
                 <div className="col-span-1">
-                  <span className="font-semibold text-lg">Hours Logged</span>
-                  <div className="flex justify-between text-sm mb-1">
-                    <span className="text-muted-foreground">{totalActualHours} / {totalEstimatedHours}</span>
-                    <span className="font-medium">{hoursPercentage} %</span>
+                  <span className="font-semibold text-muted-foreground text-lg">Hours Logged</span>
+                  <div className="flex justify-between mb-1">
+                    <span className="font-medium"><span className="text-xl">{totalActualHours}</span> <span className="text-muted-foreground text-lg">/ {totalEstimatedHours}</span></span>
+                    <span className="font-medium text-lg text-green-500">{hoursPercentage} %</span>
                   </div>
-                  <Progress value={hoursPercentage} />
+                  <Progress value={hoursPercentage} className="[&>div]:bg-green-500"/>
                 </div>
             </div>
             <div className="flex items-center justify-center text-muted-foreground">
