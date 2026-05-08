@@ -18,7 +18,8 @@ type Task = {
     status: "Todo" | "In progress" | "Done" | "Blocked";
     priority: "Low" | "Medium" | "High";
     type: "Task" | "Bug" | "Improvement",
-    assignee: string
+    assignee: string,
+    updatedAt: string
 };
 
 type ProjectTaskWithProject = ProjectTask & {
@@ -121,20 +122,21 @@ const DashboardPage: React.FC = () => {
   );
   
   //Map assignee
-  const mapAssignee = (ids: string[] = []) => {
-      if (!ids || ids.length === 0) return "";
-      return reverseUserMap[ids[0]] || "";
+  const mapAssignee = (id?: string) => {
+      if (!id) return "";
+      return reverseUserMap[id] || "";
   };
 
   const tasks = data?.content?.map((task) => ({
         id: task.id,
         name: task.taskTitle,
         status: formatStatus(task.taskStatus),
-        actualHours: 0, //Dummy data for now
+        actualHours: task.actualHours, //Dummy data for now
         estimatedHours: task.estimatedHours,
         priority: formatPriority(task.taskPriority),
         type: formatType(task.taskType),
-        assignee: mapAssignee(task.assigneeIds)
+        assignee: mapAssignee(task.assigneeId),
+        updatedAt: task.updatedAt
   })) || [];
 
   const formattedProjectTasks = projectTasks.map((task) => ({
@@ -146,6 +148,7 @@ const DashboardPage: React.FC = () => {
     priority: formatPriority(task.priority.toUpperCase()),
     type: formatType(task.type.toUpperCase()),
     assignee: task.assigneeId || "",
+    updatedAt: task.updatedAt || ""
   }));
 
   //Calculations
@@ -241,10 +244,10 @@ const DashboardPage: React.FC = () => {
           },
         },
         data: [
-          { value: todo, name: "Todo", itemStyle: { color: "#9ca3af" } },
+          { value: todo, name: "Todo", itemStyle: { color: "#3b82f6" } },
           { value: done, name: "Done", itemStyle: { color: "#22c55e" } },
-          { value: inProgress, name: "In Progress", itemStyle: { color: "#6366f1" } },
-          { value: blocked, name: "Blocked", itemStyle: { color: "red" } }
+          { value: inProgress, name: "In Progress", itemStyle: { color: "#9ca3af" } },
+          { value: blocked, name: "Blocked", itemStyle: { color: "#ef4444" } }
         ],
       },
     ],
@@ -399,6 +402,20 @@ const DashboardPage: React.FC = () => {
     );
   };
 
+  //Show only the 5 recent tasks
+  const recentTasks = [...allTasks]
+  .sort(
+    (a, b) =>
+      new Date(b.updatedAt || 0).getTime() -
+      new Date(a.updatedAt || 0).getTime()
+  )
+  .slice(0, 5);
+
+  //Replace '_' with space in project status
+  const formatProjectStatus = (status: string) => {
+    return status.replace(/_/g, " ");
+  };
+
   return (
     <div className="p-4">
       <div className="flex justify-between items-center">
@@ -426,25 +443,25 @@ const DashboardPage: React.FC = () => {
         <Card className="lg:col-span-2 p-4">
           <CardTitle className="flex gap-2 items-center text-lg font-semibold"><TrendingUp className="text-indigo-500"/>Effort By Projects</CardTitle>
           <CardContent className="p-2 space-y-4">
-            <div className="grid lg:grid-cols-2 gap-6 space-y-3">
+            <div className="grid lg:grid-cols-2 gap-6 space-y-2">
                 {/* Task Completion */}
                 <div className="col-span-1">
-                  <span className="font-semibold text-lg">Task Completion</span>
-                  <div className="flex justify-between text-sm mb-1">
-                    <span className="text-muted-foreground">{done} / {total}</span>
-                    <span className="font-medium">{taskPercentage} %</span>
+                  <span className="font-semibold text-muted-foreground text-lg">Task Completion</span>
+                  <div className="flex justify-between mb-2">
+                    <p className="text-2xl font-bold">{done} <span className="text-muted-foreground text-lg font-normal">/ {total}</span></p>
+                    <span className="font-medium text-xl text-green-500">{taskPercentage} %</span>
                   </div>
-                  <Progress value={taskPercentage} />
+                  <Progress value={taskPercentage} className="[&>div]:bg-green-500"/>
                 </div>
 
                 {/* Hours Logged */}
                 <div className="col-span-1">
-                  <span className="font-semibold text-lg">Hours Logged</span>
-                  <div className="flex justify-between text-sm mb-1">
-                    <span className="text-muted-foreground">{totalActualHours} / {totalEstimatedHours}</span>
-                    <span className="font-medium">{hoursPercentage} %</span>
+                  <span className="font-semibold text-muted-foreground text-lg">Hours Logged</span>
+                  <div className="flex justify-between mb-2">
+                    <p className="text-2xl font-bold">{totalActualHours} <span className="text-muted-foreground text-lg font-normal">/ {totalEstimatedHours}</span></p>
+                    <span className="font-medium text-xl text-green-500">{hoursPercentage} %</span>
                   </div>
-                  <Progress value={hoursPercentage} />
+                  <Progress value={hoursPercentage} className="[&>div]:bg-green-500"/>
                 </div>
             </div>
             <div className="flex items-center justify-center text-muted-foreground">
@@ -481,7 +498,8 @@ const DashboardPage: React.FC = () => {
             </div>
             <Separator />
             <div>
-              <span className="flex justify-between">
+              <span className="font-semibold text-sm text-muted-foreground">BY PRIORITY</span>
+              <span className="flex justify-between mt-2">
                 <span className="flex gap-3 items-center justify-center font-semibold"><span className="w-2 h-2 rounded-full bg-green-500" />Low</span><span className="font-semibold">{low}</span>
               </span>
               <span className="flex justify-between">
@@ -508,7 +526,7 @@ const DashboardPage: React.FC = () => {
             </button>
           </div>
           <div>
-            <DataTableLayout data={allTasks} columns={columns}
+            <DataTableLayout data={recentTasks} columns={columns}
               extraTools={{
                 totalPages: 2,
                 toggleViewMode: true,
@@ -534,18 +552,18 @@ const DashboardPage: React.FC = () => {
                 View All
               </button>
             </div>
-            <CardContent className="p-2 space-y-4">
+            <CardContent className="p-2 space-y-4 max-h-[420px] overflow-y-auto">
               {isProjectLoading ? (
-                <p className="text-sm text-muted-foreground">Loading...</p>
+                <p className="text-sm text-muted-foreground flex items-center justify-center">Loading...</p>
               ) : projects.length === 0 ? (
-                <p className="text-sm text-muted-foreground">No projects found</p>
+                <p className="text-sm text-muted-foreground flex items-center justify-center">No projects found!</p>
               ) : (
                 projects.map((project) => (
                   <ProjectCard
                     key={project.id}
                     id={String(project.id)}
                     name={project.projectName}
-                    status={project.projectStatus}
+                    status={formatProjectStatus(project.projectStatus)}
                   />
                 ))
               )}

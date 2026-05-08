@@ -1,6 +1,7 @@
 package com.ikon.taskmanagement.service.impl;
 
 import com.ikon.taskmanagement.dto.request.TaskRequestDto;
+import com.ikon.taskmanagement.dto.request.UpdateTaskStatusDto;
 import com.ikon.taskmanagement.dto.response.TaskResponseDto;
 import com.ikon.taskmanagement.entity.Task;
 import com.ikon.taskmanagement.mapper.TaskMapper;
@@ -65,6 +66,14 @@ public class TaskServiceImpl implements TaskService {
     public TaskResponseDto updateTask(UUID id, TaskRequestDto dto) {
         Task entity = taskRepository.findById(id).orElseThrow(() -> new RuntimeException("Task not found"));
         taskMapper.updateEntityFromDto(dto, entity);
+        Task updated = taskRepository.save(entity);
+        return taskMapper.mapToDto(updated);
+    }
+
+    @Override
+    public TaskResponseDto patchTaskStatus(UUID id, UpdateTaskStatusDto dto) {
+        Task entity = taskRepository.findById(id).orElseThrow(() -> new RuntimeException("Task not found"));
+        entity.setStatus(dto.getTaskStatus());
         Task updated = taskRepository.save(entity);
         return taskMapper.mapToDto(updated);
     }

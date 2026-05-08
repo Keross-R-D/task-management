@@ -27,9 +27,9 @@ import {
   Zap,
 } from "lucide-react";
 
-import type { Epic as EpicType } from "@/features/epics/epicsApiSlice";
-import type { Sprint } from "@/features/sprints/sprintsApiSlice";
-import type { Task } from "@/features/tasks/tasksApiSlice";
+import { useDeleteEpicMutation, type Epic as EpicType } from "@/features/epics/epicsApiSlice";
+import { useDeleteSprintMutation, useUpdateSprintStatusMutation, type Sprint } from "@/features/sprints/sprintsApiSlice";
+import { useDeleteTaskMutation, useUpdateTaskStatusMutation, useUpdateTaskMutation, type Task } from "@/features/tasks/tasksApiSlice";
 
 // ── Helper: status badge color ──
 function statusColor(status: string) {
@@ -65,9 +65,25 @@ function formatDate(dateStr?: string) {
 }
 
 // ── Task Row ──
-function TaskRow({ task }: { task: Task }) {
+function TaskRow({ task, sprintStartDate, sprintEndDate }: { task: Task; sprintStartDate?: string; sprintEndDate?: string }) {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isLogTimeOpen, setIsLogTimeOpen] = useState(false);
+  const [isViewTimeLogsOpen, setIsViewTimeLogsOpen] = useState(false);
+
+  const [updateTaskStatus] = useUpdateTaskStatusMutation();
+  const [updateTask] = useUpdateTaskMutation();
+  const [deleteTask] = useDeleteTaskMutation();
+
+  const handleTaskStatus = (status: string) => {
+    updateTaskStatus({ id: task.id, taskStatus: status });
+  };
+
+  const taskStatuses = [
+    { value: "TO_DO", label: "Set To Do" },
+    { value: "IN_PROGRESS", label: "Set In Progress" },
+    { value: "DONE", label: "Set Done" },
+    { value: "BLOCKED", label: "Set Blocked" },
+  ];
 
   return (
     <>
@@ -122,14 +138,32 @@ function TaskRow({ task }: { task: Task }) {
               <DropdownMenuItem className="rounded-md cursor-pointer" onClick={() => setIsLogTimeOpen(true)}>
                 <Timer className="inline mr-2" /> Log Time
               </DropdownMenuItem>
-              <DropdownMenuItem className="rounded-md">
+              <DropdownMenuItem className="rounded-md cursor-pointer" onClick={() => setIsViewTimeLogsOpen(true)}>
                 <History className="inline mr-2" /> View Time Logs
               </DropdownMenuItem>
-              <DropdownMenuItem className="rounded-md">
-                <Play className="inline mr-2" /> Move to Sprint
-              </DropdownMenuItem>
+              {task.sprintId ? (
+                <DropdownMenuItem className="rounded-md cursor-pointer" onClick={() => updateTask({ id: task.id, sprintId: null })}>
+                  <Play className="inline mr-2" /> Move to Backlog
+                </DropdownMenuItem>
+              ) : (
+                <DropdownMenuItem className="rounded-md">
+                  <Play className="inline mr-2" /> Move to Sprint
+                </DropdownMenuItem>
+              )}
+              <hr className="my-1" />
+              {taskStatuses
+                .filter(status => status.value !== task.status)
+                .map(status => (
+                  <DropdownMenuItem
+                    key={status.value}
+                    className="cursor-pointer"
+                    onClick={() => handleTaskStatus(status.value)}
+                  >
+                    {status.label}
+                  </DropdownMenuItem>
+                ))}
               <hr className="py-1 font-bold" />
-              <DropdownMenuItem>
+              <DropdownMenuItem className="cursor-pointer text-red-600" onClick={() => deleteTask(task.id)}>
                 <Trash2 className="inline mr-2" /> Delete Task
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -137,8 +171,18 @@ function TaskRow({ task }: { task: Task }) {
         </div>
       </div>
 
-      <AddTaskModal open={isEditOpen} task={task} projectId={task.projectId} epicId={task.epicId} sprintId={task.sprintId} onClose={() => setIsEditOpen(false)} />
+      <AddTaskModal
+        open={isEditOpen}
+        task={task}
+        projectId={task.projectId}
+        epicId={task.epicId}
+        sprintId={task.sprintId}
+        sprintStartDate={sprintStartDate}
+        sprintEndDate={sprintEndDate}
+        onClose={() => setIsEditOpen(false)}
+      />
       <LogTimeModal open={isLogTimeOpen} task={task} onClose={() => setIsLogTimeOpen(false)} />
+      <ViewTimeLogsModal open={isViewTimeLogsOpen} task={task} onClose={() => setIsViewTimeLogsOpen(false)} onLogMoreTime={() => setIsLogTimeOpen(true)} />
     </>
   );
 }
@@ -148,6 +192,7 @@ import AddSprintModal from "./AddSprintModal";
 import AddTaskModal from "./AddTaskModal";
 import AddEpicModal from "./AddEpicModal";
 import LogTimeModal from "./LogTimeModal";
+import ViewTimeLogsModal from "./ViewTimeLogsModal";
 
 interface EpicComponentProps {
   epics: EpicType[];
@@ -155,6 +200,34 @@ interface EpicComponentProps {
   tasks: Task[];
 }
 
+type SprintStatus = "PLANNED" | "ACTIVE" | "COMPLETED" | "CANCELLED";
+
+const sprintActions: Record<
+  SprintStatus,
+  {
+    label: string;
+    status: SprintStatus;
+    icon: typeof Play;
+  }[]
+> = {
+  PLANNED: [
+    { label: "Start Sprint", status: "ACTIVE", icon: Play },
+  ],
+
+  ACTIVE: [
+    { label: "Complete Sprint", status: "COMPLETED", icon: Play },
+    { label: "Cancel Sprint", status: "CANCELLED", icon: X },
+  ],
+
+  COMPLETED: [
+    { label: "Re-open Sprint", status: "ACTIVE", icon: Play },
+    { label: "Cancel Sprint", status: "CANCELLED", icon: X },
+  ],
+
+  CANCELLED: [
+    { label: "Start Sprint", status: "ACTIVE", icon: Play },
+  ],
+};
 export default function Epic({ epics, sprints, tasks }: EpicComponentProps) {
   const [addSprintEpicId, setAddSprintEpicId] = useState<string | null>(null);
   const [addTaskData, setAddTaskData] = useState<{
@@ -164,6 +237,10 @@ export default function Epic({ epics, sprints, tasks }: EpicComponentProps) {
   } | null>(null);
   const [editEpic, setEditEpic] = useState<EpicType | null>(null);
   const [editSprint, setEditSprint] = useState<Sprint | null>(null);
+
+  const [updateSprintStatus] = useUpdateSprintStatusMutation();
+  const [deleteSprint] = useDeleteSprintMutation();
+  const [deleteEpic] = useDeleteEpicMutation();
 
   if (epics.length === 0) {
     return (
@@ -230,8 +307,8 @@ export default function Epic({ epics, sprints, tasks }: EpicComponentProps) {
                           >
                             <Plus className="inline mr-2" /> Add Sprint
                           </DropdownMenuItem>
-                          <DropdownMenuItem 
-                            className="rounded-md cursor-pointer" 
+                          <DropdownMenuItem
+                            className="rounded-md cursor-pointer"
                             onClick={(e) => {
                               e.stopPropagation();
                               setEditEpic(epic);
@@ -240,7 +317,13 @@ export default function Epic({ epics, sprints, tasks }: EpicComponentProps) {
                             <Pencil className="inline mr-2" /> Edit Epic
                           </DropdownMenuItem>
                           <hr className="border-red-800 my-1" />
-                          <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
+                          <DropdownMenuItem
+                            className="text-red-600 cursor-pointer"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              deleteEpic(epic.id);
+                            }}
+                          >
                             <Trash2 className="inline mr-2" /> Delete Epic
                           </DropdownMenuItem>
                         </DropdownMenuContent>
@@ -302,7 +385,7 @@ export default function Epic({ epics, sprints, tasks }: EpicComponentProps) {
                                         </div>
                                       </DropdownMenuTrigger>
                                       <DropdownMenuContent align="end" className="border rounded-lg">
-                                        <DropdownMenuItem 
+                                        <DropdownMenuItem
                                           className="rounded-md cursor-pointer"
                                           onClick={(e) => {
                                             e.stopPropagation();
@@ -315,8 +398,8 @@ export default function Epic({ epics, sprints, tasks }: EpicComponentProps) {
                                         >
                                           <Plus className="inline mr-2" /> Add Task
                                         </DropdownMenuItem>
-                                        <DropdownMenuItem 
-                                          className="rounded-md cursor-pointer" 
+                                        <DropdownMenuItem
+                                          className="rounded-md cursor-pointer"
                                           onClick={(e) => {
                                             e.stopPropagation();
                                             setEditSprint(sprint);
@@ -325,14 +408,28 @@ export default function Epic({ epics, sprints, tasks }: EpicComponentProps) {
                                           <Pencil className="inline mr-2" /> Edit Sprint
                                         </DropdownMenuItem>
                                         <hr className="my-1" />
-                                        <DropdownMenuItem className="rounded-md cursor-pointer" onClick={(e) => e.stopPropagation()}>
-                                          <Play className="inline mr-2" /> Start Sprint
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem className="rounded-md cursor-pointer" onClick={(e) => e.stopPropagation()}>
-                                          <X className="inline mr-2" /> Cancel Sprint
-                                        </DropdownMenuItem>
+                                        {sprintActions[sprint.status as SprintStatus]?.map(action => {
+                                          const Icon = action.icon;
+
+                                          return (
+                                            <DropdownMenuItem
+                                              key={action.status}
+                                              className="rounded-md cursor-pointer"
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                                updateSprintStatus({
+                                                  id: sprint.id,
+                                                  status: action.status,
+                                                });
+                                              }}
+                                            >
+                                              <Icon className="inline mr-2" />
+                                              {action.label}
+                                            </DropdownMenuItem>
+                                          );
+                                        })}
                                         <hr className="py-1 font-bold" />
-                                        <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
+                                        <DropdownMenuItem className="text-red-600 cursor-pointer" onClick={(e) => { e.stopPropagation(); deleteSprint(sprint.id) }}>
                                           <Trash2 className="inline mr-2" /> Delete Sprint
                                         </DropdownMenuItem>
                                       </DropdownMenuContent>
@@ -348,7 +445,7 @@ export default function Epic({ epics, sprints, tasks }: EpicComponentProps) {
                                     No tasks in this sprint
                                   </p>
                                 ) : (
-                                  sprintTasks.map((task) => <TaskRow key={task.id} task={task} />)
+                                  sprintTasks.map((task) => <TaskRow key={task.id} task={task} sprintStartDate={sprint.startDate} sprintEndDate={sprint.endDate} />)
                                 )}
                               </AccordionContent>
                             </AccordionItem>
@@ -371,6 +468,8 @@ export default function Epic({ epics, sprints, tasks }: EpicComponentProps) {
           onClose={() => setAddSprintEpicId(null)}
           projectId={epics.find((e) => e.id === addSprintEpicId)?.projectId || ""}
           epicId={addSprintEpicId}
+          epicStartDate={epics.find((e) => e.id === addSprintEpicId)?.startDate}
+          epicEndDate={epics.find((e) => e.id === addSprintEpicId)?.endDate}
         />
       )}
 
@@ -381,6 +480,8 @@ export default function Epic({ epics, sprints, tasks }: EpicComponentProps) {
           projectId={addTaskData.projectId}
           epicId={addTaskData.epicId}
           sprintId={addTaskData.sprintId}
+          sprintStartDate={sprints.find((s) => s.id === addTaskData?.sprintId)?.startDate}
+          sprintEndDate={sprints.find((s) => s.id === addTaskData?.sprintId)?.endDate}
         />
       )}
 
@@ -396,6 +497,8 @@ export default function Epic({ epics, sprints, tasks }: EpicComponentProps) {
         sprint={editSprint}
         projectId={editSprint?.projectId || ""}
         epicId={editSprint?.epicId || ""}
+        epicStartDate={epics.find((e) => e.id === editSprint?.epicId)?.startDate}
+        epicEndDate={epics.find((e) => e.id === editSprint?.epicId)?.endDate}
         onClose={() => setEditSprint(null)}
       />
     </div>

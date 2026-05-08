@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import { DataTableLayout, Button, LoadingSpinner } from "ikon-react-components-lib";
+import { DataTableLayout, Button } from "ikon-react-components-lib";
 import {
   Plus,
   Users,
@@ -33,13 +33,12 @@ export function ProjectsGrid({ data }: { data: any[] }) {
               </div>
               <div className="flex items-center gap-2">
                 <div
-                  className={`px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider ${
-                    project.projectStatus === "COMPLETED"
-                      ? "bg-green-500/10 text-green-500"
-                      : project.projectStatus === "IN_PROGRESS"
-                        ? "bg-blue-500/10 text-blue-500"
-                        : "bg-gray-500/10 text-gray-500"
-                  }`}
+                  className={`px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider ${project.projectStatus === "COMPLETED"
+                    ? "bg-green-500/10 text-green-500"
+                    : project.projectStatus === "IN_PROGRESS"
+                      ? "bg-blue-500/10 text-blue-500"
+                      : "bg-gray-500/10 text-gray-500"
+                    }`}
                 >
                   {project.projectStatus}
                 </div>
@@ -124,7 +123,6 @@ const ProjectsPage: React.FC = () => {
   const {
     data: projects = [],
     isLoading,
-    isError,
     refetch,
   } = useGetProjectsQuery();
   const [createProject, { isLoading: isCreating }] = useCreateProjectMutation();
@@ -152,20 +150,6 @@ const ProjectsPage: React.FC = () => {
     </Button>
   );
 
-  if (isLoading) {
-      return (
-          <LoadingSpinner className="size-8" />
-      );
-  }
-
-  if (isError) {
-      return (
-          <div className="p-4 bg-red-100 text-red-700 rounded-md">
-              Failed to fetch projects. Please try again.
-          </div>
-      );
-  }
-
   return (
     <div className="flex flex-col gap-6">
       <div>
@@ -178,16 +162,16 @@ const ProjectsPage: React.FC = () => {
       <div className="w-full">
         <DataTableLayout
           data={projects}
-          columns={columns}
-          keyExtractor={(row: any) => row.id}
+          columns={columns as any}
+          // keyExtractor={(row: any) => row.id}
           extraTools={{
             totalPages: 1,
-            currentPage: 1,
+            // currentPage: 1,
             actionNode: headerActions,
             isLoading: isLoading,
             onReload: refetch,
             toggleViewMode: true,
-            onRowClick: (row: any) => navigate(`/main/projects/${row.id}`),
+            // onRowClick: (row: any) => navigate(`/main/projects/${row.id}`),
             gridComponent: (data: any[]) => <ProjectsGrid data={data} />,
           }}
         />

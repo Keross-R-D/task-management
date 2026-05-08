@@ -1,5 +1,6 @@
 package com.ikon.taskmanagement.dto.request;
 
+import com.ikon.taskmanagement.enums.TaskStatus;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
@@ -7,5 +8,5 @@ import lombok.Data;
 public class UpdateTaskStatusDto {
 
     @NotNull(message = "taskStatus is required")
-    private String taskStatus;
+    private TaskStatus taskStatus;
 }

@@ -81,6 +81,16 @@ export const tasksApiSlice = apiSlice.injectEndpoints({
       }),
       invalidatesTags: (_result, _error, arg) => [{ type: 'Task', id: arg.id }],
     }),
+    updateTaskStatus: builder.mutation<Task, { id: string; filterKey?: string; taskStatus: string }>({
+      query: ({ id, taskStatus }) => ({
+        apiUrl: `/tasks/${id}/status`,
+        config: {
+          method: 'PATCH',
+          data: { taskStatus },
+        },
+      }),
+      invalidatesTags: (_result, _error, arg) => [{ type: 'Task', id: arg.id }],
+    }),
     deleteTask: builder.mutation<void, string>({
       query: (id) => ({
         apiUrl: `/tasks/${id}`,
@@ -98,5 +108,6 @@ export const {
   useGetTasksBySprintQuery,
   useCreateTaskMutation,
   useUpdateTaskMutation,
+  useUpdateTaskStatusMutation,
   useDeleteTaskMutation,
 } = tasksApiSlice;

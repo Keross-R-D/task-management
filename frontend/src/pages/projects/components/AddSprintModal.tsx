@@ -2,7 +2,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useCreateSprintMutation, useUpdateSprintMutation } from "@/features/sprints/sprintsApiSlice";
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 import type { Sprint } from "@/features/sprints/sprintsApiSlice";
 
 import {
@@ -27,7 +27,7 @@ import {
 } from "ikon-react-components-lib";
 
 
-const sprintSchema = z.object({
+const baseSprintSchema = z.object({
   name: z.string().min(2, "Sprint name is required"),
   goal: z.string().min(3, "Goal is required"),
   status: z.string().min(3, "Status is required"),
@@ -35,13 +35,15 @@ const sprintSchema = z.object({
   endDate: z.string().min(1, "End date is required"),
 });
 
-export type SprintFormValues = z.infer<typeof sprintSchema>;
+export type SprintFormValues = z.infer<typeof baseSprintSchema>;
 
 interface Props {
   open: boolean;
   projectId: string;
   epicId: string;
   sprint?: Sprint | null;
+  epicStartDate?: string;
+  epicEndDate?: string;
   onClose: () => void;
 }
 
@@ -50,6 +52,8 @@ export default function AddSprintModal({
   projectId,
   epicId,
   sprint,
+  epicStartDate,
+  epicEndDate,
   onClose,
 }: Props) {
   const [createSprint, { isLoading: isCreating }] = useCreateSprintMutation();
@@ -57,8 +61,23 @@ export default function AddSprintModal({
 
   const isLoading = isCreating || isUpdating;
 
+  const dynamicSchema = React.useMemo(() => {
+    return baseSprintSchema.superRefine((data, ctx) => {
+      if (data.startDate && data.endDate && new Date(data.startDate) > new Date(data.endDate)) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Start Date must not be later than End Date", path: ["startDate"] });
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: "End Date must not be earlier than Start Date", path: ["endDate"] });
+      }
+      if (epicStartDate && data.startDate && new Date(data.startDate) < new Date(epicStartDate)) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: `Cannot be earlier than Epic start date (${epicStartDate})`, path: ["startDate"] });
+      }
+      if (epicEndDate && data.endDate && new Date(data.endDate) > new Date(epicEndDate)) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: `Cannot be later than Epic end date (${epicEndDate})`, path: ["endDate"] });
+      }
+    });
+  }, [epicStartDate, epicEndDate]);
+
   const form = useForm<SprintFormValues>({
-    resolver: zodResolver(sprintSchema),
+    resolver: zodResolver(dynamicSchema),
     defaultValues: {
       name: "",
       goal: "",

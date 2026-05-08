@@ -1,6 +1,7 @@
 package com.ikon.taskmanagement.dto.request;
 
 import lombok.Data;
+import com.ikon.taskmanagement.enums.TaskStatus;
 import java.time.LocalDate;
 import java.util.UUID;
 
@@ -12,7 +13,7 @@ public class TaskRequestDto {
     private String title;
     private String description;
     private String type;
-    private String status;
+    private TaskStatus status;
     private String priority;
     private UUID assigneeId;
     private UUID reporterId;

@@ -19,46 +19,34 @@ import {
 import {
   MoreHorizontal,
   Edit2,
-  Pencil,
   Timer,
   Trash2,
   CheckSquare,
   Clock,
-  CalendarDays,
 } from "lucide-react";
 
-import type { Task } from "@/features/tasks/tasksApiSlice";
+import { type Task, useUpdateTaskStatusMutation, useDeleteTaskMutation } from "@/features/tasks/tasksApiSlice";
 
 import AddTaskModal from "./AddTaskModal";
 import LogTimeModal from "./LogTimeModal";
+import type { Sprint as SprintType } from "@/features/sprints/sprintsApiSlice";
 
 /* ================= TYPES ================= */
 
 type DraggableItemProps = {
   item: Task;
   column: string;
+  sprints?: SprintType[];
 };
 
 type ColumnProps = {
   id: string;
   label: string;
   items: Task[];
+  sprints?: SprintType[];
 };
 
 /* ================= HELPERS ================= */
-
-function statusColor(status: string) {
-  switch (status?.toUpperCase()) {
-    case "BLOCKED":
-      return "bg-red-600/20 text-red-400";
-    case "IN_PROGRESS":
-      return "bg-blue-600/20 text-blue-400";
-    case "DONE":
-      return "bg-green-600/20 text-green-400";
-    default:
-      return "bg-gray-600/20 text-gray-400";
-  }
-}
 
 function priorityColor(priority: string) {
   switch (priority?.toUpperCase()) {
@@ -82,9 +70,11 @@ const COLUMN_CONFIG = [
 
 /* ================= COMPONENTS ================= */
 
-function DraggableItem({ item, column }: DraggableItemProps) {
+function DraggableItem({ item, column, sprints }: DraggableItemProps) {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isLogTimeOpen, setIsLogTimeOpen] = useState(false);
+  const [updateTaskStatus] = useUpdateTaskStatusMutation();
+  const [deleteTask] = useDeleteTaskMutation();
 
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: item.id,
@@ -134,10 +124,49 @@ function DraggableItem({ item, column }: DraggableItemProps) {
                   >
                     <Timer className="inline mr-2" /> Log Time
                   </DropdownMenuItem>
-                  <hr className="py-1 font-bold" />
                   <DropdownMenuItem
                     className="cursor-pointer"
-                    onPointerDown={(e) => e.stopPropagation()}
+                    onPointerDown={(e) => {
+                      e.stopPropagation();
+                      updateTaskStatus({ id: item.id, taskStatus: "TO_DO" });
+                    }}
+                  >
+                    Set To Do
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    className="cursor-pointer"
+                    onPointerDown={(e) => {
+                      e.stopPropagation();
+                      updateTaskStatus({ id: item.id, taskStatus: "IN_PROGRESS" });
+                    }}
+                  >
+                    Set In Progress
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    className="cursor-pointer"
+                    onPointerDown={(e) => {
+                      e.stopPropagation();
+                      updateTaskStatus({ id: item.id, taskStatus: "DONE" });
+                    }}
+                  >
+                    Set Done
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    className="cursor-pointer"
+                    onPointerDown={(e) => {
+                      e.stopPropagation();
+                      updateTaskStatus({ id: item.id, taskStatus: "BLOCKED" });
+                    }}
+                  >
+                    Set Blocked
+                  </DropdownMenuItem>
+                  <hr className="py-1 font-bold" />
+                  <DropdownMenuItem
+                    className="cursor-pointer text-red-600"
+                    onPointerDown={(e) => {
+                      e.stopPropagation();
+                      deleteTask(item.id);
+                    }}
                   >
                     <Trash2 className="inline mr-2" /> Delete Task
                   </DropdownMenuItem>
@@ -174,6 +203,8 @@ function DraggableItem({ item, column }: DraggableItemProps) {
           projectId={item.projectId}
           epicId={item.epicId}
           sprintId={item.sprintId}
+          sprintStartDate={sprints?.find((s) => s.id === item.sprintId)?.startDate}
+          sprintEndDate={sprints?.find((s) => s.id === item.sprintId)?.endDate}
           onClose={() => setIsEditOpen(false)}
         />
       )}
@@ -188,7 +219,7 @@ function DraggableItem({ item, column }: DraggableItemProps) {
   );
 }
 
-function Column({ id, label, items }: ColumnProps) {
+function Column({ id, label, items, sprints }: ColumnProps) {
   const { setNodeRef } = useDroppable({ id });
 
   return (
@@ -201,7 +232,7 @@ function Column({ id, label, items }: ColumnProps) {
       </div>
       <hr className="mb-3" />
       {items.map((item) => (
-        <DraggableItem key={item.id} item={item} column={id} />
+        <DraggableItem key={item.id} item={item} column={id} sprints={sprints} />
       ))}
     </div>
   );
@@ -211,9 +242,10 @@ function Column({ id, label, items }: ColumnProps) {
 
 interface TaskBoardProps {
   tasks: Task[];
+  sprints?: SprintType[];
 }
 
-export default function TaskBoard({ tasks }: TaskBoardProps) {
+export default function TaskBoard({ tasks, sprints = [] }: TaskBoardProps) {
   // Group tasks by status
   const groupedTasks = useMemo(() => {
     const groups: Record<string, Task[]> = {};
@@ -232,6 +264,7 @@ export default function TaskBoard({ tasks }: TaskBoardProps) {
   }, [tasks]);
 
   const [columns, setColumns] = useState(groupedTasks);
+  const [updateTaskStatus] = useUpdateTaskStatusMutation();
 
   // Re-sync when tasks change
   useMemo(() => {
@@ -263,7 +296,18 @@ export default function TaskBoard({ tasks }: TaskBoardProps) {
       [destCol]: [...prev[destCol], movedItem],
     }));
 
-    // TODO: Call updateTask mutation to persist status change
+    // Persist status change using mutation Hook
+    const statusMap: Record<string, string> = {
+      todo: "TO_DO",
+      in_progress: "IN_PROGRESS",
+      done: "DONE",
+      blocked: "BLOCKED",
+    };
+
+    updateTaskStatus({
+      id: movedItem.id,
+      taskStatus: statusMap[destCol] || "TO_DO",
+    });
   };
 
   return (
@@ -275,6 +319,7 @@ export default function TaskBoard({ tasks }: TaskBoardProps) {
             id={col.key}
             label={col.label}
             items={columns[col.key] || []}
+            sprints={sprints}
           />
         ))}
       </div>

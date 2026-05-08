@@ -2,6 +2,7 @@ package com.ikon.taskmanagement.controller;
 
 import com.ikon.taskmanagement.api.SprintApi;
 import com.ikon.taskmanagement.dto.request.SprintRequestDto;
+import com.ikon.taskmanagement.dto.request.UpdateSprintStatusDto;
 import com.ikon.taskmanagement.dto.response.SprintResponseDto;
 import com.ikon.taskmanagement.service.SprintService;
 import lombok.RequiredArgsConstructor;
@@ -48,5 +49,10 @@ public class SprintController implements SprintApi {
     public ResponseEntity<Void> deleteSprint(UUID id) {
         sprintService.deleteSprint(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @Override
+    public ResponseEntity<SprintResponseDto> patchSprintStatus(UUID id, UpdateSprintStatusDto dto) {
+        return ResponseEntity.ok(sprintService.patchSprintStatus(id, dto));
     }
 }

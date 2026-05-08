@@ -23,9 +23,9 @@ export const sprintsApiSlice = apiSlice.injectEndpoints({
       providesTags: (result, _error, projectId) =>
         result
           ? [
-              ...result.map(({ id }) => ({ type: 'Sprint' as const, id })),
-              { type: 'Sprint', id: `LIST_PROJ_${projectId}` },
-            ]
+            ...result.map(({ id }) => ({ type: 'Sprint' as const, id })),
+            { type: 'Sprint', id: `LIST_PROJ_${projectId}` },
+          ]
           : [{ type: 'Sprint', id: `LIST_PROJ_${projectId}` }],
     }),
     getSprintsByEpic: builder.query<Sprint[], string>({
@@ -33,9 +33,9 @@ export const sprintsApiSlice = apiSlice.injectEndpoints({
       providesTags: (result, _error, epicId) =>
         result
           ? [
-              ...result.map(({ id }) => ({ type: 'Sprint' as const, id })),
-              { type: 'Sprint', id: `LIST_EPIC_${epicId}` },
-            ]
+            ...result.map(({ id }) => ({ type: 'Sprint' as const, id })),
+            { type: 'Sprint', id: `LIST_EPIC_${epicId}` },
+          ]
           : [{ type: 'Sprint', id: `LIST_EPIC_${epicId}` }],
     }),
     createSprint: builder.mutation<Sprint, CreateSprintRequest>({
@@ -61,6 +61,16 @@ export const sprintsApiSlice = apiSlice.injectEndpoints({
       }),
       invalidatesTags: (_result, _error, arg) => [{ type: 'Sprint', id: arg.id }],
     }),
+    updateSprintStatus: builder.mutation<Sprint, { id: string; status: string }>({
+      query: ({ id, status }) => ({
+        apiUrl: `/sprints/${id}/status`,
+        config: {
+          method: 'PATCH',
+          data: { status },
+        },
+      }),
+      invalidatesTags: (_result, _error, arg) => [{ type: 'Sprint', id: arg.id }],
+    }),
     deleteSprint: builder.mutation<void, string>({
       query: (id) => ({
         apiUrl: `/sprints/${id}`,
@@ -76,5 +86,6 @@ export const {
   useGetSprintsByEpicQuery,
   useCreateSprintMutation,
   useUpdateSprintMutation,
+  useUpdateSprintStatusMutation,
   useDeleteSprintMutation,
 } = sprintsApiSlice;

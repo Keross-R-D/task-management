@@ -10,7 +10,6 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -41,13 +40,14 @@ public class MyTask {
     private String taskStatus;
 
     @Column
-    private Double estimatedHours;
+    private Double estimatedHours = 0.0;
 
-    @ElementCollection
-    @CollectionTable(name = "task_assignees", joinColumns = @JoinColumn(name = "task_id"))
-    @Column(name = "assignee_id")
+    @Column
     @JdbcTypeCode(SqlTypes.UUID)
-    private List<UUID> assigneeIds;
+    private UUID assigneeId;
+
+    @Column
+    private Double actualHours = 0.0;
 
     @Column
     private String type = "Task";

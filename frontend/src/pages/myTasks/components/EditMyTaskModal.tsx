@@ -69,7 +69,7 @@ export default function EditMyTaskModal({
     isLoading,
 }: Props) {
     const form = useForm<TaskFormValues>({
-        resolver: zodResolver(taskSchema),
+        resolver: zodResolver(taskSchema) as any,
         defaultValues: {
             title: "",
             description: "",
@@ -118,12 +118,12 @@ export default function EditMyTaskModal({
 
                 <Form {...form}>
                     <form
-                        onSubmit={form.handleSubmit(handleSubmitForm)}
+                        onSubmit={form.handleSubmit(handleSubmitForm as any)}
                         className="space-y-4"
                     >
                         {/* Title */}
                         <FormField
-                            control={form.control}
+                            control={form.control as any}
                             name="title"
                             render={({ field }) => (
                                 <FormItem>
@@ -140,7 +140,7 @@ export default function EditMyTaskModal({
 
                         {/* Description */}
                         <FormField
-                            control={form.control}
+                            control={form.control as any}
                             name="description"
                             render={({ field }) => (
                                 <FormItem>
@@ -156,7 +156,7 @@ export default function EditMyTaskModal({
                         {/* Type + Priority */}
                         <div className="grid grid-cols-2 gap-4">
                             <FormField
-                                control={form.control}
+                                control={form.control as any}
                                 name="type"
                                 render={({ field }) => (
                                     <FormItem>
@@ -180,7 +180,7 @@ export default function EditMyTaskModal({
                             />
 
                             <FormField
-                                control={form.control}
+                                control={form.control as any}
                                 name="priority"
                                 render={({ field }) => (
                                     <FormItem>
@@ -205,7 +205,7 @@ export default function EditMyTaskModal({
                         {/* Status + Hours */}
                         <div className="grid grid-cols-2 gap-4">
                             <FormField
-                                control={form.control}
+                                control={form.control as any}
                                 name="status"
                                 render={({ field }) => (
                                     <FormItem>
@@ -230,7 +230,7 @@ export default function EditMyTaskModal({
                             />
 
                             <FormField
-                                control={form.control}
+                                control={form.control as any}
                                 name="estimatedHours"
                                 render={({ field }) => (
                                     <FormItem>
@@ -244,7 +244,7 @@ export default function EditMyTaskModal({
                                                 onChange={(e) => {
                                                     const value = e.target.value;
                                                     field.onChange(
-                                                    value === "" ? undefined : Number(value)
+                                                    value === "" ? 0 : Number(value)
                                                     );
                                                 }}
                                             />
@@ -256,7 +256,7 @@ export default function EditMyTaskModal({
 
                         {/* Assignee */}
                         <FormField
-                            control={form.control}
+                            control={form.control as any}
                             name="assignee"
                             render={({ field }) => (
                                 <FormItem>

@@ -22,7 +22,7 @@ import {
   Textarea,
 } from "ikon-react-components-lib";
 
-const worklogSchema = z.object({
+const baseWorklogSchema = z.object({
   description: z.string().optional(),
   date: z.string().optional(),
   startDate: z.string().optional(),
@@ -30,7 +30,7 @@ const worklogSchema = z.object({
   totalHours: z.number().min(0.1, "Must log at least 0.1 hours").optional(),
 });
 
-export type WorklogFormValues = z.infer<typeof worklogSchema>;
+export type WorklogFormValues = z.infer<typeof baseWorklogSchema>;
 
 interface Props {
   open: boolean;
@@ -49,8 +49,41 @@ export default function LogTimeModal({ open, task, onClose }: Props) {
     Record<string, number>
   >({});
 
+  const dynamicSchema = useMemo(() => {
+    return baseWorklogSchema.superRefine((data, ctx) => {
+      if (isMultiDay && data.startDate && data.endDate && new Date(data.startDate) > new Date(data.endDate)) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Start Date must not be later than End Date", path: ["startDate"] });
+      }
+
+      if (!task?.startDate || !task?.endDate) return;
+      const tStart = new Date(task.startDate);
+      const tEnd = new Date(task.endDate);
+
+      if (!isMultiDay && data.date) {
+        const d = new Date(data.date);
+        if (d < tStart || d > tEnd) {
+          ctx.addIssue({ code: z.ZodIssueCode.custom, message: `Date must be between ${task.startDate} and ${task.endDate}`, path: ["date"] });
+        }
+      }
+
+      if (isMultiDay && data.startDate) {
+        const sd = new Date(data.startDate);
+        if (sd < tStart || sd > tEnd) {
+          ctx.addIssue({ code: z.ZodIssueCode.custom, message: `Out of Task bounds: ${task.startDate} to ${task.endDate}`, path: ["startDate"] });
+        }
+      }
+
+      if (isMultiDay && data.endDate) {
+        const ed = new Date(data.endDate);
+        if (ed < tStart || ed > tEnd) {
+          ctx.addIssue({ code: z.ZodIssueCode.custom, message: `Out of Task bounds: ${task.startDate} to ${task.endDate}`, path: ["endDate"] });
+        }
+      }
+    });
+  }, [task, isMultiDay]);
+
   const form = useForm<WorklogFormValues>({
-    resolver: zodResolver(worklogSchema),
+    resolver: zodResolver(dynamicSchema),
     defaultValues: {
       description: "",
       date: new Date().toISOString().substring(0, 10),
