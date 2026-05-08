@@ -34,7 +34,7 @@ const ProjectCard = ({ id, name, status }: Props) => {
                 <>
                     <div className="flex items-center gap-3">
                         <div className="flex-1">
-                            <Progress value={percentage} />
+                            <Progress value={percentage} className="[&>div]:bg-indigo-500"/>
                         </div>
                         <span className="text-sm font-medium">{percentage}%</span>
                     </div>

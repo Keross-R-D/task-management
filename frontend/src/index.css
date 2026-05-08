@@ -1,7 +1,6 @@
 @import "tailwindcss";
 
 @import "ikon-react-components-lib/dist/ikon-react-components-lib.css";
-
 /* App level styles */
 /* @theme {
   --color-border: hsl(var(--border));
