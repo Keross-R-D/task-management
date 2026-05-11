@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useCreateEpicMutation, useUpdateEpicMutation } from "@/features/epics/epicsApiSlice";
 import React, { useEffect } from "react";
 import type { Epic as EpicType } from "@/features/epics/epicsApiSlice";
+import { EpicEnum } from "@/enums/epic.constants";
 
 import {
   Dialog,
@@ -91,14 +92,18 @@ export default function AddEpicModal({
           name: epic.name || "",
           description: epic.description || "",
           status: epic.status || "",
-          startDate: epic.startDate ? new Date(epic.startDate).toISOString().split('T')[0] : "",
-          endDate: epic.endDate ? new Date(epic.endDate).toISOString().split('T')[0] : "",
+          startDate: epic.startDate
+            ? new Date(epic.startDate).toISOString().split("T")[0]
+            : "",
+          endDate: epic.endDate
+            ? new Date(epic.endDate).toISOString().split("T")[0]
+            : "",
         });
       } else {
         form.reset({
           name: "",
           description: "",
-          status: "NOT_STARTED",
+          status: "",
           startDate: "",
           endDate: "",
         });
@@ -138,7 +143,9 @@ export default function AddEpicModal({
         <DialogHeader className="my-3">
           <DialogTitle>{epic ? "Edit Epic" : "Add Epic"}</DialogTitle>
           <span className="text-gray-400">
-            {epic ? "Update details for the epic." : "Create a new epic for this project."}
+            {epic
+              ? "Update details for the epic."
+              : "Create a new epic for this project."}
           </span>
         </DialogHeader>
 
@@ -204,9 +211,11 @@ export default function AddEpicModal({
                     </FormControl>
 
                     <SelectContent>
-                      <SelectItem value="PLANNED">Planned</SelectItem>
-                      <SelectItem value="ACTIVE">Active</SelectItem>
-                      <SelectItem value="COMPLETED">Completed</SelectItem>
+                      {Object.values(EpicEnum.Status).map((status) => (
+                        <SelectItem key={status} value={status}>
+                          {status}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
 

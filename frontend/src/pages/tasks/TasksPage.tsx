@@ -3,7 +3,7 @@ import { DataTableLayout, Button, Select, SelectTrigger, SelectValue, SelectCont
 import { Plus, LayoutList, Clock, ArrowUpRight, ClipboardList } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useGetProjectsQuery } from "@/features/projects/projectsApiSlice";
-import { useGetTasksByProjectQuery } from "@/features/tasks/tasksApiSlice";
+import { useCreateTaskMutation, useGetTasksByProjectQuery } from "@/features/tasks/tasksApiSlice";
 import AddTaskModal from "../projects/components/AddTaskModal";
 import LogTimeModal from "../projects/components/LogTimeModal";
 

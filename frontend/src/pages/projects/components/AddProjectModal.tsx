@@ -22,6 +22,7 @@ import {
   SelectItem,
   Textarea,
 } from "ikon-react-components-lib";
+import { ProjectEnum } from "@/enums/project.constants";
 
 const projectSchema = z.object({
   projectName: z.string().min(1, "Project name is required"),
@@ -55,7 +56,12 @@ interface Props {
   isLoading?: boolean;
 }
 
-export default function AddProjectModal({ open, onClose, onSubmit, isLoading }: Props) {
+export default function AddProjectModal({
+  open,
+  onClose,
+  onSubmit,
+  isLoading,
+}: Props) {
   const form = useForm<ProjectFormValues>({
     resolver: zodResolver(projectSchema),
     defaultValues: {
@@ -87,7 +93,10 @@ export default function AddProjectModal({ open, onClose, onSubmit, isLoading }: 
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleCreate)} className="space-y-4">
+          <form
+            onSubmit={form.handleSubmit(handleCreate)}
+            className="space-y-4"
+          >
             <FormField
               control={form.control}
               name="projectName"
@@ -169,9 +178,11 @@ export default function AddProjectModal({ open, onClose, onSubmit, isLoading }: 
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="PLANNED">Planned</SelectItem>
-                        <SelectItem value="IN_PROGRESS">In Progress</SelectItem>
-                        <SelectItem value="COMPLETED">Completed</SelectItem>
+                        {Object.values(ProjectEnum.Status).map((status) => (
+                          <SelectItem key={status} value={status}>
+                            {status}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -194,8 +205,11 @@ export default function AddProjectModal({ open, onClose, onSubmit, isLoading }: 
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="INTERNAL">Internal</SelectItem>
-                        <SelectItem value="EXTERNAL">External</SelectItem>
+                        {Object.values(ProjectEnum.Type).map((type) => (
+                          <SelectItem key={type} value={type}>
+                            {type}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                     <FormMessage />

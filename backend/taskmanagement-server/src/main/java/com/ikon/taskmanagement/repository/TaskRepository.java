@@ -13,4 +13,5 @@ public interface TaskRepository extends JpaRepository<Task, UUID> {
     List<Task> findByEpicId(UUID epicId);
     List<Task> findBySprintId(UUID sprintId);
     List<Task> findByProjectIdAndSprintIdIsNull(UUID projectId);
+     boolean existsByTitleIgnoreCaseAndSprintId(String title, UUID sprintId);
 }

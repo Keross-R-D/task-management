@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useCreateTaskMutation, useUpdateTaskMutation } from "@/features/tasks/tasksApiSlice";
 import React, { useEffect } from "react";
 import type { Task } from "@/features/tasks/tasksApiSlice";
+import { TaskEnum } from "@/enums/task.constants";
 
 import {
   Dialog,
@@ -93,9 +94,9 @@ export default function AddTaskModal({
     defaultValues: {
       title: "",
       description: "",
-      type: "TASK",
-      status: "TO_DO",
-      priority: "MEDIUM",
+      type: TaskEnum.Type.TASK,
+      status: TaskEnum.Status.TODO,
+      priority: TaskEnum.Priority.MEDIUM,
       assigneeId: "",
       reporterId: "",
       estimatedHours: undefined,
@@ -111,23 +112,27 @@ export default function AddTaskModal({
         form.reset({
           title: task.title || "",
           description: task.description || "",
-          type: task.type || "TASK",
-          status: task.status || "TO_DO",
-          priority: task.priority || "MEDIUM",
+          type: task.type || "",
+          status: task.status || "",
+          priority: task.priority || "",
           assigneeId: task.assigneeId || "",
           reporterId: task.reporterId || "",
           estimatedHours: task.estimatedHours || undefined,
           plannedDuration: task.plannedDuration || undefined,
-          startDate: task.startDate ? new Date(task.startDate).toISOString().split('T')[0] : "",
-          endDate: task.endDate ? new Date(task.endDate).toISOString().split('T')[0] : "",
+          startDate: task.startDate
+            ? new Date(task.startDate).toISOString().split("T")[0]
+            : "",
+          endDate: task.endDate
+            ? new Date(task.endDate).toISOString().split("T")[0]
+            : "",
         });
       } else {
         form.reset({
           title: "",
           description: "",
-          type: "TASK",
-          status: "TO_DO",
-          priority: "MEDIUM",
+          type: "",
+          status: "",
+          priority: "",
           assigneeId: "",
           reporterId: "",
           estimatedHours: undefined,
@@ -220,16 +225,21 @@ export default function AddTaskModal({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Type *</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value || ""}>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value || ""}
+                    >
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select Type" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="TASK">Task</SelectItem>
-                        <SelectItem value="BUG">Bug</SelectItem>
-                        <SelectItem value="STORY">Story</SelectItem>
+                        {Object.values(TaskEnum.Type).map((type) => (
+                          <SelectItem key={type} value={type}>
+                            {type}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -244,16 +254,21 @@ export default function AddTaskModal({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Priority *</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value || ""}>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value || ""}
+                    >
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select Priority" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="LOW">Low</SelectItem>
-                        <SelectItem value="MEDIUM">Medium</SelectItem>
-                        <SelectItem value="HIGH">High</SelectItem>
+                        {Object.values(TaskEnum.Priority).map((priority) => (
+                          <SelectItem key={priority} value={priority}>
+                            {priority}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -268,16 +283,21 @@ export default function AddTaskModal({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Status *</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value || ""}>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value || ""}
+                    >
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select Status" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="TO_DO">To Do</SelectItem>
-                        <SelectItem value="IN_PROGRESS">In Progress</SelectItem>
-                        <SelectItem value="DONE">Done</SelectItem>
+                        {Object.values(TaskEnum.Status).map((status) => (
+                          <SelectItem key={status} value={status}>
+                            {status}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -362,7 +382,9 @@ export default function AddTaskModal({
                         value={field.value ?? ""}
                         onChange={(e) =>
                           field.onChange(
-                            e.target.value === "" ? undefined : e.target.valueAsNumber
+                            e.target.value === ""
+                              ? undefined
+                              : e.target.valueAsNumber,
                           )
                         }
                       />
@@ -384,7 +406,9 @@ export default function AddTaskModal({
                         value={field.value ?? ""}
                         onChange={(e) =>
                           field.onChange(
-                            e.target.value === "" ? undefined : e.target.valueAsNumber
+                            e.target.value === ""
+                              ? undefined
+                              : e.target.valueAsNumber,
                           )
                         }
                       />
