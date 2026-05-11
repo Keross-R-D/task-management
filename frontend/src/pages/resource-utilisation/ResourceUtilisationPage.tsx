@@ -1,8 +1,10 @@
 import React, { useState, useMemo } from "react";
 import {
   Button,
+  Card,
   ComboboxInput,
   DataTableLayout,
+  Skeleton,
   Table,
   TableBody,
   TableCell,
@@ -20,6 +22,7 @@ import { useGetProjectsQuery, type Project } from "@/features/projects/projectsA
 import { useGetTasksByProjectQuery, type Task } from "@/features/tasks/tasksApiSlice";
 import { useGetWorklogsByProjectQuery, type TaskWorklog } from "@/features/worklogs/worklogsApiSlice";
 import { getUserInfo, getAllUsers, DEFAULT_CAPACITY_HOURS } from "@/utils/userMap";
+import ErrorState from "@/components/ErrorState";
 
 // ── Types ──
 
@@ -141,8 +144,14 @@ function useAllProjectData(projects: Project[]) {
   const allWorklogs: TaskWorklog[] = worklogQueries.flatMap((q) => q.data ?? []);
   const isLoading =
     taskQueries.some((q) => q.isLoading) || worklogQueries.some((q) => q.isLoading);
+  const isFetching =
+    taskQueries.some((q) => q.isFetching) ||
+    worklogQueries.some((q) => q.isFetching);
+     const isError =
+    taskQueries.some((q) => q.isError) ||
+    worklogQueries.some((q) => q.isError);
 
-  return { allTasks, allWorklogs, isLoading };
+  return { allTasks, allWorklogs, isLoading, isFetching, isError };
 }
 
 // ── Main Component ──
@@ -152,11 +161,13 @@ const ResourceUtilisationPage: React.FC = () => {
   const [userFilter, setUserFilter] = useState("all");
   const [projectFilter, setProjectFilter] = useState("all");
 
-  const { data: projects = [], isLoading: projectsLoading } = useGetProjectsQuery();
-  const { allTasks, allWorklogs, isLoading: dataLoading } = useAllProjectData(projects);
+  const { data: projects = [], isLoading: projectsLoading, isFetching: projectsFetching , isError: projectsError, refetch } = useGetProjectsQuery();
+  const { allTasks, allWorklogs, isLoading: dataLoading, isFetching: dataFetching, isError: dataError } = useAllProjectData(projects);
 
   const isLoading = projectsLoading || dataLoading;
-
+  const isFetching = projectsFetching || dataFetching;
+  const isError = projectsError || dataError;
+ 
   const weekDates = getWeek(startDate);
 
   // ── Filter options ──
@@ -292,157 +303,220 @@ const ResourceUtilisationPage: React.FC = () => {
   const goToCurrentWeek = () => setStartDate(new Date());
 
   return (
-    <div className="p-4 space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold">Resource Utilisation</h1>
-        <p className="text-muted-foreground">
-          Monitor team capacity and workload across all projects.
-        </p>
-      </div>
+     <div className="w-full">     
+      {isFetching ? (
+        <div className="flex flex-col gap-4">
+          {/* Header */}
+          <div className="space-y-2">
+            <Skeleton className="h-7 w-40 rounded-md" />
+            <Skeleton className="h-4 w-52 mb-6 rounded-md" />
+            <Skeleton className="h-8 w-120 rounded-md" />
+          </div>
 
-      {/* Tabs */}
-      <Tabs defaultValue="team">
-        <TabsList>
-          <TabsTrigger value="team" className="flex gap-2 items-center">
-            <Users className="h-4 w-4" /> Team Member View
-          </TabsTrigger>
-          <TabsTrigger value="project" className="flex gap-2 items-center">
-            <FolderKanban className="h-4 w-4" /> Project View
-          </TabsTrigger>
-          <TabsTrigger value="timesheet" className="flex gap-2 items-center">
-            <CalendarDays className="h-4 w-4" /> Timesheet
-          </TabsTrigger>
-        </TabsList>
+          {/* Actions */}
+          <div className="flex justify-between items-center mb-2">
+            <Skeleton className="h-10 w-72 rounded-md" />
 
-        {/* Team View */}
-        <TabsContent value="team" className="mt-5">
-          {isLoading ? (
-            <div className="text-center py-8 text-muted-foreground">Loading resource data...</div>
-          ) : teamMemberData.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              No resource data available. Assign tasks to team members to see utilisation.
-            </div>
-          ) : (
-            <DataTableLayout
-              data={teamMemberData}
-              columns={columns}
-              extraTools={{ totalPages: 1 }}
-            />
-          )}
-        </TabsContent>
-
-        {/* Project View */}
-        <TabsContent value="project" className="mt-5">
-          {isLoading ? (
-            <div className="text-center py-8 text-muted-foreground">Loading projects...</div>
-          ) : (
-            <ProjectMemberView projects={projects} allTasks={allTasks} />
-          )}
-        </TabsContent>
-
-        {/* Timesheet */}
-        <TabsContent value="timesheet" className="mt-5">
-          {/* Controls */}
-          <div className="flex flex-col gap-3 mb-4 md:flex-row md:items-center md:justify-between">
-            {/* LEFT: Week Navigation */}
-            <div className="flex items-center gap-2 flex-wrap justify-between md:justify-start">
-              <div className="flex items-center gap-2">
-                <Button variant="outline" size="icon" onClick={prevWeek}>
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                <span className="font-medium whitespace-nowrap text-sm md:text-base">
-                  {formatDate(weekDates[0])} — {formatDate(weekDates[6])}
-                </span>
-                <Button variant="outline" size="icon" onClick={nextWeek}>
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
-              {!isCurrentWeek && (
-                <Button variant="outline" size="sm" onClick={goToCurrentWeek}>
-                  This Week
-                </Button>
-              )}
-            </div>
-
-            {/* RIGHT: Filters */}
-            <div className="flex flex-col gap-2 w-full md:flex-row md:w-auto md:items-center">
-              <div className="w-full md:w-[180px]">
-                <ComboboxInput
-                  placeholder="All Users"
-                  items={userOptions}
-                  defaultValue={userFilter}
-                  onSelect={(value) => setUserFilter(value as string)}
-                />
-              </div>
-              <div className="w-full md:w-[180px]">
-                <ComboboxInput
-                  placeholder="All Projects"
-                  items={projectOptions}
-                  defaultValue={projectFilter}
-                  onSelect={(value) => setProjectFilter(value as string)}
-                />
-              </div>
+            <div className="flex gap-3">
+              <Skeleton className="h-10 w-10 rounded-md" />
+              <Skeleton className="h-10 w-10 rounded-md" />
+              <Skeleton className="h-10 w-32 rounded-md" />
             </div>
           </div>
 
-          {/* Timesheet Table */}
-          <div className="border rounded-lg overflow-hidden">
-            <Table>
-              <TableHeader className="h-11 bg-muted font-extrabold">
-                <TableRow>
-                  <TableHead>Assignee</TableHead>
-                  {weekDates.map((date) => (
-                    <TableHead key={date.toISOString()}>{formatDate(date)}</TableHead>
-                  ))}
-                  <TableHead>Total</TableHead>
-                </TableRow>
-              </TableHeader>
+          {/* Table */}
+          <Card className="p-4">
+            {/* Table Header */}
+            <div className="grid grid-cols-4 gap-4 border-b pb-4 mb-4">
+              <Skeleton className="h-9 w-full" />
+              <Skeleton className="h-9 w-full" />
+              <Skeleton className="h-9 w-full" />
+              <Skeleton className="h-9 w-full" />
+            </div>
 
-              <TableBody>
-                {isLoading ? (
-                  <TableRow>
-                    <TableCell colSpan={weekDates.length + 2} className="text-center">
-                      Loading timesheet...
-                    </TableCell>
-                  </TableRow>
-                ) : timesheetData.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={weekDates.length + 2} className="text-center">
-                      No time logged
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  timesheetData.map((row) => {
-                    const total = weekDates.reduce((sum, date) => {
-                      const key = toKey(date);
-                      return sum + (row.entries[key] || 0);
-                    }, 0);
+            {/* Table Rows */}
+            <div className="space-y-4">
+              {Array.from({ length: 10 }).map((_, i) => (
+                <div key={i} className="grid grid-cols-4 gap-4 items-center">
+                  <Skeleton className="h-8 w-full" />
+                  <Skeleton className="h-8 w-full" />
+                  <Skeleton className="h-8 w-full" />
+                  <Skeleton className="h-8 w-full" />
+                </div>
+              ))}
+            </div>
+          </Card>
+        </div>
+      ) : isError ? (
+        <ErrorState message="We couldn’t load the resource utilisation data right now. Please try again after a moment." onRetry={refetch} />
+      ) : (
+        <div className="p-4 space-y-6">
+          {/* Header */}
+          <div>
+            <h1 className="text-2xl font-bold">Resource Utilisation</h1>
+            <p className="text-muted-foreground">
+              Monitor team capacity and workload across all projects.
+            </p>
+          </div>
 
-                    return (
-                      <TableRow key={row.userId}>
-                        <TableCell>{row.name}</TableCell>
-                        {weekDates.map((date) => {
-                          const key = toKey(date);
-                          const hrs = row.entries[key] || 0;
-                          return (
-                            <TableCell key={key}>
-                              {hrs ? `${hrs}h` : "-"}
-                            </TableCell>
-                          );
-                        })}
-                        <TableCell className="font-semibold">
-                          {Math.round(total * 10) / 10}h
+          {/* Tabs */}
+          <Tabs defaultValue="team">
+            <TabsList>
+              <TabsTrigger value="team" className="flex gap-2 items-center">
+                <Users className="h-4 w-4" /> Team Member View
+              </TabsTrigger>
+              <TabsTrigger value="project" className="flex gap-2 items-center">
+                <FolderKanban className="h-4 w-4" /> Project View
+              </TabsTrigger>
+              <TabsTrigger
+                value="timesheet"
+                className="flex gap-2 items-center"
+              >
+                <CalendarDays className="h-4 w-4" /> Timesheet
+              </TabsTrigger>
+            </TabsList>
+
+            {/* Team View */}
+            <TabsContent value="team" className="mt-5">
+              {isLoading ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  Loading resource data...
+                </div>
+              ) : teamMemberData.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  No resource data available. Assign tasks to team members to
+                  see utilisation.
+                </div>
+              ) : (
+                <DataTableLayout
+                  data={teamMemberData}
+                  columns={columns}
+                  extraTools={{ totalPages: 1 }}
+                />
+              )}
+            </TabsContent>
+
+            {/* Project View */}
+            <TabsContent value="project" className="mt-5">
+              {isLoading ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  Loading projects...
+                </div>
+              ) : (
+                <ProjectMemberView projects={projects} allTasks={allTasks} />
+              )}
+            </TabsContent>
+
+            {/* Timesheet */}
+            <TabsContent value="timesheet" className="mt-5">
+              {/* Controls */}
+              <div className="flex flex-col gap-3 mb-4 md:flex-row md:items-center md:justify-between">
+                {/* LEFT: Week Navigation */}
+                <div className="flex items-center gap-2 flex-wrap justify-between md:justify-start">
+                  <div className="flex items-center gap-2">
+                    <Button variant="outline" size="icon" onClick={prevWeek}>
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    <span className="font-medium whitespace-nowrap text-sm md:text-base">
+                      {formatDate(weekDates[0])} — {formatDate(weekDates[6])}
+                    </span>
+                    <Button variant="outline" size="icon" onClick={nextWeek}>
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  {!isCurrentWeek && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={goToCurrentWeek}
+                    >
+                      This Week
+                    </Button>
+                  )}
+                </div>
+
+                {/* RIGHT: Filters */}
+                <div className="flex flex-col gap-2 w-full md:flex-row md:w-auto md:items-center">
+                  <div className="w-full md:w-[180px]">
+                    <ComboboxInput
+                      placeholder="All Users"
+                      items={userOptions}
+                      defaultValue={userFilter}
+                      onSelect={(value) => setUserFilter(value as string)}
+                    />
+                  </div>
+                  <div className="w-full md:w-[180px]">
+                    <ComboboxInput
+                      placeholder="All Projects"
+                      items={projectOptions}
+                      defaultValue={projectFilter}
+                      onSelect={(value) => setProjectFilter(value as string)}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Timesheet Table */}
+              <div className="border rounded-lg overflow-hidden">
+                <Table>
+                  <TableHeader className="h-11 bg-muted font-extrabold">
+                    <TableRow>
+                      <TableHead>Assignee</TableHead>
+                      {weekDates.map((date) => (
+                        <TableHead key={date.toISOString()}>
+                          {formatDate(date)}
+                        </TableHead>
+                      ))}
+                      <TableHead>Total</TableHead>
+                    </TableRow>
+                  </TableHeader>
+
+                  <TableBody>
+                    {isLoading ? (
+                      <TableRow>
+                    <TableCell colSpan={weekDates.length + 2} className="text-center">
+                          Loading timesheet...
                         </TableCell>
                       </TableRow>
-                    );
-                  })
-                )}
-              </TableBody>
-            </Table>
-          </div>
-        </TabsContent>
-      </Tabs>
+                    ) : timesheetData.length === 0 ? (
+                      <TableRow>
+                    <TableCell colSpan={weekDates.length + 2} className="text-center">
+                          No time logged
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      timesheetData.map((row) => {
+                        const total = weekDates.reduce((sum, date) => {
+                          const key = toKey(date);
+                          return sum + (row.entries[key] || 0);
+                        }, 0);
+
+                        return (
+                          <TableRow key={row.userId}>
+                            <TableCell>{row.name}</TableCell>
+                            {weekDates.map((date) => {
+                              const key = toKey(date);
+                              const hrs = row.entries[key] || 0;
+                              return (
+                                <TableCell key={key}>
+                                  {hrs ? `${hrs}h` : "-"}
+                                </TableCell>
+                              );
+                            })}
+                            <TableCell className="font-semibold">
+                              {Math.round(total * 10) / 10}h
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+            </TabsContent>
+          </Tabs>
+        </div>
+      )}
     </div>
   );
 };

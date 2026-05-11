@@ -217,7 +217,7 @@ export default function ProjectDetailPage() {
 
           {/* RESOURCE TAB */}
           <TabsContent value="resource">
-            <ResourceUtilization tasks={allTasks} />
+            <ResourceUtilization tasks={allTasks} epics={epics} />
           </TabsContent>
         </Tabs>
       </div>
