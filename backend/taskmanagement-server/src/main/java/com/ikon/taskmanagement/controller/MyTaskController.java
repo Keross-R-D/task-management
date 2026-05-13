@@ -6,6 +6,7 @@ import com.ikon.taskmanagement.dto.request.UpdateTaskStatusDto;
 import com.ikon.taskmanagement.dto.response.MyTaskResponseDto;
 import com.ikon.taskmanagement.service.MyTaskService;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
@@ -32,6 +33,11 @@ public class MyTaskController implements MyTaskApi {
     @Override
     public ResponseEntity<Page<MyTaskResponseDto>> getAllMyTasks(Pageable pageable) {
         return ResponseEntity.ok(myTaskService.getAllMyTasks(pageable));
+    }
+
+    @Override
+    public ResponseEntity<List<MyTaskResponseDto>> getAllMyTasksList() {
+        return ResponseEntity.ok(myTaskService.getAllMyTasks());
     }
 
     @Override

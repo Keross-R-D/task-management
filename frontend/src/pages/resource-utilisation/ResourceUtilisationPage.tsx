@@ -21,6 +21,8 @@ import { CalendarDays, ChevronLeft, ChevronRight, FolderKanban, Users } from "lu
 import { useGetProjectsQuery, type Project } from "@/features/projects/projectsApiSlice";
 import { useGetTasksByProjectQuery, type Task } from "@/features/tasks/tasksApiSlice";
 import { useGetWorklogsByProjectQuery, type TaskWorklog } from "@/features/worklogs/worklogsApiSlice";
+import { useGetAllMyTasksQuery, type Task as MyTask } from "@/features/myTasks/mytasksApiSlice";
+import { useGetAllMyTaskWorklogsQuery, type MyTaskWorklog } from "@/features/myTaskWorklogs/myTaskWorklogApiSlice";
 import { getUserInfo, getAllUsers, DEFAULT_CAPACITY_HOURS } from "@/utils/userMap";
 import ErrorState from "@/components/ErrorState";
 
@@ -94,32 +96,114 @@ function buildTeamMemberData(allTasks: Task[]): ResourceMember[] {
 
 function buildTimesheetData(
   allTasks: Task[],
-  allWorklogs: TaskWorklog[]
+  allWorklogs: TaskWorklog[],
+  myTasks: MyTask[] = [],
+  myTaskWorklogs: MyTaskWorklog[] = []
 ): TimesheetRow[] {
-  // Map taskId → assigneeId
+
+  // TASK -> ASSIGNEE MAP
+
   const taskAssigneeMap: Record<string, string> = {};
+
   allTasks.forEach((t) => {
-    if (t.assigneeId) taskAssigneeMap[t.id] = t.assigneeId;
+    if (t.assigneeId) {
+      taskAssigneeMap[t.id] = t.assigneeId;
+    }
   });
 
-  // Aggregate hours by assignee and date
-  const byAssignee: Record<string, Record<string, number>> = {};
+  // MYTASK -> ASSIGNEE MAP
+
+  const myTaskAssigneeMap: Record<string, string> = {};
+
+  myTasks.forEach((t) => {
+    if (t.assigneeId) {
+      myTaskAssigneeMap[t.id] = t.assigneeId;
+    }
+  });
+
+  // FINAL AGGREGATION OBJECT
+
+  const byAssignee: Record<
+    string,
+    Record<string, number>
+  > = {};
+
+  // PRE-CREATE TASK ASSIGNEES
+
+  allTasks.forEach((t) => {
+    if (t.assigneeId && !byAssignee[t.assigneeId]) {
+      byAssignee[t.assigneeId] = {};
+    }
+  });
+
+  // PRE-CREATE MYTASK ASSIGNEES
+
+  myTasks.forEach((t) => {
+    if (t.assigneeId && !byAssignee[t.assigneeId]) {
+      byAssignee[t.assigneeId] = {};
+    }
+  });
+
+  // TASK WORKLOGS
 
   allWorklogs.forEach((wl) => {
-    const assigneeId = taskAssigneeMap[wl.taskId];
+
+    const assigneeId =
+      taskAssigneeMap[wl.taskId];
+
     if (!assigneeId) return;
-    if (!byAssignee[assigneeId]) byAssignee[assigneeId] = {};
 
-    const dist = wl.hoursDistribution || {};
-    Object.entries(dist).forEach(([date, hours]) => {
-      byAssignee[assigneeId][date] = (byAssignee[assigneeId][date] || 0) + hours;
-    });
+    const dist: Record<string, number> =
+      wl.hoursDistribution || {};
+
+    Object.entries(dist).forEach(
+      ([date, hours]) => {
+
+        byAssignee[assigneeId][date] =
+          (byAssignee[assigneeId][date] || 0)
+          + Number(hours);
+
+      }
+    );
   });
 
-  return Object.entries(byAssignee).map(([userId, entries]) => {
-    const user = getUserInfo(userId);
-    return { userId, name: user.name, entries };
+  // MYTASK WORKLOGS
+
+  myTaskWorklogs.forEach((wl) => {
+
+    const assigneeId =
+      myTaskAssigneeMap[wl.myTaskId];
+
+    if (!assigneeId) return;
+
+    const dist: Record<string, number> =
+      wl.hoursDistribution || {};
+
+    Object.entries(dist).forEach(
+      ([date, hours]) => {
+
+        byAssignee[assigneeId][date] =
+          (byAssignee[assigneeId][date] || 0)
+          + Number(hours);
+
+      }
+    );
   });
+
+  // CONVERT TO UI ROWS
+
+  return Object.entries(byAssignee).map(
+    ([userId, entries]) => {
+
+      const user = getUserInfo(userId);
+
+      return {
+        userId,
+        name: user?.name || "Unknown User",
+        entries,
+      };
+    }
+  );
 }
 
 // ── Aggregator component for fetching tasks/worklogs across all projects ──
@@ -142,16 +226,25 @@ function useAllProjectData(projects: Project[]) {
 
   const allTasks: Task[] = taskQueries.flatMap((q) => q.data ?? []);
   const allWorklogs: TaskWorklog[] = worklogQueries.flatMap((q) => q.data ?? []);
+
+  // Fetch all myTasks and myTaskWorklogs
+  const { data: allMyTasks = [], isLoading: myTasksLoading, isFetching: myTasksFetching, isError: myTasksError } = useGetAllMyTasksQuery();
+  const { data: allMyTaskWorklogs = [], isLoading: myTaskWorklogsLoading, isFetching: myTaskWorklogsFetching, isError: myTaskWorklogsError } = useGetAllMyTaskWorklogsQuery();
+
   const isLoading =
-    taskQueries.some((q) => q.isLoading) || worklogQueries.some((q) => q.isLoading);
+    taskQueries.some((q) => q.isLoading) || worklogQueries.some((q) => q.isLoading) || myTasksLoading || myTaskWorklogsLoading;
   const isFetching =
     taskQueries.some((q) => q.isFetching) ||
-    worklogQueries.some((q) => q.isFetching);
+    worklogQueries.some((q) => q.isFetching) ||
+    myTasksFetching ||
+    myTaskWorklogsFetching;
      const isError =
     taskQueries.some((q) => q.isError) ||
-    worklogQueries.some((q) => q.isError);
+    worklogQueries.some((q) => q.isError) ||
+    myTasksError ||
+    myTaskWorklogsError;
 
-  return { allTasks, allWorklogs, isLoading, isFetching, isError };
+  return { allTasks, allWorklogs, allMyTasks, allMyTaskWorklogs, isLoading, isFetching, isError };
 }
 
 // ── Main Component ──
@@ -162,7 +255,7 @@ const ResourceUtilisationPage: React.FC = () => {
   const [projectFilter, setProjectFilter] = useState("all");
 
   const { data: projects = [], isLoading: projectsLoading, isFetching: projectsFetching , isError: projectsError, refetch } = useGetProjectsQuery();
-  const { allTasks, allWorklogs, isLoading: dataLoading, isFetching: dataFetching, isError: dataError } = useAllProjectData(projects);
+  const { allTasks, allWorklogs, allMyTasks, allMyTaskWorklogs, isLoading: dataLoading, isFetching: dataFetching, isError: dataError } = useAllProjectData(projects);
 
   const isLoading = projectsLoading || dataLoading;
   const isFetching = projectsFetching || dataFetching;
@@ -183,6 +276,7 @@ const ResourceUtilisationPage: React.FC = () => {
   const projectOptions = useMemo(() => {
     return [
       { label: "All Projects", value: "all" },
+      { label: "My Tasks", value: "myTasks" },
       ...projects.map((p) => ({ label: p.projectName, value: String(p.id) })),
     ];
   }, [projects]);
@@ -201,25 +295,94 @@ const ResourceUtilisationPage: React.FC = () => {
   }, [allTasks, userFilter, projectFilter]);
 
   // ── Timesheet data ──
+const timesheetData = useMemo(() => {
+  let filteredTasks = [...allTasks];
+  let filteredWorklogs = [...allWorklogs];
 
-  const timesheetData = useMemo(() => {
-    let filteredTasks = allTasks;
-    let filteredWorklogs = allWorklogs;
+  let filteredMyTasks = [...allMyTasks];
+  let filteredMyTaskWorklogs = [...allMyTaskWorklogs];
 
-    if (projectFilter !== "all") {
-      filteredTasks = filteredTasks.filter((t) => String(t.projectId) === projectFilter);
-      const taskIds = new Set(filteredTasks.map((t) => t.id));
-      filteredWorklogs = filteredWorklogs.filter((w) => taskIds.has(w.taskId));
-    }
+  // PROJECT FILTER
 
-    if (userFilter !== "all") {
-      filteredTasks = filteredTasks.filter((t) => t.assigneeId === userFilter);
-      const taskIds = new Set(filteredTasks.map((t) => t.id));
-      filteredWorklogs = filteredWorklogs.filter((w) => taskIds.has(w.taskId));
-    }
+  if (projectFilter !== "all" && projectFilter !== "myTasks") {
+    // normal project selected
 
-    return buildTimesheetData(filteredTasks, filteredWorklogs);
-  }, [allTasks, allWorklogs, userFilter, projectFilter]);
+    filteredTasks = filteredTasks.filter(
+      (t) => String(t.projectId) === projectFilter
+    );
+
+    const taskIds = new Set(filteredTasks.map((t) => t.id));
+
+    filteredWorklogs = filteredWorklogs.filter((w) =>
+      taskIds.has(w.taskId)
+    );
+
+    // remove my task data
+    filteredMyTasks = [];
+    filteredMyTaskWorklogs = [];
+  }
+
+  if (projectFilter === "myTasks") {
+    // only myTasks mode
+
+    filteredTasks = [];
+    filteredWorklogs = [];
+  }
+
+  // USER FILTER
+
+  if (userFilter !== "all") {
+    // NORMAL TASKS
+
+    filteredTasks = filteredTasks.filter(
+      (t) => t.assigneeId === userFilter
+    );
+
+    const taskIds = new Set(filteredTasks.map((t) => t.id));
+
+    filteredWorklogs = filteredWorklogs.filter((w) =>
+      taskIds.has(w.taskId)
+    );
+
+    // MY TASKS
+
+    filteredMyTasks = filteredMyTasks.filter(
+      (t) => t.assigneeId === userFilter
+    );
+  }
+
+  // IMPORTANT:
+  // ALWAYS recalculate myTaskIds AFTER filtering
+
+  const myTaskIds = new Set(
+    filteredMyTasks.map((t) => t.id)
+  );
+
+  filteredMyTaskWorklogs = filteredMyTaskWorklogs.filter((w) =>
+    myTaskIds.has(w.myTaskId)
+  );
+
+  console.log({
+    filteredTasks,
+    filteredWorklogs,
+    filteredMyTasks,
+    filteredMyTaskWorklogs,
+  });
+
+  return buildTimesheetData(
+    filteredTasks,
+    filteredWorklogs,
+    filteredMyTasks,
+    filteredMyTaskWorklogs
+  );
+}, [
+  allTasks,
+  allWorklogs,
+  allMyTasks,
+  allMyTaskWorklogs,
+  userFilter,
+  projectFilter,
+]);
 
   // ── Team view columns ──
 
@@ -504,7 +667,7 @@ const ResourceUtilisationPage: React.FC = () => {
                               );
                             })}
                             <TableCell className="font-semibold">
-                              {Math.round(total * 10) / 10}h
+                                 {total}h
                             </TableCell>
                           </TableRow>
                         );

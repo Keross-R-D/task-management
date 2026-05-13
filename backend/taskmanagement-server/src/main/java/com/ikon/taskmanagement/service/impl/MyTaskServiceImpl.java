@@ -7,6 +7,7 @@ import com.ikon.taskmanagement.mapper.MyTaskMapper;
 import com.ikon.taskmanagement.repository.MyTaskRepository;
 import com.ikon.taskmanagement.service.MyTaskService;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -34,6 +35,13 @@ public class MyTaskServiceImpl implements MyTaskService {
     public Page<MyTaskResponseDto> getAllMyTasks(Pageable pageable) {
         return myTaskRepository.findAll(pageable)
                 .map(task -> myTaskMapper.mapToDto(task));
+    }
+
+    @Override
+    public List<MyTaskResponseDto> getAllMyTasks() {
+        return myTaskRepository.findAll().stream()
+                .map(myTaskMapper::mapToDto)
+                .toList();
     }
 
     @Override

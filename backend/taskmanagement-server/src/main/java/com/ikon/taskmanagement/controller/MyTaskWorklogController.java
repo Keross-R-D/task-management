@@ -25,6 +25,11 @@ public class MyTaskWorklogController implements MyTaskWorklogApi {
     }
 
     @Override
+    public ResponseEntity<List<MyTaskWorklogResponseDto>> getAllWorklogs() {
+        return ResponseEntity.ok(worklogService.getAllWorklogs());
+    }
+
+    @Override
     public ResponseEntity<List<MyTaskWorklogResponseDto>> getWorklogsByMyTaskId(UUID myTaskId) {
         return ResponseEntity.ok(worklogService.getWorklogsByMyTaskId(myTaskId));
     }

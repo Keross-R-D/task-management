@@ -61,6 +61,19 @@ export const mytasksApiSlice = apiSlice.injectEndpoints({
                     ]
                     : [{ type: "MyTask", id: "LIST" }],
         }),
+        getAllMyTasks: builder.query<Task[], void>({
+            query: () => ({ apiUrl: "/myTasks/all" }),
+            providesTags: (result) =>
+                result
+                    ? [
+                        ...result.map(({ id }) => ({
+                            type: "MyTask" as const,
+                            id,
+                        })),
+                        { type: "MyTask", id: "LIST" },
+                    ]
+                    : [{ type: "MyTask", id: "LIST" }],
+        }),
         // getTasks: builder.query<TasksResponse, { page: number; size: number }>({
         //     query: ({ page, size }) => ({
         //         apiUrl: `/myTasks?page=${page}&size=${size}`,
@@ -132,4 +145,4 @@ export const mytasksApiSlice = apiSlice.injectEndpoints({
     }),
 });
 
-export const { useGetMyTasksQuery, useUpdateMyTaskMutation, useUpdateMyTaskStatusMutation, useDeleteMyTaskMutation, useCreateMyTaskMutation } = mytasksApiSlice;
+export const { useGetMyTasksQuery, useGetAllMyTasksQuery, useUpdateMyTaskMutation, useUpdateMyTaskStatusMutation, useDeleteMyTaskMutation, useCreateMyTaskMutation } = mytasksApiSlice;

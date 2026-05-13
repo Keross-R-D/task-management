@@ -63,6 +63,13 @@ public class MyTaskWorklogServiceImpl implements MyTaskWorklogService {
     }
 
     @Override
+    public List<MyTaskWorklogResponseDto> getAllWorklogs() {
+        return worklogRepository.findAll().stream()
+                .map(worklogMapper::mapToDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public List<MyTaskWorklogResponseDto> getWorklogsByMyTaskId(UUID myTaskId) {
         return worklogRepository.findByMyTaskId(myTaskId).stream()
                 .map(worklogMapper::mapToDto)

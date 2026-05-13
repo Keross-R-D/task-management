@@ -18,6 +18,10 @@ public interface MyTaskWorklogApi {
     @PostMapping
     ResponseEntity<MyTaskWorklogResponseDto> createWorklog(@RequestBody MyTaskWorklogRequestDto dto);
 
+    @Operation(summary = "Fetch all worklogs")
+    @GetMapping
+    ResponseEntity<List<MyTaskWorklogResponseDto>> getAllWorklogs();
+
     @Operation(summary = "Get worklogs by MyTask ID")
     @GetMapping("/task/{myTaskId}")
     ResponseEntity<List<MyTaskWorklogResponseDto>> getWorklogsByMyTaskId(@PathVariable UUID myTaskId);
