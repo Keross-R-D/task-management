@@ -19,7 +19,7 @@ import AddMyTaskModal from "./components/AddMyTaskModal";
 import StatsCard from "./components/StatsCard";
 import MyTaskLogTimeModal from "./components/MyTaskLogTimeModal";
 import ViewMyTaskTimeLogsModal from "./components/ViewMyTaskTimeLogsModal";
-import { userMap } from "@/features/myTasks/mytasksApiSlice";
+import { useUserMap } from "@/utils/userMap";
 
 import {
   Plus,
@@ -108,9 +108,7 @@ const formatType = (type: string): Task["type"] => {
   }
 };
 
-const reverseUserMap: Record<string, string> = Object.fromEntries(
-  Object.entries(userMap).map(([key, value]) => [value, key]),
-);
+
 
 const reverseStatusMap: Record<string, string> = {
   Todo: "TO_DO",
@@ -131,11 +129,7 @@ const reverseTypeMap: Record<string, string> = {
   Improvement: "IMPROVEMENT",
 };
 
-//Map assignee
-const mapAssignee = (id?: string) => {
-  if (!id) return "";
-  return reverseUserMap[id] || "";
-};
+
 
 //Task Page component
 const TasksPage: React.FC = () => {
@@ -150,6 +144,7 @@ const TasksPage: React.FC = () => {
   const [viewTask, setViewTask] = useState<Task | null>(null);
   const [isViewOpen, setIsViewOpen] = useState(false);
   const { data, isLoading,isFetching, isError, refetch } = useGetMyTasksQuery();
+    const { getUserInfo } = useUserMap();
   const [updateTask] = useUpdateMyTaskMutation();
   const [createTask] = useCreateMyTaskMutation();
   const [updateTaskStatus, { isLoading: isUpdating }] =
@@ -202,15 +197,14 @@ const TasksPage: React.FC = () => {
     setOpenRowId(null);
   };
 
-  const tasks =
-    data?.content?.map((task) => ({
-      id: task.id,
-      name: task.taskTitle,
-      status: formatStatus(task.taskStatus),
-      estimatedHours: task.estimatedHours,
-      priority: formatPriority(task.taskPriority),
-      type: formatType(task.taskType),
-      assignee: mapAssignee(task.assigneeId),
+    const tasks = data?.content?.map((task) => ({
+        id: task.id,
+        name: task.taskTitle,
+        status: formatStatus(task.taskStatus),
+        estimatedHours: task.estimatedHours,
+        priority: formatPriority(task.taskPriority),
+        type: formatType(task.taskType),
+        assignee: getUserInfo(task.assigneeId).name
     })) || [];
 
   const total = tasks.length;

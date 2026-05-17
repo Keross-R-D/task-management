@@ -4,6 +4,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useCreateTaskMutation, useUpdateTaskMutation } from "@/features/tasks/tasksApiSlice";
 import React, { useEffect } from "react";
 import type { Task } from "@/features/tasks/tasksApiSlice";
+import { useGetProjectsQuery } from "@/features/projects/projectsApiSlice";
+import { useUserMap } from "@/utils/userMap";
 import { TaskEnum } from "@/enums/task.constants";
 
 import {
@@ -72,6 +74,15 @@ export default function AddTaskModal({
   const [createTask, { isLoading: isCreating }] = useCreateTaskMutation();
   const [updateTask, { isLoading: isUpdating }] = useUpdateTaskMutation();
   
+  const { data: projects = [] } = useGetProjectsQuery();
+  const project = projects.find((p) => p.id === projectId);
+  
+  const { allUsers, getUserInfo } = useUserMap();
+  const teamMembers = React.useMemo(() => {
+    if (!project?.teamMemberIds) return [];
+    return project.teamMemberIds.map((id) => getUserInfo(id));
+  }, [project, getUserInfo]);
+
   const isLoading = isCreating || isUpdating;
 
   const dynamicSchema = React.useMemo(() => {
@@ -306,17 +317,30 @@ export default function AddTaskModal({
               />
             </div>
 
-            {/* Assignee + Reporter */}
             <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="assigneeId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Assignee ID</FormLabel>
-                    <FormControl>
-                      <Input placeholder="UUID" {...field} />
-                    </FormControl>
+                    <FormLabel>Assignee ID *</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value || ""}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select Assignee" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {teamMembers.map((member) => (
+                          <SelectItem key={member.id} value={member.id}>
+                            {member.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -327,10 +351,24 @@ export default function AddTaskModal({
                 name="reporterId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Reporter ID</FormLabel>
-                    <FormControl>
-                      <Input placeholder="UUID" {...field} />
-                    </FormControl>
+                    <FormLabel>Reporter ID *</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value || ""}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select Reporter" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {allUsers.map((user) => (
+                          <SelectItem key={user.id} value={user.id}>
+                            {user.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}

@@ -10,7 +10,6 @@ import { ChevronRight, Dot } from "lucide-react";
 import { useMemo } from "react";
 import type { Project } from "@/features/projects/projectsApiSlice";
 import type { Task } from "@/features/tasks/tasksApiSlice";
-import { getUserInfo } from "@/utils/userMap";
 
 // ── Types ──
 
@@ -27,6 +26,7 @@ type ProjectMember = {
 interface Props {
     projects: Project[];
     allTasks: Task[];
+    getUserInfo: any;
 }
 
 // ── Columns ──
@@ -96,7 +96,7 @@ const projectColumns: any = [
 
 // ── Component ──
 
-export default function ProjectMemberView({ projects, allTasks }: Props) {
+export default function ProjectMemberView({ projects, allTasks, getUserInfo }: Props) {
     // Compute per-project data
     const projectsData = useMemo(() => {
         return projects.map((project) => {

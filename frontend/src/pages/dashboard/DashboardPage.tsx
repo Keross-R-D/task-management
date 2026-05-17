@@ -31,10 +31,7 @@ import {
 } from "ikon-react-components-lib";
 import ProjectCard from "./components/ProjectCard";
 import { useNavigate } from "react-router-dom";
-import {
-  useGetMyTasksQuery,
-  userMap,
-} from "@/features/myTasks/mytasksApiSlice";
+import { useGetMyTasksQuery, userMap } from "@/features/myTasks/mytasksApiSlice";
 import { useGetProjectsQuery } from "@/features/projects/projectsApiSlice";
 import type { Task as ProjectTask } from "@/features/tasks/tasksApiSlice";
 import { useLazyGetTasksByProjectQuery } from "@/features/tasks/tasksApiSlice";
@@ -71,6 +68,7 @@ const DashboardPage: React.FC = () => {
   );
 
   const isFetching = isProjectFetching || isDataFetching;
+  const { getUserInfo } = useUserMap();
 
   //Project tasks data
   useEffect(() => {
@@ -156,27 +154,18 @@ const DashboardPage: React.FC = () => {
     }
   };
 
-  const reverseUserMap: Record<string, string> = Object.fromEntries(
-    Object.entries(userMap).map(([key, value]) => [value, key]),
-  );
 
-  //Map assignee
-  const mapAssignee = (id?: string) => {
-    if (!id) return "";
-    return reverseUserMap[id] || "";
-  };
 
-  const tasks =
-    data?.content?.map((task) => ({
-      id: task.id,
-      name: task.taskTitle,
-      status: formatStatus(task.taskStatus),
-      actualHours: task.actualHours, //Dummy data for now
-      estimatedHours: task.estimatedHours,
-      priority: formatPriority(task.taskPriority),
-      type: formatType(task.taskType),
-      assignee: mapAssignee(task.assigneeId),
-    })) || [];
+  const tasks = data?.content?.map((task) => ({
+    id: task.id,
+    name: task.taskTitle,
+    status: formatStatus(task.taskStatus),
+    actualHours: task.actualHours, //Dummy data for now
+    estimatedHours: task.estimatedHours,
+    priority: formatPriority(task.taskPriority),
+    type: formatType(task.taskType),
+    assignee: getUserInfo(task.assigneeId).name
+  })) || [];
 
   const formattedProjectTasks = projectTasks.map((task) => ({
     id: task.id,
@@ -186,7 +175,7 @@ const DashboardPage: React.FC = () => {
     estimatedHours: task.estimatedHours,
     priority: formatPriority(task.priority.toUpperCase()),
     type: formatType(task.type.toUpperCase()),
-    assignee: task.assigneeId || "",
+    assignee: getUserInfo(task.assigneeId).name,
   }));
 
   //Calculations

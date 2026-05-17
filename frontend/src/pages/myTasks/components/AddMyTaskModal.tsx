@@ -22,6 +22,7 @@ import {
     SelectItem,
     Textarea,
 } from "ikon-react-components-lib";
+import { useUserMap } from "@/utils/userMap";
 
 const taskSchema = z.object({
     title: z.string().min(1, "Title is required"),
@@ -48,6 +49,7 @@ export default function AddMyTaskModal({
     onSubmit,
     isLoading,
 }: Props) {
+    const { allUsers } = useUserMap();
     const form = useForm<TaskFormValues>({
         resolver: zodResolver(taskSchema) as any,
         defaultValues: {
@@ -242,9 +244,11 @@ export default function AddMyTaskModal({
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
-                                            <SelectItem value="john">John</SelectItem>
-                                            <SelectItem value="bob">Bob</SelectItem>
-                                            <SelectItem value="alice">Alice</SelectItem>
+                                            {allUsers.map((user) => (
+                                                <SelectItem key={user.id} value={user.id}>
+                                                    {user.name}
+                                                </SelectItem>
+                                            ))}
                                         </SelectContent>
                                     </Select>
                                     <FormMessage />

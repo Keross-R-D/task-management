@@ -23,7 +23,7 @@ import { useGetTasksByProjectQuery, type Task } from "@/features/tasks/tasksApiS
 import { useGetWorklogsByProjectQuery, type TaskWorklog } from "@/features/worklogs/worklogsApiSlice";
 import { useGetAllMyTasksQuery, type Task as MyTask } from "@/features/myTasks/mytasksApiSlice";
 import { useGetAllMyTaskWorklogsQuery, type MyTaskWorklog } from "@/features/myTaskWorklogs/myTaskWorklogApiSlice";
-import { getUserInfo, getAllUsers, DEFAULT_CAPACITY_HOURS } from "@/utils/userMap";
+import { useUserMap, DEFAULT_CAPACITY_HOURS } from "@/utils/userMap";
 import ErrorState from "@/components/ErrorState";
 
 // ── Types ──
@@ -67,7 +67,7 @@ const toKey = (date: Date) => date.toISOString().split("T")[0];
 
 // ── Helper: aggregate tasks by assignee across all projects ──
 
-function buildTeamMemberData(allTasks: Task[]): ResourceMember[] {
+function buildTeamMemberData(allTasks: Task[], getUserInfo: any): ResourceMember[] {
   const byAssignee: Record<string, { planned: number; actual: number }> = {};
 
   allTasks.forEach((task) => {
@@ -97,6 +97,7 @@ function buildTeamMemberData(allTasks: Task[]): ResourceMember[] {
 function buildTimesheetData(
   allTasks: Task[],
   allWorklogs: TaskWorklog[],
+  getUserInfo: any,
   myTasks: MyTask[] = [],
   myTaskWorklogs: MyTaskWorklog[] = []
 ): TimesheetRow[] {
@@ -256,8 +257,9 @@ const ResourceUtilisationPage: React.FC = () => {
 
   const { data: projects = [], isLoading: projectsLoading, isFetching: projectsFetching , isError: projectsError, refetch } = useGetProjectsQuery();
   const { allTasks, allWorklogs, allMyTasks, allMyTaskWorklogs, isLoading: dataLoading, isFetching: dataFetching, isError: dataError } = useAllProjectData(projects);
+  const { allUsers, getUserInfo, isLoading: usersLoading } = useUserMap();
 
-  const isLoading = projectsLoading || dataLoading;
+  const isLoading = projectsLoading || dataLoading || usersLoading;
   const isFetching = projectsFetching || dataFetching;
   const isError = projectsError || dataError;
  
@@ -266,12 +268,11 @@ const ResourceUtilisationPage: React.FC = () => {
   // ── Filter options ──
 
   const userOptions = useMemo(() => {
-    const knownUsers = getAllUsers();
     return [
       { label: "All Users", value: "all" },
-      ...knownUsers.map((u) => ({ label: u.name, value: u.id })),
+      ...allUsers.map((u) => ({ label: u.name, value: u.id })),
     ];
-  }, []);
+  }, [allUsers]);
 
   const projectOptions = useMemo(() => {
     return [
@@ -291,8 +292,8 @@ const ResourceUtilisationPage: React.FC = () => {
     if (projectFilter !== "all") {
       filtered = filtered.filter((t) => String(t.projectId) === projectFilter);
     }
-    return buildTeamMemberData(filtered);
-  }, [allTasks, userFilter, projectFilter]);
+    return buildTeamMemberData(filtered, getUserInfo);
+  }, [allTasks, userFilter, projectFilter, getUserInfo]);
 
   // ── Timesheet data ──
 const timesheetData = useMemo(() => {
@@ -371,7 +372,7 @@ const timesheetData = useMemo(() => {
 
   return buildTimesheetData(
     filteredTasks,
-    filteredWorklogs,
+    filteredWorklogs, getUserInfo,
     filteredMyTasks,
     filteredMyTaskWorklogs
   );
@@ -381,7 +382,7 @@ const timesheetData = useMemo(() => {
   allMyTasks,
   allMyTaskWorklogs,
   userFilter,
-  projectFilter,
+  projectFilter, getUserInfo,
 ]);
 
   // ── Team view columns ──
@@ -559,16 +560,14 @@ const timesheetData = useMemo(() => {
               )}
             </TabsContent>
 
-            {/* Project View */}
-            <TabsContent value="project" className="mt-5">
-              {isLoading ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  Loading projects...
-                </div>
-              ) : (
-                <ProjectMemberView projects={projects} allTasks={allTasks} />
-              )}
-            </TabsContent>
+        {/* Project View */}
+        <TabsContent value="project" className="mt-5">
+          {isLoading ? (
+            <div className="text-center py-8 text-muted-foreground">Loading projects...</div>
+          ) : (
+            <ProjectMemberView projects={projects} allTasks={allTasks} getUserInfo={getUserInfo} />
+          )}
+        </TabsContent>
 
             {/* Timesheet */}
             <TabsContent value="timesheet" className="mt-5">

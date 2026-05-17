@@ -5,7 +5,7 @@ import React, { useState } from "react";
 
 import type { Task } from "@/features/tasks/tasksApiSlice";
 import type { Epic } from "@/features/epics/epicsApiSlice"; // adjust import path as needed
-import { getUserInfo } from "@/utils/userMap";
+import { useUserMap } from "@/utils/userMap";
 
 import {
   Users,

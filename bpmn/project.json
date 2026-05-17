@@ -1,7 +1,31 @@
 {
-    "projectName": "invoice-management",
-    "projectPath": "./",
-    "processes": [],
-    "groups": [],
-    "roles": []
+  "projectName": "invoice-management",
+  "groups": [
+    {
+      "id": "3d28f900-ac91-4c20-ae9f-32113345c281",
+      "name": "Project Manager",
+      "description": "",
+      "active": true
+    }
+  ],
+  "roles": [
+    {
+      "id": "f4f003a8-2b14-4237-ba69-ad75bebd36e6",
+      "name": "Project Manager",
+      "active": true,
+      "description": "This role will have access to view and edit all the epics, sprints and tasks of their respective projects.",
+      "groups": [
+        "3d28f900-ac91-4c20-ae9f-32113345c281"
+      ]
+    },
+    {
+      "id": "99c15921-3545-42d2-b4d6-250c9439df1d",
+      "name": "Task Manager",
+      "active": true,
+      "description": "have access to view and edit all the epics, sprints and tasks",
+      "groups": [
+        "3d28f900-ac91-4c20-ae9f-32113345c281"
+      ]
+    }
+  ]
 }

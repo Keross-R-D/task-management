@@ -30,11 +30,7 @@ type CreateTaskPayload = {
     assignee: string;
 };
 
-export const userMap: Record<string, string> = {
-    john: "550e8400-e29b-41d4-a716-446655440000",
-    bob: "123e4567-e89b-12d3-a456-426614174000",
-    alice: "987e6543-e21b-12d3-a456-426614174999",
-};
+
 
 const statusMap: Record<string, string> = {
     todo: "TO_DO",
@@ -42,8 +38,6 @@ const statusMap: Record<string, string> = {
     done: "DONE",
     blocked: "BLOCKED",
 };
-
-const mapUserToUUID = (user: string) => userMap[user];
 
 
 export const mytasksApiSlice = apiSlice.injectEndpoints({
@@ -92,9 +86,7 @@ export const mytasksApiSlice = apiSlice.injectEndpoints({
                         taskPriority: data.priority.toUpperCase(),
                         taskStatus: statusMap[data.status],
                         estimatedHours: data.estimatedHours,
-                        assigneeId: data.assignee
-                            ? mapUserToUUID(data.assignee)
-                            : null,
+                        assigneeId: data.assignee || null,
                     },
                 },
             }),
@@ -125,9 +117,7 @@ export const mytasksApiSlice = apiSlice.injectEndpoints({
                         taskPriority: data.priority.toUpperCase(),
                         taskStatus: statusMap[data.status],
                         estimatedHours: data.estimatedHours,
-                        assigneeId: data.assignee
-                            ? mapUserToUUID(data.assignee)
-                            : null,
+                        assigneeId: data.assignee || null,
                     },
                 },
             }),

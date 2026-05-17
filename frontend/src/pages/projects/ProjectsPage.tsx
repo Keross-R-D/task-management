@@ -174,7 +174,7 @@ const ProjectsPage: React.FC = () => {
       await createProject({
         ...data,
         managerId: data.managerId || "00000000-0000-0000-0000-000000000000",
-        teamMemberIds: [],
+        teamMemberIds: data.teamMemberIds,
       }).unwrap();
       setIsModalOpen(false);
     } catch (error) {
