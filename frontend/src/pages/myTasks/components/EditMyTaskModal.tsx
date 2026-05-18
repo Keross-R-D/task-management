@@ -23,6 +23,7 @@ import {
     SelectItem,
     Textarea,
 } from "ikon-react-components-lib";
+import { useUserMap } from "@/utils/userMap";
 
 /* ================= SCHEMA ================= */
 
@@ -68,6 +69,7 @@ export default function EditMyTaskModal({
     onSubmit,
     isLoading,
 }: Props) {
+    const { allUsers } = useUserMap();
     const form = useForm<TaskFormValues>({
         resolver: zodResolver(taskSchema) as any,
         defaultValues: {
@@ -77,7 +79,7 @@ export default function EditMyTaskModal({
             priority: "medium",
             status: "todo",
             estimatedHours: 0,
-            assignee: "john",
+            assignee: "",
         },
     });
 
@@ -92,7 +94,7 @@ export default function EditMyTaskModal({
                 status: task.status === "Todo" ? "todo" : task.status === "In progress" ? "in_progress" : task.status.toLowerCase(),
                 type: task.type === "Task" ? "task" : task.type === "Bug" ? "bug" : task.type.toLowerCase(),
                 estimatedHours: task.estimatedHours !== undefined && task.estimatedHours !== null ? task.estimatedHours : 0.5,
-                assignee: task.assignee || "john",
+                assignee: task.assignee || "",
             });
         }
     }, [task, form]);
@@ -268,9 +270,11 @@ export default function EditMyTaskModal({
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
-                                            <SelectItem value="john">John</SelectItem>
-                                            <SelectItem value="bob">Bob</SelectItem>
-                                            <SelectItem value="alice">Alice</SelectItem>
+                                            {allUsers.map((user) => (
+                                                <SelectItem key={user.id} value={user.id}>
+                                                    {user.name}
+                                                </SelectItem>
+                                            ))}
                                         </SelectContent>
                                     </Select>
                                 </FormItem>

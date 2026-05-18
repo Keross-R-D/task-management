@@ -163,10 +163,10 @@ export default function Backlog({ tasks }: BacklogProps) {
         <div className="border rounded-xl">
           <AccordionItem
             value="backlog"
-            className="rounded-xl overflow-hidden"
+            className="rounded-xl overflow-hidden group"
           >
             {/* BACKLOG HEADER */}
-            <AccordionTrigger className="group hover:no-underline px-3 py-3 [&[data-state]>svg]:hidden">
+            <AccordionTrigger className=" hover:no-underline hover:bg-[#272b2f]/50 px-3 py-3 [&[data-state]>svg]:hidden">
               <div className="flex items-center justify-between w-full min-w-0 cursor-pointer">
                 {/* LEFT */}
                 <div className="flex items-center gap-3 min-w-0">
@@ -199,10 +199,11 @@ export default function Backlog({ tasks }: BacklogProps) {
                 </div>
               </div>
             </AccordionTrigger>
-            <hr />
+            <div className="h-px bg-border hidden group-data-[state=open]:block" />
+
 
             {/* BACKLOG CONTENT */}
-            <AccordionContent className="px-2 pb-2 py-2 overflow-hidden">
+            <AccordionContent className="px-2 py-2 max-h-[300px] overflow-y-auto scrollbar-thin">
               {tasks.length === 0 ? (
                 <p className="text-sm text-muted-foreground py-4 text-center">
                   No backlog tasks

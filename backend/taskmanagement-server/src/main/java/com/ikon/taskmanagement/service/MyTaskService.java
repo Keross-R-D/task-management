@@ -3,6 +3,7 @@ package com.ikon.taskmanagement.service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
 import java.util.UUID;
 
 import com.ikon.taskmanagement.dto.request.MyTaskRequestDto;
@@ -13,6 +14,8 @@ public interface MyTaskService {
     MyTaskResponseDto createMyTask(MyTaskRequestDto myTaskDto);
 
     Page<MyTaskResponseDto> getAllMyTasks(Pageable pageable);
+
+    List<MyTaskResponseDto> getAllMyTasks();
 
     MyTaskResponseDto updateMyTask(UUID id, MyTaskRequestDto myTaskDto);
 

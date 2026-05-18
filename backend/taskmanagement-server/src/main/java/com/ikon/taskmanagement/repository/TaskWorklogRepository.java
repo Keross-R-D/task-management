@@ -10,4 +10,6 @@ import java.util.UUID;
 @Repository
 public interface TaskWorklogRepository extends JpaRepository<TaskWorklog, UUID> {
     List<TaskWorklog> findByTaskId(UUID taskId);
+
+    List<TaskWorklog> findByTaskIdIn(List<UUID> taskIds);
 }

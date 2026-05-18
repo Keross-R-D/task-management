@@ -1,5 +1,10 @@
 import React, { useState, useMemo } from "react";
-import { DataTableLayout, Button } from "ikon-react-components-lib";
+import {
+  DataTableLayout,
+  Button,
+  Card,
+  Skeleton,
+} from "ikon-react-components-lib";
 import {
   Plus,
   Users,
@@ -15,6 +20,7 @@ import {
 import AddProjectModal, {
   type ProjectFormValues,
 } from "./components/AddProjectModal";
+import ErrorState from "@/components/ErrorState";
 
 export function ProjectsGrid({ data }: { data: any[] }) {
   const navigate = useNavigate();
@@ -33,12 +39,13 @@ export function ProjectsGrid({ data }: { data: any[] }) {
               </div>
               <div className="flex items-center gap-2">
                 <div
-                  className={`px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider ${project.projectStatus === "COMPLETED"
-                    ? "bg-green-500/10 text-green-500"
-                    : project.projectStatus === "IN_PROGRESS"
-                      ? "bg-blue-500/10 text-blue-500"
-                      : "bg-gray-500/10 text-gray-500"
-                    }`}
+                  className={`px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider ${
+                    project.projectStatus === "COMPLETED"
+                      ? "bg-green-500/10 text-green-500"
+                      : project.projectStatus === "IN_PROGRESS"
+                        ? "bg-blue-500/10 text-blue-500"
+                        : "bg-gray-500/10 text-gray-500"
+                  }`}
                 >
                   {project.projectStatus}
                 </div>
@@ -123,17 +130,51 @@ const ProjectsPage: React.FC = () => {
   const {
     data: projects = [],
     isLoading,
+    isFetching,
+    isError,
     refetch,
   } = useGetProjectsQuery();
   const [createProject, { isLoading: isCreating }] = useCreateProjectMutation();
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const navigates = useNavigate();
+
+  const columnsa = [
+    {
+      accessorKey: "projectName",
+      header: () => <div className="text-left font-semibold">Project Name</div>,
+      cell: ({ row }: any) => (
+        <span
+          className="font-medium cursor-pointer"
+          onClick={() => navigates(`/main/projects/${row.original.id}`)}
+        >
+          {row.original.projectName}
+        </span>
+      ),
+    },
+    {
+      accessorKey: "clientName",
+      header: () => <div className="text-left font-semibold">Client Name</div>,
+      cell: ({ row }: any) => <span>{row.original.clientName}</span>,
+    },
+    {
+      accessorKey: "projectStatus",
+      header: () => <div className="text-left font-semibold">Status</div>,
+      cell: ({ row }: any) => <span>{row.original.projectStatus}</span>,
+    },
+    {
+      accessorKey: "startDate",
+      header: () => <div className="text-left font-semibold">Start Date</div>,
+      cell: ({ row }: any) => <span>{row.original.startDate}</span>,
+    },
+  ];
 
   const handleCreateProject = async (data: ProjectFormValues) => {
     try {
       await createProject({
         ...data,
         managerId: data.managerId || "00000000-0000-0000-0000-000000000000",
-        teamMemberIds: [],
+        teamMemberIds: data.teamMemberIds,
       }).unwrap();
       setIsModalOpen(false);
     } catch (error) {
@@ -151,38 +192,86 @@ const ProjectsPage: React.FC = () => {
   );
 
   return (
-    <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="text-xl font-bold">Projects</h1>
-        <p className="text-sm text-gray-400 mt-1">
-          {projects.length} of {projects.length} projects
-        </p>
-      </div>
+    <div className="p-6">
+      {isFetching ? (
+        <div className="flex flex-col gap-6">
+          {/* Header */}
+          <div className="space-y-2">
+            <Skeleton className="h-7 w-40 rounded-md" />
+            <Skeleton className="h-4 w-52 rounded-md" />
+          </div>
 
-      <div className="w-full">
-        <DataTableLayout
-          data={projects}
-          columns={columns as any}
-          // keyExtractor={(row: any) => row.id}
-          extraTools={{
-            totalPages: 1,
-            // currentPage: 1,
-            actionNode: headerActions,
-            isLoading: isLoading,
-            onReload: refetch,
-            toggleViewMode: true,
-            // onRowClick: (row: any) => navigate(`/main/projects/${row.id}`),
-            gridComponent: (data: any[]) => <ProjectsGrid data={data} />,
-          }}
-        />
-      </div>
+          {/* Actions */}
+          <div className="flex justify-between items-center mb-2">
+            <Skeleton className="h-10 w-72 rounded-md" />
 
-      <AddProjectModal
-        open={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSubmit={handleCreateProject}
-        isLoading={isCreating}
-      />
+            <div className="flex gap-3">
+              <Skeleton className="h-10 w-10 rounded-md" />
+              <Skeleton className="h-10 w-10 rounded-md" />
+              <Skeleton className="h-10 w-32 rounded-md" />
+            </div>
+          </div>
+
+          {/* Table */}
+          <Card className="p-4">
+            {/* Table Header */}
+            <div className="grid grid-cols-4 gap-4 border-b pb-4 mb-4">
+              <Skeleton className="h-9 w-full" />
+              <Skeleton className="h-9 w-full" />
+              <Skeleton className="h-9 w-full" />
+              <Skeleton className="h-9 w-full" />
+            </div>
+
+            {/* Table Rows */}
+            <div className="space-y-4">
+              {Array.from({ length: 10 }).map((_, i) => (
+                <div key={i} className="grid grid-cols-4 gap-4 items-center">
+                  <Skeleton className="h-8 w-full" />
+                  <Skeleton className="h-8 w-full" />
+                  <Skeleton className="h-8 w-full" />
+                  <Skeleton className="h-8 w-full" />
+                </div>
+              ))}
+            </div>
+          </Card>
+        </div>
+      ) : isError ? (
+        <ErrorState message="We couldn’t load the projects data right now. Please try again after a moment." onRetry={() => refetch()} />
+      ) : (
+        <div className="flex flex-col gap-6">
+          <div>
+            <h1 className="text-xl font-bold">Projects</h1>
+            <p className="text-sm text-gray-400 mt-1">
+              {projects.length} of {projects.length} projects
+            </p>
+          </div>
+
+          <div className="w-full">
+            <DataTableLayout
+              data={projects}
+              columns={columns as any}
+              // keyExtractor={(row: any) => row.id}
+              extraTools={{
+                totalPages: 1,
+                // currentPage: 1,
+                actionNode: headerActions,
+                isLoading: isLoading,
+                onReload: refetch,
+                toggleViewMode: true,
+                // onRowClick: (row: any) => navigate(`/main/projects/${row.id}`),
+                gridComponent: (data: any[]) => <ProjectsGrid data={data} />,
+              }}
+            />
+          </div>
+
+          <AddProjectModal
+            open={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            onSubmit={handleCreateProject}
+            isLoading={isCreating}
+          />
+        </div>
+      )}
     </div>
   );
 };

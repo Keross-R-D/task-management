@@ -30,11 +30,7 @@ type CreateTaskPayload = {
     assignee: string;
 };
 
-export const userMap: Record<string, string> = {
-    john: "550e8400-e29b-41d4-a716-446655440000",
-    bob: "123e4567-e89b-12d3-a456-426614174000",
-    alice: "987e6543-e21b-12d3-a456-426614174999",
-};
+
 
 const statusMap: Record<string, string> = {
     todo: "TO_DO",
@@ -43,23 +39,34 @@ const statusMap: Record<string, string> = {
     blocked: "BLOCKED",
 };
 
-const mapUserToUUID = (user: string) => userMap[user];
-
 
 export const mytasksApiSlice = apiSlice.injectEndpoints({
     endpoints: (builder) => ({
         getMyTasks: builder.query<TasksResponse, void>({
-        query: () => ({ apiUrl: "/myTasks?sort=createdAt,asc" }),
-        providesTags: (result) =>
-            result
-            ? [
-                ...result.content.map(({ id }) => ({
-                    type: "MyTask" as const,
-                    id,
-                })),
-                { type: "MyTask", id: "LIST" },
-                ]
-            : [{ type: "MyTask", id: "LIST" }],
+            query: () => ({ apiUrl: "/myTasks?sort=createdAt,asc" }),
+            providesTags: (result) =>
+                result
+                    ? [
+                        ...result.content.map(({ id }) => ({
+                            type: "MyTask" as const,
+                            id,
+                        })),
+                        { type: "MyTask", id: "LIST" },
+                    ]
+                    : [{ type: "MyTask", id: "LIST" }],
+        }),
+        getAllMyTasks: builder.query<Task[], void>({
+            query: () => ({ apiUrl: "/myTasks/all" }),
+            providesTags: (result) =>
+                result
+                    ? [
+                        ...result.map(({ id }) => ({
+                            type: "MyTask" as const,
+                            id,
+                        })),
+                        { type: "MyTask", id: "LIST" },
+                    ]
+                    : [{ type: "MyTask", id: "LIST" }],
         }),
         // getTasks: builder.query<TasksResponse, { page: number; size: number }>({
         //     query: ({ page, size }) => ({
@@ -68,54 +75,50 @@ export const mytasksApiSlice = apiSlice.injectEndpoints({
         //     providesTags: ["MyTask"],
         // }),
         createMyTask: builder.mutation<Task, CreateTaskPayload>({
-        query: (data) => ({
+            query: (data) => ({
                 apiUrl: "/myTasks",
                 config: {
-                method: "POST",
-                data: {
-                    taskTitle: data.title,
-                    taskDescription: data.description || "",
-                    taskType: data.type.toUpperCase(),
-                    taskPriority: data.priority.toUpperCase(),
-                    taskStatus: statusMap[data.status],
-                    estimatedHours: data.estimatedHours,
-                    assigneeId: data.assignee
-                    ? mapUserToUUID(data.assignee)
-                    : null,
-                },
+                    method: "POST",
+                    data: {
+                        taskTitle: data.title,
+                        taskDescription: data.description || "",
+                        taskType: data.type.toUpperCase(),
+                        taskPriority: data.priority.toUpperCase(),
+                        taskStatus: statusMap[data.status],
+                        estimatedHours: data.estimatedHours,
+                        assigneeId: data.assignee || null,
+                    },
                 },
             }),
             invalidatesTags: ["MyTask"],
         }),
         updateMyTaskStatus: builder.mutation<Task,
-        { id: string; status: string }>({
-            query: ({ id, status }) => ({
-                apiUrl: `/myTasks/${id}`,
-                config: {
-                method: "PATCH",
-                data: {
-                    taskStatus: status,
-                },
-                },
+            { id: string; status: string }>({
+                query: ({ id, status }) => ({
+                    apiUrl: `/myTasks/${id}`,
+                    config: {
+                        method: "PATCH",
+                        data: {
+                            taskStatus: status,
+                        },
+                    },
+                }),
+                invalidatesTags: ["MyTask"],
             }),
-            invalidatesTags: ["MyTask"],
-        }),
         updateMyTask: builder.mutation<Task, { id: string; data: CreateTaskPayload }>({
             query: ({ id, data }) => ({
                 apiUrl: `/myTasks/${id}`,
                 config: {
-                method: "PUT", // or PATCH (depends on backend)
-                data: {
-                    taskTitle: data.title,
-                    taskDescription: data.description || "",
-                    taskType: data.type.toUpperCase(),
-                    taskPriority: data.priority.toUpperCase(),
-                    taskStatus: statusMap[data.status],
-                    estimatedHours: data.estimatedHours,
-                    assigneeId: data.assignee
-                    ? mapUserToUUID(data.assignee)
-                    : null,
-                },
+                    method: "PUT", // or PATCH (depends on backend)
+                    data: {
+                        taskTitle: data.title,
+                        taskDescription: data.description || "",
+                        taskType: data.type.toUpperCase(),
+                        taskPriority: data.priority.toUpperCase(),
+                        taskStatus: statusMap[data.status],
+                        estimatedHours: data.estimatedHours,
+                        assigneeId: data.assignee || null,
+                    },
                 },
             }),
             invalidatesTags: ["MyTask"],
@@ -124,7 +127,7 @@ export const mytasksApiSlice = apiSlice.injectEndpoints({
             query: (id) => ({
                 apiUrl: `/myTasks/${id}`,
                 config: {
-                method: "DELETE",
+                    method: "DELETE",
                 },
             }),
             invalidatesTags: ["MyTask"],
@@ -132,4 +135,4 @@ export const mytasksApiSlice = apiSlice.injectEndpoints({
     }),
 });
 
-export const { useGetMyTasksQuery, useUpdateMyTaskMutation, useUpdateMyTaskStatusMutation, useDeleteMyTaskMutation, useCreateMyTaskMutation } = mytasksApiSlice;
+export const { useGetMyTasksQuery, useGetAllMyTasksQuery, useUpdateMyTaskMutation, useUpdateMyTaskStatusMutation, useDeleteMyTaskMutation, useCreateMyTaskMutation } = mytasksApiSlice;

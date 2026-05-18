@@ -22,6 +22,17 @@ export type UpdateMyTaskWorklogRequest = Partial<CreateMyTaskWorklogRequest> & {
 export const myTaskWorklogsApiSlice = apiSlice.injectEndpoints({
     endpoints: (builder) => ({
 
+        getAllMyTaskWorklogs: builder.query<MyTaskWorklog[], void>({
+            query: () => ({ apiUrl: "/myTaskWorklogs" }),
+            providesTags: (result) =>
+                result
+                    ? [
+                        ...result.map(({ id }) => ({ type: "MyTaskWorklog" as const, id })),
+                        { type: "MyTaskWorklog", id: "LIST" },
+                    ]
+                    : [{ type: "MyTaskWorklog", id: "LIST" }],
+        }),
+
         getWorklogsByMyTask: builder.query<MyTaskWorklog[], string>({
             query: (myTaskId) => ({ apiUrl: `/myTaskWorklogs/task/${myTaskId}` }),
             providesTags: (result, _error, myTaskId) =>
@@ -79,6 +90,7 @@ export const myTaskWorklogsApiSlice = apiSlice.injectEndpoints({
 });
 
 export const {
+    useGetAllMyTaskWorklogsQuery,
     useGetWorklogsByMyTaskQuery,
     useCreateMyTaskWorklogMutation,
     useUpdateMyTaskWorklogMutation,

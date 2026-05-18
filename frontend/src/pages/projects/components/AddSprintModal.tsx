@@ -25,7 +25,7 @@ import {
   SelectItem,
   Textarea,
 } from "ikon-react-components-lib";
-
+import { SprintEnum } from "@/enums/sprint.constants";
 
 const baseSprintSchema = z.object({
   name: z.string().min(2, "Sprint name is required"),
@@ -94,14 +94,18 @@ export default function AddSprintModal({
           name: sprint.name || "",
           goal: sprint.goal || "",
           status: sprint.status || "",
-          startDate: sprint.startDate ? new Date(sprint.startDate).toISOString().split('T')[0] : "",
-          endDate: sprint.endDate ? new Date(sprint.endDate).toISOString().split('T')[0] : "",
+          startDate: sprint.startDate
+            ? new Date(sprint.startDate).toISOString().split("T")[0]
+            : "",
+          endDate: sprint.endDate
+            ? new Date(sprint.endDate).toISOString().split("T")[0]
+            : "",
         });
       } else {
         form.reset({
           name: "",
           goal: "",
-          status: "PLANNED",
+          status: "",
           startDate: "",
           endDate: "",
         });
@@ -143,13 +147,17 @@ export default function AddSprintModal({
         <DialogHeader className="my-3">
           <DialogTitle>{sprint ? "Edit Sprint" : "Add Sprint"}</DialogTitle>
           <span className="text-gray-400">
-            {sprint ? "Update details for the sprint." : "Create a new sprint within this epic."}
+            {sprint
+              ? "Update details for the sprint."
+              : "Create a new sprint within this epic."}
           </span>
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleCreateOrUpdate)} className="space-y-4">
-
+          <form
+            onSubmit={form.handleSubmit(handleCreateOrUpdate)}
+            className="space-y-4"
+          >
             {/* Sprint Name */}
             <FormField
               control={form.control}
@@ -206,9 +214,11 @@ export default function AddSprintModal({
                     </FormControl>
 
                     <SelectContent>
-                      <SelectItem value="PLANNED">Planned</SelectItem>
-                      <SelectItem value="ACTIVE">Active</SelectItem>
-                      <SelectItem value="COMPLETED">Completed</SelectItem>
+                      {Object.values(SprintEnum.Status).map((status) => (
+                        <SelectItem key={status} value={status}>
+                          {status}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
 
@@ -258,7 +268,11 @@ export default function AddSprintModal({
                 Cancel
               </Button>
               <Button type="submit" disabled={isLoading}>
-                {isLoading ? "Saving..." : sprint ? "Update Sprint" : "Add Sprint"}
+                {isLoading
+                  ? "Saving..."
+                  : sprint
+                    ? "Update Sprint"
+                    : "Add Sprint"}
               </Button>
             </div>
           </form>

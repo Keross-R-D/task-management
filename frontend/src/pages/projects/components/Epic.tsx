@@ -27,18 +27,31 @@ import {
   Zap,
 } from "lucide-react";
 
-import { useDeleteEpicMutation, type Epic as EpicType } from "@/features/epics/epicsApiSlice";
-import { useDeleteSprintMutation, useUpdateSprintStatusMutation, type Sprint } from "@/features/sprints/sprintsApiSlice";
-import { useDeleteTaskMutation, useUpdateTaskStatusMutation, useUpdateTaskMutation, type Task } from "@/features/tasks/tasksApiSlice";
+import { TaskEnum } from "@/enums/task.constants";
+import {
+  useDeleteEpicMutation,
+  type Epic as EpicType,
+} from "@/features/epics/epicsApiSlice";
+import {
+  useDeleteSprintMutation,
+  useUpdateSprintStatusMutation,
+  type Sprint,
+} from "@/features/sprints/sprintsApiSlice";
+import {
+  useDeleteTaskMutation,
+  useUpdateTaskStatusMutation,
+  useUpdateTaskMutation,
+  type Task,
+} from "@/features/tasks/tasksApiSlice";
 
 // ── Helper: status badge color ──
 function statusColor(status: string) {
   switch (status?.toUpperCase()) {
-    case "BLOCKED":
+    case TaskEnum.Status.BLOCKED:
       return "bg-red-600/20 text-red-400";
-    case "IN_PROGRESS":
+    case TaskEnum.Status.IN_PROGRESS:
       return "bg-blue-600/20 text-blue-400";
-    case "DONE":
+    case TaskEnum.Status.DONE:
       return "bg-green-600/20 text-green-400";
     default:
       return "bg-gray-600/20 text-gray-400";
@@ -47,11 +60,11 @@ function statusColor(status: string) {
 
 function priorityColor(priority: string) {
   switch (priority?.toUpperCase()) {
-    case "CRITICAL":
+    case TaskEnum.Priority.CRITICAL:
       return "bg-red-600/20 text-red-400";
-    case "HIGH":
+    case TaskEnum.Priority.HIGH:
       return "bg-orange-600/20 text-orange-400";
-    case "MEDIUM":
+    case TaskEnum.Priority.MEDIUM:
       return "bg-yellow-600/20 text-yellow-400";
     default:
       return "bg-gray-600/20 text-gray-400";
@@ -61,11 +74,23 @@ function priorityColor(priority: string) {
 function formatDate(dateStr?: string) {
   if (!dateStr) return "";
   const d = new Date(dateStr);
-  return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  return d.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
 }
 
 // ── Task Row ──
-function TaskRow({ task, sprintStartDate, sprintEndDate }: { task: Task; sprintStartDate?: string; sprintEndDate?: string }) {
+function TaskRow({
+  task,
+  sprintStartDate,
+  sprintEndDate,
+}: {
+  task: Task;
+  sprintStartDate?: string;
+  sprintEndDate?: string;
+}) {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isLogTimeOpen, setIsLogTimeOpen] = useState(false);
   const [isViewTimeLogsOpen, setIsViewTimeLogsOpen] = useState(false);
@@ -87,7 +112,7 @@ function TaskRow({ task, sprintStartDate, sprintEndDate }: { task: Task; sprintS
 
   return (
     <>
-      <div className="w-full border px-6 my-2 py-2 flex items-center justify-between rounded-md">
+      <div className="w-full border hover:bg-[#272b2f]/50 px-6 my-2 py-2 flex items-center justify-between rounded-md">
         {/* LEFT SIDE */}
         <div className="flex items-center gap-3">
           <Zap className="text-yellow-400 h-4 w-4 shrink-0" />
@@ -132,17 +157,29 @@ function TaskRow({ task, sprintStartDate, sprintEndDate }: { task: Task; sprintS
               </div>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="border rounded-lg">
-              <DropdownMenuItem className="rounded-md cursor-pointer" onClick={() => setIsEditOpen(true)}>
+              <DropdownMenuItem
+                className="rounded-md cursor-pointer"
+                onClick={() => setIsEditOpen(true)}
+              >
                 <Pencil className="inline mr-2" /> Edit Task
               </DropdownMenuItem>
-              <DropdownMenuItem className="rounded-md cursor-pointer" onClick={() => setIsLogTimeOpen(true)}>
+              <DropdownMenuItem
+                className="rounded-md cursor-pointer"
+                onClick={() => setIsLogTimeOpen(true)}
+              >
                 <Timer className="inline mr-2" /> Log Time
               </DropdownMenuItem>
-              <DropdownMenuItem className="rounded-md cursor-pointer" onClick={() => setIsViewTimeLogsOpen(true)}>
+              <DropdownMenuItem
+                className="rounded-md cursor-pointer"
+                onClick={() => setIsViewTimeLogsOpen(true)}
+              >
                 <History className="inline mr-2" /> View Time Logs
               </DropdownMenuItem>
               {task.sprintId ? (
-                <DropdownMenuItem className="rounded-md cursor-pointer" onClick={() => updateTask({ id: task.id, sprintId: null })}>
+                <DropdownMenuItem
+                  className="rounded-md cursor-pointer"
+                  onClick={() => updateTask({ id: task.id, sprintId: null })}
+                >
                   <Play className="inline mr-2" /> Move to Backlog
                 </DropdownMenuItem>
               ) : (
@@ -152,8 +189,8 @@ function TaskRow({ task, sprintStartDate, sprintEndDate }: { task: Task; sprintS
               )}
               <hr className="my-1" />
               {taskStatuses
-                .filter(status => status.value !== task.status)
-                .map(status => (
+                .filter((status) => status.value !== task.status)
+                .map((status) => (
                   <DropdownMenuItem
                     key={status.value}
                     className="cursor-pointer"
@@ -163,7 +200,10 @@ function TaskRow({ task, sprintStartDate, sprintEndDate }: { task: Task; sprintS
                   </DropdownMenuItem>
                 ))}
               <hr className="py-1 font-bold" />
-              <DropdownMenuItem className="cursor-pointer text-red-600" onClick={() => deleteTask(task.id)}>
+              <DropdownMenuItem
+                className="cursor-pointer text-red-600"
+                onClick={() => deleteTask(task.id)}
+              >
                 <Trash2 className="inline mr-2" /> Delete Task
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -181,13 +221,22 @@ function TaskRow({ task, sprintStartDate, sprintEndDate }: { task: Task; sprintS
         sprintEndDate={sprintEndDate}
         onClose={() => setIsEditOpen(false)}
       />
-      <LogTimeModal open={isLogTimeOpen} task={task} onClose={() => setIsLogTimeOpen(false)} />
-      <ViewTimeLogsModal open={isViewTimeLogsOpen} task={task} onClose={() => setIsViewTimeLogsOpen(false)} onLogMoreTime={() => setIsLogTimeOpen(true)} />
+      <LogTimeModal
+        open={isLogTimeOpen}
+        task={task}
+        onClose={() => setIsLogTimeOpen(false)}
+      />
+      <ViewTimeLogsModal
+        open={isViewTimeLogsOpen}
+        task={task}
+        onClose={() => setIsViewTimeLogsOpen(false)}
+        onLogMoreTime={() => setIsLogTimeOpen(true)}
+      />
     </>
   );
 }
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import AddSprintModal from "./AddSprintModal";
 import AddTaskModal from "./AddTaskModal";
 import AddEpicModal from "./AddEpicModal";
@@ -198,6 +247,7 @@ interface EpicComponentProps {
   epics: EpicType[];
   sprints: Sprint[];
   tasks: Task[];
+  isFiltering: boolean; // ← new prop
 }
 
 type SprintStatus = "PLANNED" | "ACTIVE" | "COMPLETED" | "CANCELLED";
@@ -210,9 +260,7 @@ const sprintActions: Record<
     icon: typeof Play;
   }[]
 > = {
-  PLANNED: [
-    { label: "Start Sprint", status: "ACTIVE", icon: Play },
-  ],
+  PLANNED: [{ label: "Start Sprint", status: "ACTIVE", icon: Play }],
 
   ACTIVE: [
     { label: "Complete Sprint", status: "COMPLETED", icon: Play },
@@ -224,11 +272,14 @@ const sprintActions: Record<
     { label: "Cancel Sprint", status: "CANCELLED", icon: X },
   ],
 
-  CANCELLED: [
-    { label: "Start Sprint", status: "ACTIVE", icon: Play },
-  ],
+  CANCELLED: [{ label: "Start Sprint", status: "ACTIVE", icon: Play }],
 };
-export default function Epic({ epics, sprints, tasks }: EpicComponentProps) {
+export default function Epic({
+  epics,
+  sprints,
+  tasks,
+  isFiltering,
+}: EpicComponentProps) {
   const [addSprintEpicId, setAddSprintEpicId] = useState<string | null>(null);
   const [addTaskData, setAddTaskData] = useState<{
     sprintId: string;
@@ -238,6 +289,29 @@ export default function Epic({ epics, sprints, tasks }: EpicComponentProps) {
   const [editEpic, setEditEpic] = useState<EpicType | null>(null);
   const [editSprint, setEditSprint] = useState<Sprint | null>(null);
 
+  // ── Controlled accordion state ──
+  const [openEpics, setOpenEpics] = useState<string[]>([]);
+  const [openSprints, setOpenSprints] = useState<string[]>([]);
+
+  // ── IDs that have matching tasks ──
+  const activeSprintIds = useMemo(
+    () => new Set(tasks.map((t) => t.sprintId).filter(Boolean)),
+    [tasks],
+  );
+  const activeEpicIds = useMemo(
+    () => new Set(tasks.map((t) => t.epicId).filter(Boolean)),
+    [tasks],
+  );
+
+  const derivedOpenEpics = useMemo(() => {
+    if (!isFiltering) return [];
+    return [...activeEpicIds].map((id) => `epic-${id}`);
+  }, [activeEpicIds, isFiltering]);
+
+  const derivedOpenSprints = useMemo(() => {
+    if (!isFiltering) return [];
+    return [...activeSprintIds].map((id) => `sprint-${id}`);
+  }, [activeSprintIds, isFiltering]);
   const [updateSprintStatus] = useUpdateSprintStatusMutation();
   const [deleteSprint] = useDeleteSprintMutation();
   const [deleteEpic] = useDeleteEpicMutation();
@@ -252,7 +326,12 @@ export default function Epic({ epics, sprints, tasks }: EpicComponentProps) {
 
   return (
     <div className="w-full rounded-xl my-4">
-      <Accordion type="multiple" className="w-full space-y-3">
+      <Accordion
+        type="multiple"
+        value={isFiltering ? derivedOpenEpics : openEpics}
+        onValueChange={setOpenEpics} // ← user can still manually toggle
+        className="w-full space-y-3 max-h-[400px] overflow-y-auto scrollbar-thin"
+      >
         {epics.map((epic) => {
           const epicSprints = sprints.filter((s) => s.epicId === epic.id);
 
@@ -260,26 +339,25 @@ export default function Epic({ epics, sprints, tasks }: EpicComponentProps) {
             <div key={epic.id} className="border rounded-xl">
               <AccordionItem
                 value={`epic-${epic.id}`}
-                className="rounded-xl overflow-hidden"
+                className="rounded-xl overflow-hidden group"
               >
-                {/* EPIC HEADER */}
-                <AccordionTrigger className="group hover:no-underline px-3 py-3 [&[data-state]>svg]:hidden">
+                {/* EPIC HEADER — unchanged */}
+                <AccordionTrigger className="hover:no-underline hover:bg-[#272b2f]/50 px-3 py-3 [&[data-state]>svg]:hidden">
                   <div className="flex items-center justify-between w-full min-w-0 cursor-pointer">
-                    {/* LEFT */}
                     <div className="flex items-center gap-3 min-w-0">
                       <ChevronRight className="h-4 w-4 transition-transform duration-200 group-data-[state=open]:rotate-90 shrink-0" />
                       <div className="h-8 w-8 flex items-center justify-center rounded-full border">
                         <Target className="text-[#61DAFB] text-lg" />
                       </div>
                       <div className="min-w-0">
-                        <p className="font-semibold text-left truncate">{epic.name}</p>
+                        <p className="font-semibold text-left truncate">
+                          {epic.name}
+                        </p>
                         <p className="text-sm text-gray-400 text-left truncate">
                           {epic.description || "No description"}
                         </p>
                       </div>
                     </div>
-
-                    {/* RIGHT */}
                     <div className="flex items-center gap-3 shrink-0">
                       <span className="text-xs px-2 py-1 rounded-md border">
                         {epicSprints.length} sprint
@@ -331,60 +409,66 @@ export default function Epic({ epics, sprints, tasks }: EpicComponentProps) {
                     </div>
                   </div>
                 </AccordionTrigger>
-                <hr className="border" />
+                <div className="h-px bg-border hidden group-data-[state=open]:block" />
 
-                {/* EPIC CONTENT → Sprints */}
-                <AccordionContent className="px-2 pb-2 py-2 overflow-hidden">
+                {/* SPRINTS — now type="multiple" and controlled */}
+                <AccordionContent className="px-3 py-2 max-h-[300px] overflow-y-auto scrollbar-thin ">
                   {epicSprints.length === 0 ? (
                     <p className="text-sm text-muted-foreground py-4 text-center">
                       No sprints in this epic
                     </p>
                   ) : (
                     <Accordion
-                      type="single"
-                      collapsible
+                      type="multiple" // ← was "single", now "multiple" so all matching sprints open
+                      value={isFiltering ? derivedOpenSprints : openSprints}
+                      onValueChange={setOpenSprints}
                       className="w-full space-y-2"
                     >
                       {epicSprints.map((sprint) => {
                         const sprintTasks = tasks.filter(
                           (t) => t.sprintId === sprint.id,
                         );
+
                         return (
                           <div key={sprint.id} className="border rounded-xl">
                             <AccordionItem
                               value={`sprint-${sprint.id}`}
-                              className="border rounded-lg"
+                              className="border rounded-lg group/item"
                             >
-                              <AccordionTrigger className="group hover:no-underline px-3 py-3 [&[data-state]>svg]:hidden">
+                              <AccordionTrigger className="hover:no-underline hover:bg-[#272b2f]/50 px-3 py-3 [&[data-state]>svg]:hidden">
                                 <div className="flex items-center justify-between w-full min-w-0 cursor-pointer">
-                                  {/* LEFT */}
-                                  <div className="flex items-center gap-3 min-w-0">
-                                    <ChevronRight className="h-4 w-4 transition-transform duration-200 group-data-[state=open]:rotate-90 shrink-0" />
-                                    <div className="flex items-center gap-3 min-w-0 flex-wrap">
-                                      <LayoutDashboard className="text-sm text-blue-400" />
-                                      <span className="font-medium truncate">{sprint.name}</span>
-                                      <span className="text-xs px-2 py-1 rounded-md border shrink-0">
-                                        {sprint.status}
-                                      </span>
-                                      <span className="text-sm truncate">
-                                        ({formatDate(sprint.startDate)} - {formatDate(sprint.endDate)}
-                                        )
-                                      </span>
-                                    </div>
+                                  <div className="flex items-center gap-3 min-w-0 flex-wrap">
+                                    <ChevronRight className="h-4 w-4 transition-transform duration-200 group-data-[state=open]/item:rotate-90 shrink-0" />
+                                    <LayoutDashboard className="text-sm text-blue-400" />
+                                    <span className="font-medium truncate">
+                                      {sprint.name}
+                                    </span>
+                                    <span className="text-xs px-2 py-1 rounded-md border shrink-0">
+                                      {sprint.status}
+                                    </span>
+                                    <span className="text-sm truncate">
+                                      ({formatDate(sprint.startDate)} -{" "}
+                                      {formatDate(sprint.endDate)})
+                                    </span>
                                   </div>
-
-                                  {/* RIGHT */}
                                   <div className="flex items-center gap-3 shrink-0">
                                     <span className="text-sm">
-                                      {sprintTasks.length} task{sprintTasks.length !== 1 ? "s" : ""}
+                                      {sprintTasks.length} task
+                                      {sprintTasks.length !== 1 ? "s" : ""}
                                     </span>
                                     <DropdownMenu>
                                       <DropdownMenuTrigger asChild>
                                         <div className="p-0 border-none outline-none">
-                                          <MoreHorizontal size={18} className="cursor-pointer" />
+                                          <MoreHorizontal
+                                            size={18}
+                                            className="cursor-pointer"
+                                          />
                                         </div>
                                       </DropdownMenuTrigger>
-                                      <DropdownMenuContent align="end" className="border rounded-lg">
+                                      <DropdownMenuContent
+                                        align="end"
+                                        className="border rounded-lg"
+                                      >
                                         <DropdownMenuItem
                                           className="rounded-md cursor-pointer"
                                           onClick={(e) => {
@@ -396,7 +480,8 @@ export default function Epic({ epics, sprints, tasks }: EpicComponentProps) {
                                             });
                                           }}
                                         >
-                                          <Plus className="inline mr-2" /> Add Task
+                                          <Plus className="inline mr-2" /> Add
+                                          Task
                                         </DropdownMenuItem>
                                         <DropdownMenuItem
                                           className="rounded-md cursor-pointer"
@@ -405,10 +490,13 @@ export default function Epic({ epics, sprints, tasks }: EpicComponentProps) {
                                             setEditSprint(sprint);
                                           }}
                                         >
-                                          <Pencil className="inline mr-2" /> Edit Sprint
+                                          <Pencil className="inline mr-2" />{" "}
+                                          Edit Sprint
                                         </DropdownMenuItem>
                                         <hr className="my-1" />
-                                        {sprintActions[sprint.status as SprintStatus]?.map(action => {
+                                        {sprintActions[
+                                          sprint.status as SprintStatus
+                                        ]?.map((action) => {
                                           const Icon = action.icon;
 
                                           return (
@@ -429,23 +517,41 @@ export default function Epic({ epics, sprints, tasks }: EpicComponentProps) {
                                           );
                                         })}
                                         <hr className="py-1 font-bold" />
-                                        <DropdownMenuItem className="text-red-600 cursor-pointer" onClick={(e) => { e.stopPropagation(); deleteSprint(sprint.id) }}>
-                                          <Trash2 className="inline mr-2" /> Delete Sprint
+                                        <DropdownMenuItem
+                                          className="text-red-600 cursor-pointer"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            deleteSprint(sprint.id);
+                                          }}
+                                        >
+                                          <Trash2 className="inline mr-2" />{" "}
+                                          Delete Sprint
                                         </DropdownMenuItem>
                                       </DropdownMenuContent>
                                     </DropdownMenu>
                                   </div>
                                 </div>
                               </AccordionTrigger>
-
-                              <hr />
-                              <AccordionContent className="px-3 pb-0">
+                              {(isFiltering
+                                ? derivedOpenSprints
+                                : openSprints
+                              ).includes(`sprint-${sprint.id}`) && (
+                                <div className="h-px bg-border" />
+                              )}
+                              <AccordionContent className="px-3 pb-0 max-h-[300px] overflow-y-auto scrollbar-thin">
                                 {sprintTasks.length === 0 ? (
                                   <p className="text-sm text-muted-foreground py-4 text-center">
                                     No tasks in this sprint
                                   </p>
                                 ) : (
-                                  sprintTasks.map((task) => <TaskRow key={task.id} task={task} sprintStartDate={sprint.startDate} sprintEndDate={sprint.endDate} />)
+                                  sprintTasks.map((task) => (
+                                    <TaskRow
+                                      key={task.id}
+                                      task={task}
+                                      sprintStartDate={sprint.startDate}
+                                      sprintEndDate={sprint.endDate}
+                                    />
+                                  ))
                                 )}
                               </AccordionContent>
                             </AccordionItem>
@@ -461,18 +567,19 @@ export default function Epic({ epics, sprints, tasks }: EpicComponentProps) {
         })}
       </Accordion>
 
-      {/* Modals */}
+      {/* Modals — unchanged */}
       {addSprintEpicId && (
         <AddSprintModal
           open={!!addSprintEpicId}
           onClose={() => setAddSprintEpicId(null)}
-          projectId={epics.find((e) => e.id === addSprintEpicId)?.projectId || ""}
+          projectId={
+            epics.find((e) => e.id === addSprintEpicId)?.projectId || ""
+          }
           epicId={addSprintEpicId}
           epicStartDate={epics.find((e) => e.id === addSprintEpicId)?.startDate}
           epicEndDate={epics.find((e) => e.id === addSprintEpicId)?.endDate}
         />
       )}
-
       {addTaskData && (
         <AddTaskModal
           open={!!addTaskData}
@@ -480,24 +587,28 @@ export default function Epic({ epics, sprints, tasks }: EpicComponentProps) {
           projectId={addTaskData.projectId}
           epicId={addTaskData.epicId}
           sprintId={addTaskData.sprintId}
-          sprintStartDate={sprints.find((s) => s.id === addTaskData?.sprintId)?.startDate}
-          sprintEndDate={sprints.find((s) => s.id === addTaskData?.sprintId)?.endDate}
+          sprintStartDate={
+            sprints.find((s) => s.id === addTaskData?.sprintId)?.startDate
+          }
+          sprintEndDate={
+            sprints.find((s) => s.id === addTaskData?.sprintId)?.endDate
+          }
         />
       )}
-
       <AddEpicModal
         open={!!editEpic}
         epic={editEpic}
         projectId={editEpic?.projectId || ""}
         onClose={() => setEditEpic(null)}
       />
-
       <AddSprintModal
         open={!!editSprint}
         sprint={editSprint}
         projectId={editSprint?.projectId || ""}
         epicId={editSprint?.epicId || ""}
-        epicStartDate={epics.find((e) => e.id === editSprint?.epicId)?.startDate}
+        epicStartDate={
+          epics.find((e) => e.id === editSprint?.epicId)?.startDate
+        }
         epicEndDate={epics.find((e) => e.id === editSprint?.epicId)?.endDate}
         onClose={() => setEditSprint(null)}
       />

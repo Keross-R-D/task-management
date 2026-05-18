@@ -1,4 +1,4 @@
-import { apiSlice } from '../api/apiSlice';
+import { apiSlice } from "../api/apiSlice";
 
 export interface Task {
   id: string; // UUID
@@ -21,7 +21,10 @@ export interface Task {
   updatedAt?: string;
 }
 
-export type CreateTaskRequest = Omit<Task, 'id' | 'actualHours' | 'createdAt' | 'updatedAt'>;
+export type CreateTaskRequest = Omit<
+  Task,
+  "id" | "actualHours" | "createdAt" | "updatedAt"
+>;
 export type UpdateTaskRequest = Partial<CreateTaskRequest> & { id: string };
 
 export const tasksApiSlice = apiSlice.injectEndpoints({
@@ -31,43 +34,47 @@ export const tasksApiSlice = apiSlice.injectEndpoints({
       providesTags: (result, error, projectId) =>
         result
           ? [
-              ...result.map(({ id }) => ({ type: 'Task' as const, id })),
-              { type: 'Task', id: `LIST_PROJ_${projectId}` },
+              ...result.map(({ id }) => ({ type: "Task" as const, id })),
+              { type: "Task", id: `LIST_PROJ_${projectId}` },
             ]
-          : [{ type: 'Task', id: `LIST_PROJ_${projectId}` }],
+          : [{ type: "Task", id: `LIST_PROJ_${projectId}` }],
     }),
     getTasksBacklog: builder.query<Task[], string>({
       query: (projectId) => ({ apiUrl: `/tasks/project/${projectId}/backlog` }),
       providesTags: (result, error, projectId) =>
         result
           ? [
-              ...result.map(({ id }) => ({ type: 'Task' as const, id })),
-              { type: 'Task', id: `BACKLOG_${projectId}` },
+              ...result.map(({ id }) => ({ type: "Task" as const, id })),
+              { type: "Task", id: `BACKLOG_${projectId}` },
             ]
-          : [{ type: 'Task', id: `BACKLOG_${projectId}` }],
+          : [{ type: "Task", id: `BACKLOG_${projectId}` }],
     }),
     getTasksBySprint: builder.query<Task[], string>({
       query: (sprintId) => ({ apiUrl: `/tasks/sprint/${sprintId}` }),
       providesTags: (result, _error, sprintId) =>
         result
           ? [
-              ...result.map(({ id }) => ({ type: 'Task' as const, id })),
-              { type: 'Task', id: `LIST_SPRINT_${sprintId}` },
+              ...result.map(({ id }) => ({ type: "Task" as const, id })),
+              { type: "Task", id: `LIST_SPRINT_${sprintId}` },
             ]
-          : [{ type: 'Task', id: `LIST_SPRINT_${sprintId}` }],
+          : [{ type: "Task", id: `LIST_SPRINT_${sprintId}` }],
     }),
     createTask: builder.mutation<Task, CreateTaskRequest>({
       query: (task) => ({
-        apiUrl: '/tasks',
+        apiUrl: "/tasks",
         config: {
-          method: 'POST',
+          method: "POST",
           data: task,
         },
       }),
       invalidatesTags: (_result, _error, arg) => {
-        const tags: any[] = [{ type: 'Task', id: `LIST_PROJ_${arg.projectId}` }];
-        if (!arg.sprintId) tags.push({ type: 'Task', id: `BACKLOG_${arg.projectId}` });
-        if (arg.sprintId) tags.push({ type: 'Task', id: `LIST_SPRINT_${arg.sprintId}` });
+        const tags: any[] = [
+          { type: "Task", id: `LIST_PROJ_${arg.projectId}` },
+        ];
+        if (!arg.sprintId)
+          tags.push({ type: "Task", id: `BACKLOG_${arg.projectId}` });
+        if (arg.sprintId)
+          tags.push({ type: "Task", id: `LIST_SPRINT_${arg.sprintId}` });
         return tags;
       },
     }),
@@ -75,28 +82,31 @@ export const tasksApiSlice = apiSlice.injectEndpoints({
       query: ({ id, ...patch }) => ({
         apiUrl: `/tasks/${id}`,
         config: {
-          method: 'PUT',
+          method: "PUT",
           data: patch,
         },
       }),
-      invalidatesTags: (_result, _error, arg) => [{ type: 'Task', id: arg.id }],
+      invalidatesTags: (_result, _error, arg) => [{ type: "Task", id: arg.id }],
     }),
-    updateTaskStatus: builder.mutation<Task, { id: string; filterKey?: string; taskStatus: string }>({
+    updateTaskStatus: builder.mutation<
+      Task,
+      { id: string; filterKey?: string; taskStatus: string }
+    >({
       query: ({ id, taskStatus }) => ({
         apiUrl: `/tasks/${id}/status`,
         config: {
-          method: 'PATCH',
+          method: "PATCH",
           data: { taskStatus },
         },
       }),
-      invalidatesTags: (_result, _error, arg) => [{ type: 'Task', id: arg.id }],
+      invalidatesTags: (_result, _error, arg) => [{ type: "Task", id: arg.id }],
     }),
     deleteTask: builder.mutation<void, string>({
       query: (id) => ({
         apiUrl: `/tasks/${id}`,
-        config: { method: 'DELETE' },
+        config: { method: "DELETE" },
       }),
-      invalidatesTags: ['Task'],
+      invalidatesTags: ["Task"],
     }),
   }),
 });

@@ -10,6 +10,8 @@ public interface MyTaskWorklogService {
 
     MyTaskWorklogResponseDto createWorklog(MyTaskWorklogRequestDto dto);
 
+    List<MyTaskWorklogResponseDto> getAllWorklogs();
+
     List<MyTaskWorklogResponseDto> getWorklogsByMyTaskId(UUID myTaskId);
 
     MyTaskWorklogResponseDto getWorklogById(UUID id);

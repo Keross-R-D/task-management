@@ -1,11 +1,18 @@
+import ErrorState from "@/components/ErrorState";
 import { useGetProjectsQuery } from "@/features/projects/projectsApiSlice";
 import { useLazyGetTasksByProjectQuery } from "@/features/tasks/tasksApiSlice";
-import { DataTableLayout, Progress } from "ikon-react-components-lib";
+import {
+  Card,
+  DataTableLayout,
+  Progress,
+  Skeleton,
+} from "ikon-react-components-lib";
+
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
 type ProjectSummary = {
-  id: string,
+  id: string;
   projectName: string;
   status: string;
   progress: number;
@@ -20,10 +27,10 @@ type ProjectSummary = {
 
 const ProjectStatusReportPage: React.FC = () => {
   const navigate = useNavigate();
-  const { data: projects = [], isLoading } = useGetProjectsQuery();
-  const [ getTasksByProject ] = useLazyGetTasksByProjectQuery();
+  const { data: projects = [], isLoading,isFetching, isError,refetch } = useGetProjectsQuery();
+  const [getTasksByProject] = useLazyGetTasksByProjectQuery();
 
-  const [ projectData, setProjectData ] = React.useState<ProjectSummary[]>([]);
+  const [projectData, setProjectData] = React.useState<ProjectSummary[]>([]);
 
   React.useEffect(() => {
     if (!projects.length) return;
@@ -35,21 +42,20 @@ const ProjectStatusReportPage: React.FC = () => {
 
           const tasksTotal = tasks.length;
 
-          const tasksDone = tasks.filter(
-            (t) => t.status === "DONE"
-          ).length;
+          const tasksDone = tasks.filter((t) => t.status === "DONE").length;
 
           const estimatedHours = tasks.reduce(
             (sum, t) => sum + (t.estimatedHours || 0),
-            0
+            0,
           );
 
           const actualHours = tasks.reduce(
             (sum, t) => sum + (t.actualHours || 0),
-            0
+            0,
           );
 
-          const progress = tasksTotal > 0 ? Math.round((tasksDone / tasksTotal) * 100) : 0;
+          const progress =
+            tasksTotal > 0 ? Math.round((tasksDone / tasksTotal) * 100) : 0;
 
           const variance = estimatedHours - actualHours;
 
@@ -66,7 +72,7 @@ const ProjectStatusReportPage: React.FC = () => {
             startDate: project.startDate,
             endDate: project.endDate,
           };
-        })
+        }),
       );
 
       setProjectData(results);
@@ -80,8 +86,14 @@ const ProjectStatusReportPage: React.FC = () => {
       accessorKey: "projectName",
       header: () => <div className="font-semibold">Project Name</div>,
       cell: ({ row }: { row: { original: ProjectSummary } }) => (
-        <div className="font-medium cursor-pointer"
-            onClick={() => navigate(`/main/project-status-report/${row.original.id}`)}>{row.original.projectName}</div>
+        <div
+          className="font-medium cursor-pointer"
+          onClick={() =>
+            navigate(`/main/project-status-report/${row.original.id}`)
+          }
+        >
+          {row.original.projectName}
+        </div>
       ),
     },
     {
@@ -166,22 +178,73 @@ const ProjectStatusReportPage: React.FC = () => {
   ];
 
   return (
-    <div className="flex flex-col gap-6 p-4">
-        <div className="mb-3">
-          <h1 className="text-2xl font-bold">Project Status Report</h1>
-          <p className="text-muted-foreground">Detailed performance and variance analysis. Click on a project name to view its full status report.</p>
+    <div>
+      {isFetching ? (
+        <div className="flex flex-col gap-6">
+          {/* Header */}
+          <div className="space-y-2">
+            <Skeleton className="h-7 w-40 rounded-md" />
+            <Skeleton className="h-4 w-120 rounded-md" />
+          </div>
+
+          {/* Actions */}
+          <div className="flex justify-between items-center mb-2">
+            <Skeleton className="h-10 w-72 rounded-md" />
+
+            <div className="flex gap-3">
+              <Skeleton className="h-10 w-10 rounded-md" />
+              <Skeleton className="h-10 w-10 rounded-md" />
+              <Skeleton className="h-10 w-32 rounded-md" />
+            </div>
+          </div>
+
+          {/* Table */}
+          <Card className="p-4">
+            {/* Table Header */}
+            <div className="grid grid-cols-4 gap-4 border-b pb-4 mb-4">
+              <Skeleton className="h-9 w-full" />
+              <Skeleton className="h-9 w-full" />
+              <Skeleton className="h-9 w-full" />
+              <Skeleton className="h-9 w-full" />
+            </div>
+
+            {/* Table Rows */}
+            <div className="space-y-4">
+              {Array.from({ length: 11 }).map((_, i) => (
+                <div key={i} className="grid grid-cols-4 gap-4 items-center">
+                  <Skeleton className="h-8 w-full" />
+                  <Skeleton className="h-8 w-full" />
+                  <Skeleton className="h-8 w-full" />
+                  <Skeleton className="h-8 w-full" />
+                </div>
+              ))}
+            </div>
+          </Card>
         </div>
-        {/* Project status DataTable */}
-        <div className="w-full">
-          <DataTableLayout 
-            data={projectData}
-            columns={projectColumns}
-            extraTools={{
-              totalPages: 1,
-              isLoading: isLoading
-            }} 
-          />
+      ) : isError ? (
+        <ErrorState  message="We couldn’t load the project status data right now. Please try again after a moment." onRetry={() => refetch()} />
+      ) : (
+        <div className="flex flex-col gap-6 p-4">
+          <div className="mb-3">
+            <h1 className="text-2xl font-bold">Project Status Report</h1>
+            <p className="text-muted-foreground">
+              Detailed performance and variance analysis. Click on a project
+              name to view its full status report.
+            </p>
+          </div>
+          {/* Project status DataTable */}
+          <div className="w-full">
+            <DataTableLayout
+              data={projectData}
+              columns={projectColumns}
+              extraTools={{
+                totalPages: 1,
+                isLoading: isLoading,
+              }}
+            />
+          </div>
         </div>
+      )}
     </div>
   );
 };

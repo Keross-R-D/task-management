@@ -65,11 +65,22 @@ export const worklogsApiSlice = apiSlice.injectEndpoints({
         { type: "Task", id: arg.taskId }, // Invalidate task
       ],
     }),
+    getWorklogsByProject: builder.query<TaskWorklog[], string>({
+      query: (projectId) => ({ apiUrl: `/worklogs/project/${projectId}` }),
+      providesTags: (result, _error, projectId) =>
+        result
+          ? [
+              ...result.map(({ id }) => ({ type: "Worklog" as const, id })),
+              { type: "Worklog", id: `LIST_PROJECT_${projectId}` },
+            ]
+          : [{ type: "Worklog", id: `LIST_PROJECT_${projectId}` }],
+    }),
   }),
 });
 
 export const {
   useGetWorklogsByTaskQuery,
+  useGetWorklogsByProjectQuery,
   useCreateWorklogMutation,
   useUpdateWorklogMutation,
   useDeleteWorklogMutation,

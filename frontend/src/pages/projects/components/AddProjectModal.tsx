@@ -21,30 +21,40 @@ import {
   SelectContent,
   SelectItem,
   Textarea,
+  FormMultiComboboxInput,
 } from "ikon-react-components-lib";
+import { ProjectEnum } from "@/enums/project.constants";
+import { useUserMap } from "@/utils/userMap";
 
-const projectSchema = z.object({
-  projectName: z.string().min(1, "Project name is required"),
-  clientName: z.string().min(1, "Client name is required"),
-  managerId: z.string().optional(),
-  startDate: z.string().min(1, "Start date is required"),
-  endDate: z.string().min(1, "End date is required"),
-  projectStatus: z.string().min(1, "Status is required"),
-  type: z.string().min(1, "Type is required"),
-}).superRefine((data, ctx) => {
-  if (data.startDate && data.endDate && new Date(data.startDate) > new Date(data.endDate)) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      message: "Start Date must not be later than End Date",
-      path: ["startDate"],
-    });
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      message: "End Date must not be earlier than Start Date",
-      path: ["endDate"],
-    });
-  }
-});
+const projectSchema = z
+  .object({
+    projectName: z.string().min(1, "Project name is required"),
+    clientName: z.string().min(1, "Client name is required"),
+    managerId: z.string().optional(),
+    startDate: z.string().min(1, "Start date is required"),
+    endDate: z.string().min(1, "End date is required"),
+    projectStatus: z.string().min(1, "Status is required"),
+    type: z.string().min(1, "Type is required"),
+    teamMemberIds: z.array(z.string()).default([]),
+  })
+  .superRefine((data, ctx) => {
+    if (
+      data.startDate &&
+      data.endDate &&
+      new Date(data.startDate) > new Date(data.endDate)
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Start Date must not be later than End Date",
+        path: ["startDate"],
+      });
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "End Date must not be earlier than Start Date",
+        path: ["endDate"],
+      });
+    }
+  });
 
 export type ProjectFormValues = z.infer<typeof projectSchema>;
 
@@ -55,7 +65,14 @@ interface Props {
   isLoading?: boolean;
 }
 
-export default function AddProjectModal({ open, onClose, onSubmit, isLoading }: Props) {
+export default function AddProjectModal({
+  open,
+  onClose,
+  onSubmit,
+  isLoading,
+}: Props) {
+  const { allUsers, isLoading: usersLoading } = useUserMap();
+
   const form = useForm<ProjectFormValues>({
     resolver: zodResolver(projectSchema),
     defaultValues: {
@@ -66,6 +83,7 @@ export default function AddProjectModal({ open, onClose, onSubmit, isLoading }: 
       endDate: "",
       projectStatus: "",
       type: "",
+      teamMemberIds: [],
     },
   });
 
@@ -87,7 +105,10 @@ export default function AddProjectModal({ open, onClose, onSubmit, isLoading }: 
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleCreate)} className="space-y-4">
+          <form
+            onSubmit={form.handleSubmit(handleCreate)}
+            className="space-y-4"
+          >
             <FormField
               control={form.control}
               name="projectName"
@@ -169,9 +190,11 @@ export default function AddProjectModal({ open, onClose, onSubmit, isLoading }: 
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="PLANNED">Planned</SelectItem>
-                        <SelectItem value="IN_PROGRESS">In Progress</SelectItem>
-                        <SelectItem value="COMPLETED">Completed</SelectItem>
+                        {Object.values(ProjectEnum.Status).map((status) => (
+                          <SelectItem key={status} value={status}>
+                            {status}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -194,16 +217,73 @@ export default function AddProjectModal({ open, onClose, onSubmit, isLoading }: 
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="INTERNAL">Internal</SelectItem>
-                        <SelectItem value="EXTERNAL">External</SelectItem>
+                        {Object.values(ProjectEnum.Type).map((type) => (
+                          <SelectItem key={type} value={type}>
+                            {type}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <Textarea />
+
+              {/* <FormField
+                control={form.control}
+                name="teamMemberIds"
+                render={({ field }) => (
+                  <FormItem className="col-span-2">
+                    <FormLabel>Team Members</FormLabel>
+                    <FormControl>
+                      <div className="border rounded-md p-2 max-h-40 overflow-y-auto space-y-2">
+                        {usersLoading ? (
+                          <div className="text-sm text-muted-foreground p-2">Loading users...</div>
+                        ) : allUsers.length === 0 ? (
+                          <div className="text-sm text-muted-foreground p-2">No users available</div>
+                        ) : (
+                          allUsers.map((user) => (
+                            <label key={user.id} className="flex items-center space-x-2 cursor-pointer p-1 hover:bg-muted rounded">
+                              <input
+                                type="checkbox"
+                                className="rounded border-gray-300 w-4 h-4"
+                                checked={field.value.includes(user.id)}
+                                onChange={(e) => {
+                                  const checked = e.target.checked;
+                                  if (checked) {
+                                    field.onChange([...field.value, user.id]);
+                                  } else {
+                                    field.onChange(field.value.filter((id) => id !== user.id));
+                                  }
+                                }}
+                              />
+                              <span className="text-sm">{user.name} <span className="text-muted-foreground text-xs">({user.email})</span></span>
+                            </label>
+                          ))
+                        )}
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              /> */}
+              {/* <Textarea /> */}
             </div>
+            <FormMultiComboboxInput
+              formControl={form.control}
+              name="teamMemberIds"
+              label="Team Members"
+              placeholder={
+                usersLoading ? "Loading users..." : "Select team members..."
+              }
+              disabled={usersLoading || allUsers.length === 0}
+              items={allUsers.map((user) => ({
+                // Assuming FormComboboxItemProps uses standard 'value' and 'label' keys.
+                // Adjust these keys if your specific interface requires 'id' or 'text'.
+                value: user.id,
+                label: `${user.name} (${user.email})`,
+              }))}
+            />
 
             <div className="flex justify-end gap-3 pt-4">
               <Button type="button" variant="secondary" onClick={handleClose}>

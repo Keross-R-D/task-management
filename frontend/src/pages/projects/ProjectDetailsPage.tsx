@@ -8,7 +8,9 @@ import {
 import { Calendar } from "lucide-react";
 import TaskList from "./components/TaskList";
 import { Upload, Plus, List, LayoutGrid, Users } from "lucide-react";
-import SearchAndFilter from "./components/SearchAndFilter";
+import SearchAndFilter, {
+  type FilterState,
+} from "./components/SearchAndFilter";
 import TaskBoard from "./components/TaskBoard";
 import ResourceUtilization from "./components/ResouceUtilisation";
 import { SimpleWidget } from "ikon-react-components-lib";
@@ -22,8 +24,19 @@ import {
 } from "@/features/tasks/tasksApiSlice";
 import { useGetProjectsQuery } from "@/features/projects/projectsApiSlice";
 import { useParams } from "react-router-dom";
+import { filterTasks } from "@/utils/taskFilters";
+
+const DEFAULT_FILTERS: FilterState = {
+  search: "",
+  status: "ALL",
+  priority: "ALL",
+  type: "ALL",
+  sprintState: "ALL",
+};
+import AddTaskBulkUploadModal from "./components/AddTaskBulkUploadModal";
 
 export default function ProjectDetailPage() {
+  const [bulkOpen, setBulkOpen] = useState(false);
   const { projectId = "" } = useParams();
 
   // ── RTK Query hooks ──
@@ -36,15 +49,19 @@ export default function ProjectDetailPage() {
   const { data: backlogTasks = [], isLoading: backlogLoading } =
     useGetTasksBacklogQuery(projectId, { skip: !projectId });
   const { data: projects = [] } = useGetProjectsQuery();
-  const project = projects.find(p => String(p.id) === projectId);
+  const project = projects.find((p) => String(p.id) === projectId);
 
   // ── Epic modal state ──
   const [open, setOpen] = useState(false);
 
+  // ── Filter state — one per tab so they don't interfere ──
+  const [boardFilters, setBoardFilters] =
+    useState<FilterState>(DEFAULT_FILTERS);
+
   const isLoading =
     epicsLoading || sprintsLoading || tasksLoading || backlogLoading;
 
-  // ── Computed metrics ──
+  // ── Computed metrics (unfiltered — always show real numbers) ──
   const metrics = useMemo(() => {
     const totalTasks = allTasks.length;
     const doneTasks = allTasks.filter(
@@ -63,6 +80,9 @@ export default function ProjectDetailPage() {
     return { totalTasks, doneTasks, estimatedHours, actualHours, completion };
   }, [allTasks]);
 
+  const boardFilteredTasks = useMemo(() => {
+    return filterTasks(allTasks, boardFilters, sprints);
+  }, [allTasks, boardFilters, sprints]);
 
   return (
     <div className="w-full">
@@ -84,54 +104,44 @@ export default function ProjectDetailPage() {
             </p>
           </div>
 
-          {/* Date */}
           <div className="flex items-center gap-2 border px-4 py-2 rounded-xl text-sm w-fit">
             <Calendar className="text-lg" />
             <span>Project Timeline</span>
           </div>
         </div>
 
-        {/* Divider */}
         <div className="border-t"></div>
 
-        {/* Stats */}
+        {/* Stats — always unfiltered */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-sm">
-          <div>
-            <SimpleWidget
-              title="Completion"
-              primaryText={`${metrics.completion}%`}
-              secondaryText=""
-              iconName=""
-              mainClassName="p-0 border-none shadow-none bg-transparent"
-            />
-          </div>
-          <div>
-            <SimpleWidget
-              title="Tasks (Total / Done)"
-              primaryText={`${metrics.totalTasks} / ${metrics.doneTasks}`}
-              secondaryText=""
-              iconName=""
-              mainClassName="p-0 border-none shadow-none bg-transparent"
-            />
-          </div>
-          <div>
-            <SimpleWidget
-              title="Estimated Hours"
-              primaryText={`${metrics.estimatedHours}h`}
-              secondaryText=""
-              iconName=""
-              mainClassName="p-0 border-none shadow-none bg-transparent"
-            />
-          </div>
-          <div>
-            <SimpleWidget
-              title="Actual Hours"
-              primaryText={`${metrics.actualHours}h`}
-              secondaryText=""
-              iconName=""
-              mainClassName="p-0 border-none shadow-none bg-transparent"
-            />
-          </div>
+          <SimpleWidget
+            title="Completion"
+            primaryText={`${metrics.completion}%`}
+            secondaryText=""
+            iconName=""
+            mainClassName="p-0 border-none shadow-none bg-transparent"
+          />
+          <SimpleWidget
+            title="Tasks (Total / Done)"
+            primaryText={`${metrics.totalTasks} / ${metrics.doneTasks}`}
+            secondaryText=""
+            iconName=""
+            mainClassName="p-0 border-none shadow-none bg-transparent"
+          />
+          <SimpleWidget
+            title="Estimated Hours"
+            primaryText={`${metrics.estimatedHours}h`}
+            secondaryText=""
+            iconName=""
+            mainClassName="p-0 border-none shadow-none bg-transparent"
+          />
+          <SimpleWidget
+            title="Actual Hours"
+            primaryText={`${metrics.actualHours}h`}
+            secondaryText=""
+            iconName=""
+            mainClassName="p-0 border-none shadow-none bg-transparent"
+          />
         </div>
       </div>
 
@@ -139,22 +149,31 @@ export default function ProjectDetailPage() {
       <div className="mt-6 flex flex-col gap-4">
         <Tabs defaultValue="task" className="w-full">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            {/* LEFT → Tabs */}
-            <TabsList className="border rounded-xl p-1 flex gap-1 w-fit">
-              <TabsTrigger value="task">
+            <TabsList className="border rounded-xl p-1 flex gap-1 w-fit !py-5">
+              <TabsTrigger
+                value="task"
+                className="bg-transparent dark:data-[state=active]:bg-[#0a0a0a] dark:data-[state=active]:text-white px-3 !py-3.5"
+              >
                 <List size={16} /> Task List
               </TabsTrigger>
-              <TabsTrigger value="board">
+
+              <TabsTrigger
+                value="board"
+                className="bg-transparent dark:data-[state=active]:bg-[#0a0a0a] dark:data-[state=active]:text-white px-3 !py-3.5"
+              >
                 <LayoutGrid size={16} /> Board
               </TabsTrigger>
-              <TabsTrigger value="resource">
+
+              <TabsTrigger
+                value="resource"
+                className="bg-transparent dark:data-[state=active]:bg-[#0a0a0a] dark:data-[state=active]:text-white px-3 !py-3.5"
+              >
                 <Users size={16} /> Resource Utilisation
               </TabsTrigger>
             </TabsList>
 
-            {/* RIGHT → Buttons */}
             <div className="flex md:justify-end gap-3">
-              <Button variant="outline">
+              <Button variant="outline" onClick={() => setBulkOpen(true)}>
                 <Upload size={16} className="mr-2" />
                 Bulk Upload
               </Button>
@@ -165,7 +184,7 @@ export default function ProjectDetailPage() {
             </div>
           </div>
 
-          {/* TASK TAB CONTENT */}
+          {/* TASK TAB — TaskList owns its own filter state internally */}
           <TabsContent value="task">
             {isLoading ? (
               <div className="text-center py-8 text-muted-foreground">
@@ -181,21 +200,24 @@ export default function ProjectDetailPage() {
             )}
           </TabsContent>
 
-          {/* BOARD TAB CONTENT */}
+          {/* BOARD TAB — filter state owned here in ProjectDetailPage */}
           <TabsContent value="board">
-            <SearchAndFilter />
+            <SearchAndFilter
+              filters={boardFilters}
+              onChange={setBoardFilters}
+            />
             {isLoading ? (
               <div className="text-center py-8 text-muted-foreground">
                 Loading tasks...
               </div>
             ) : (
-              <TaskBoard tasks={allTasks} sprints={sprints} />
+              <TaskBoard tasks={boardFilteredTasks} />
             )}
           </TabsContent>
 
-          {/* RESOURCE TAB CONTENT */}
+          {/* RESOURCE TAB */}
           <TabsContent value="resource">
-            <ResourceUtilization />
+            <ResourceUtilization tasks={allTasks} epics={epics} />
           </TabsContent>
         </Tabs>
       </div>
@@ -206,6 +228,11 @@ export default function ProjectDetailPage() {
         onClose={() => setOpen(false)}
         projectStartDate={project?.startDate}
         projectEndDate={project?.endDate}
+      />
+      <AddTaskBulkUploadModal
+        open={bulkOpen}
+        projectId={projectId}
+        onClose={() => setBulkOpen(false)}
       />
     </div>
   );
