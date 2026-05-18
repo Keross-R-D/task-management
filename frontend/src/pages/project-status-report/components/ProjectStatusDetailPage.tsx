@@ -10,7 +10,6 @@ import {
   CardHeader,
   CardTitle,
   DataTableLayout,
-  
   Progress,
 } from "ikon-react-components-lib";
 import {
@@ -22,16 +21,15 @@ import {
   ChartColumn,
   Clock,
   Target,
-
   CircleCheck,
   CircleAlert,
 } from "lucide-react";
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import WeekSprintTable from "./WeekSprintTable";
+import DatePickerWithRange from "./DateRangePicker";
 
-
-
+import { type DateRange } from "react-day-picker";
 //Types
 type OverdueTask = {
   sprintName: string;
@@ -42,21 +40,107 @@ type OverdueTask = {
 };
 
 const ProjectStatusDetailPage: React.FC = () => {
-
   const { id = "" } = useParams();
   const navigate = useNavigate();
   const { data: projects = [] } = useGetProjectsQuery();
   const project = projects.find((p) => String(p.id) === id);
-  const {
-    data: sprints = [],
-    isLoading,
-  
-  } = useGetSprintsByProjectQuery(id);
+  const { data: sprints = [], isLoading } = useGetSprintsByProjectQuery(id);
   console.log("SPRINTS:", sprints);
 
   const { data: tasks = [] } = useGetTasksByProjectQuery(id, { skip: !id });
 
-  //Get the project data
+  const today = new Date();
+
+  // Week range helpers
+  const getWeekRange = (date: Date) => {
+    const d = new Date(date);
+    const day = d.getDay();
+    const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+    const start = new Date(d.setDate(diff));
+    start.setHours(0, 0, 0, 0);
+    const end = new Date(start);
+    end.setDate(start.getDate() + 6);
+    end.setHours(23, 59, 59, 999);
+    return { start, end };
+  };
+
+  const currentWeek = getWeekRange(today);
+  const previousWeekDate = new Date(today);
+  previousWeekDate.setDate(today.getDate() - 7);
+  const nextWeekDate = new Date(today);
+  nextWeekDate.setDate(today.getDate() + 7);
+
+  // Date range state — initialized to current week by default
+  const [dateRange, setDateRange] = React.useState<DateRange | undefined>({
+    from: currentWeek.start,
+    to: currentWeek.end,
+  });
+
+  // Handle date selection with max 7 days restriction
+ const handleDateRangeChange = (range: DateRange | undefined) => {
+  if (!range?.from) {
+    setDateRange(range);
+    return;
+  }
+
+  // only start selected
+  if (range.from && !range.to) {
+    setDateRange(range);
+    return;
+  }
+
+  if (range.from && range.to) {
+    const from = new Date(range.from);
+    const to = new Date(range.to);
+
+    from.setHours(0, 0, 0, 0);
+    to.setHours(0, 0, 0, 0);
+
+    const diffInDays = Math.floor(
+      (to.getTime() - from.getTime()) / (1000 * 60 * 60 * 24),
+    );
+
+    // max allowed range = 7 days
+    if (diffInDays > 6) {
+      // detect which side user changed
+      if (
+        dateRange?.from &&
+        from.getTime() !== new Date(dateRange.from).setHours(0, 0, 0, 0)
+      ) {
+        // start date changed -> move end date
+        const adjustedTo = new Date(from);
+        adjustedTo.setDate(from.getDate() + 6);
+
+        setDateRange({
+          from,
+          to: adjustedTo,
+        });
+
+        return;
+      }
+
+      // end date changed -> move start date
+      const adjustedFrom = new Date(to);
+      adjustedFrom.setDate(to.getDate() - 6);
+
+      setDateRange({
+        from: adjustedFrom,
+        to,
+      });
+
+      return;
+    }
+  }
+
+  setDateRange(range);
+};
+  // Calculate dynamic week ranges based on selected date range
+  const selectedWeek =
+    dateRange?.from && dateRange?.to
+      ? { start: dateRange.from, end: dateRange.to }
+      : { start: currentWeek.start, end: currentWeek.end };
+
+  // Get the project data
   const computedData = React.useMemo(() => {
     const tasksTotal = tasks.length;
 
@@ -132,8 +216,17 @@ const ProjectStatusDetailPage: React.FC = () => {
     );
   }, [tasks]);
 
-  //Columns for Overdue tasks table
-  const overdueTasksColumns = [
+  // Calculate progress for task
+  const getProgress = (sprintId: string) => {
+    const sprintTasks = tasksBySprint[sprintId] || [];
+    const total = sprintTasks.length;
+    const done = sprintTasks.filter((t) => t.status === "done").length;
+    return total === 0 ? 0 : Math.round((done / total) * 100);
+  };
+
+  // Overdue tasks columns
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const overdueTasksColumns: any = [
     {
       accessorKey: "sprintName",
       header: () => <div className="font-semibold">Sprint Name</div>,
@@ -160,10 +253,10 @@ const ProjectStatusDetailPage: React.FC = () => {
       header: () => <div className="font-semibold">Overdue (in days)</div>,
       cell: ({ row }: { row: { original: OverdueTask } }) => {
         const days = row.original.overdueDays;
-
-        let color = "bg-green-500/10 text-green-500";
-        if (days > 0) color = "bg-red-500/10 text-red-500";
-
+        const color =
+          days > 0
+            ? "bg-red-500/10 text-red-500"
+            : "bg-green-500/10 text-green-500";
         return (
           <div className={`px-2 py-1 text-left w-fit rounded text-sm ${color}`}>
             {days} days
@@ -189,30 +282,97 @@ const ProjectStatusDetailPage: React.FC = () => {
     },
   ];
 
-  const today = new Date();
-
-  //Calculate progress for task
-  const getProgress = (sprintId: string) => {
-    const sprintTasks = tasksBySprint[sprintId] || [];
-
-    const total = sprintTasks.length;
-    const done = sprintTasks.filter((t) => t.status === "done").length;
-
-    return total === 0 ? 0 : Math.round((done / total) * 100);
+  // Table data for Overdue tasks - will be moved after filteredSprints
+  const getProjectStatus = (endDate: string, overdueSprints: number) => {
+    const today = new Date();
+    const end = new Date(endDate);
+    today.setHours(0, 0, 0, 0);
+    end.setHours(0, 0, 0, 0);
+    if (overdueSprints === 0) return "on_time";
+    if (today > end) {
+      const diffDays = Math.floor(
+        (today.getTime() - end.getTime()) / (1000 * 60 * 60 * 24),
+      );
+      if (diffDays <= 7) return "slight_delay";
+      return "delay";
+    }
+    return "slight_delay";
   };
+  // CURRENT WEEK
+  // Sprint start date falls inside selected range
 
-  //Table data for Overdue tasks
+  const currentWeekStart = new Date(selectedWeek.start);
+  currentWeekStart.setHours(0, 0, 0, 0);
+
+  const currentWeekEnd = new Date(selectedWeek.end);
+  currentWeekEnd.setHours(23, 59, 59, 999);
+
+  const currentWeekSprints = sprints.filter((sprint) => {
+    const sprintStart = new Date(sprint.startDate);
+    const sprintEnd = new Date(sprint.endDate);
+    sprintStart.setHours(0, 0, 0, 0);
+    sprintEnd.setHours(23, 59, 59, 999);
+
+    return sprintStart <= currentWeekEnd && sprintEnd >= currentWeekStart;
+  });
+
+  // PREVIOUS WEEK
+  // Sprint ended within 7 days BEFORE selected range start
+
+  const previousWeekStart = new Date(currentWeekStart);
+  previousWeekStart.setDate(previousWeekStart.getDate() - 7);
+  previousWeekStart.setHours(0, 0, 0, 0);
+
+  const previousWeekSprints = sprints.filter((sprint) => {
+    const sprintEnd = new Date(sprint.endDate);
+
+    return sprintEnd >= previousWeekStart && sprintEnd < currentWeekStart;
+  });
+
+  // UPCOMING WEEK
+  // Sprint starts within 7 days AFTER selected range end
+
+  const upcomingWeekStart = new Date(currentWeekEnd);
+  upcomingWeekStart.setDate(upcomingWeekStart.getDate() + 1);
+  upcomingWeekStart.setHours(0, 0, 0, 0);
+
+  const upcomingWeekEnd = new Date(currentWeekEnd);
+  upcomingWeekEnd.setDate(upcomingWeekEnd.getDate() + 7);
+  upcomingWeekEnd.setHours(23, 59, 59, 999);
+
+  const upcomingWeekSprints = sprints.filter((sprint) => {
+    const sprintStart = new Date(sprint.startDate);
+
+    return sprintStart >= upcomingWeekStart && sprintStart <= upcomingWeekEnd;
+  });
+
+  const normalizedMinDate = React.useMemo(() => {
+    if (!project?.startDate) return undefined;
+
+    const d = new Date(project.startDate);
+    d.setHours(0, 0, 0, 0);
+
+    return d;
+  }, [project]);
+
+  const normalizedMaxDate = React.useMemo(() => {
+    if (!project?.endDate) return undefined;
+
+    const d = new Date(project.endDate);
+    d.setHours(23, 59, 59, 999);
+
+    return d;
+  }, [project]);
+  // Table data for Overdue tasks - computed after filteredSprints
   const overdueTasks = sprints
     .map((sprint) => {
       const endDate = new Date(sprint.endDate);
-
       const overdueDays =
         sprint.status !== "COMPLETED" && endDate < today
           ? Math.floor(
               (today.getTime() - endDate.getTime()) / (1000 * 60 * 60 * 24),
             )
           : 0;
-
       return {
         id: sprint.id,
         sprintName: sprint.name,
@@ -224,91 +384,7 @@ const ProjectStatusDetailPage: React.FC = () => {
     })
     .filter((s) => s.overdueDays > 0);
 
-  //Get project overall status
-  const getProjectStatus = (endDate: string, overdueSprints: number) => {
-    const today = new Date();
-    const end = new Date(endDate);
-
-    today.setHours(0, 0, 0, 0);
-    end.setHours(0, 0, 0, 0);
-
-    // No overdue sprints means on time
-    if (overdueSprints === 0) return "on_time";
-
-    // Date-based delay
-    if (today > end) {
-      const diffDays = Math.floor(
-        (today.getTime() - end.getTime()) / (1000 * 60 * 60 * 24),
-      );
-
-      if (diffDays <= 7) return "slight_delay";
-      return "delay";
-    }
-
-    // Default fallback
-    return "slight_delay";
-  };
-
   const status = getProjectStatus(computedData.endDate, overdueTasks.length);
-
-  //Get current, previous and upcoming week range
-  const getWeekRange = (date: Date) => {
-    const d = new Date(date);
-
-    const day = d.getDay(); // 0 (Sun) → 6 (Sat)
-    const diff = d.getDate() - day + (day === 0 ? -6 : 1); // adjust to Monday
-
-    const start = new Date(d.setDate(diff));
-    start.setHours(0, 0, 0, 0);
-
-    const end = new Date(start);
-    end.setDate(start.getDate() + 6);
-    end.setHours(23, 59, 59, 999);
-
-    return { start, end };
-  };
-
-  const currentWeek = getWeekRange(today);
-
-  const previousWeekDate = new Date(today);
-  previousWeekDate.setDate(today.getDate() - 7);
-  const previousWeek = getWeekRange(previousWeekDate);
-
-  const nextWeekDate = new Date(today);
-  nextWeekDate.setDate(today.getDate() + 7);
-  const upcomingWeek = getWeekRange(nextWeekDate);
-
-  const isInRange = (date: Date, start: Date, end: Date) =>
-    date >= start && date <= end;
-
-  const currentWeekSprints = sprints.filter((sprint) => {
-    const start = new Date(sprint.startDate);
-    return isInRange(start, currentWeek.start, currentWeek.end);
-  });
-
-  const previousWeekSprints = sprints.filter((sprint) => {
-    const start = new Date(sprint.startDate);
-    return isInRange(start, previousWeek.start, previousWeek.end);
-  });
-
-  const upcomingWeekSprints = sprints.filter((sprint) => {
-    const start = new Date(sprint.startDate);
-    return isInRange(start, upcomingWeek.start, upcomingWeek.end);
-  });
-
-  //get current, previous and upcoming week sprints
-  const currentWeekData = currentWeekSprints.map((s) => ({
-    sprintName: s.name,
-    progress: getProgress(s.id),
-  }));
-  console.log("CURRENT WEEK SPRINTS:", currentWeekData);
-
-  const upcomingWeekData = upcomingWeekSprints.map((s) => ({
-    sprintName: s.name,
-    plannedEndDate: s.endDate,
-  }));
-
-  console.log("OVERDUE TASKS:", upcomingWeekData);
 
   return (
     <div className="flex flex-col gap-6 p-4">
@@ -321,13 +397,13 @@ const ProjectStatusDetailPage: React.FC = () => {
           <div className="flex items-center">Back to reports</div>
         </button>
       </div>
+
       <div>
-        <div className="grid grid-cols-1 lg:grid-cols-2! x gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2! gap-6">
           {/* Project Details */}
           <Card>
             <CardHeader className="flex justify-between items-center">
               <CardTitle className="text-2xl">Project Details</CardTitle>
-
               <span
                 className={`px-3 py-1 text-xs rounded-full ${getStatusClass(status)}`}
               >
@@ -363,7 +439,7 @@ const ProjectStatusDetailPage: React.FC = () => {
 
               <p className="flex items-center gap-2">
                 <ChartColumn className="h-4" />
-                <span className=" flex items-center gap-1font-bold">
+                <span className="flex items-center gap-1 font-bold">
                   Status:
                 </span>{" "}
                 <span className="text-sm">
@@ -378,7 +454,6 @@ const ProjectStatusDetailPage: React.FC = () => {
                 </span>{" "}
                 <span>{computedData.progress}%</span>
               </p>
-
               <div className="flex items-center gap-2">
                 <Clock className="h-4" />
                 <span className="flex items-center gap-1 font-bold">
@@ -386,12 +461,9 @@ const ProjectStatusDetailPage: React.FC = () => {
                 </span>{" "}
                 {computedData.actualHours}h / {computedData.estimatedHours}h
               </div>
-
               <div className="pt-2">
                 <hr />
               </div>
-
-              {/* Legend */}
               <div className="flex flex-wrap gap-4 text-xs pt-2">
                 <span className="flex gap-2 items-center justify-center font-semibold text-green-500">
                   <span className="w-2 h-2 rounded-full bg-green-500" />
@@ -416,10 +488,13 @@ const ProjectStatusDetailPage: React.FC = () => {
                 Executive Summary Report
               </CardTitle>
 
-              <span className="text-sm">
-                From: {formatDate(previousWeek.start)} To:{" "}
-                {formatDate(upcomingWeek.end)}
-              </span>
+              {/*  Replaced static text with DatePickerWithRange */}
+              <DatePickerWithRange
+                date={dateRange}
+                onDateChange={handleDateRangeChange}
+                minDate={normalizedMinDate}
+                maxDate={normalizedMaxDate}
+              />
             </CardHeader>
 
             <CardContent className="space-y-4 text-sm">
@@ -454,7 +529,6 @@ const ProjectStatusDetailPage: React.FC = () => {
                 </p>
               </div>
 
-              {/* Stats */}
               <div className="flex justify-around mt-8 pt-5 border-t">
                 <div className="text-center">
                   <p className="text-2xl font-bold">
@@ -462,14 +536,12 @@ const ProjectStatusDetailPage: React.FC = () => {
                   </p>
                   <p className="text-sm text-gray-400">Total Tasks</p>
                 </div>
-
                 <div className="text-center">
                   <p className="text-2xl font-bold text-green-500">
                     {computedData.tasksDone}
                   </p>
                   <p className="text-sm text-gray-400">Completed</p>
                 </div>
-
                 <div className="text-center">
                   <p className="text-2xl font-bold text-yellow-500">
                     {computedData.remainingTasks}
@@ -481,7 +553,7 @@ const ProjectStatusDetailPage: React.FC = () => {
           </Card>
         </div>
 
-        {/* Bottom Cards */}
+        {/* Overdue Tasks Table */}
         <div className="mt-4 mb-4">
           <Card>
             <CardHeader>

@@ -67,14 +67,50 @@ const toKey = (date: Date) => date.toISOString().split("T")[0];
 
 // ── Helper: aggregate tasks by assignee across all projects ──
 
-function buildTeamMemberData(allTasks: Task[], getUserInfo: any): ResourceMember[] {
+function buildTeamMemberData(
+  allTasks: Task[],
+  allMyTasks: MyTask[] = [],
+  allMyTaskWorklogs: MyTaskWorklog[] = [],
+  getUserInfo: any
+): ResourceMember[] {
   const byAssignee: Record<string, { planned: number; actual: number }> = {};
+
+  const addAssignee = (assigneeId: string | null | undefined) => {
+    if (!assigneeId) return;
+    if (!byAssignee[assigneeId]) byAssignee[assigneeId] = { planned: 0, actual: 0 };
+  };
 
   allTasks.forEach((task) => {
     const key = task.assigneeId || "unassigned";
+    if (task.assigneeId) addAssignee(task.assigneeId);
     if (!byAssignee[key]) byAssignee[key] = { planned: 0, actual: 0 };
     byAssignee[key].planned += task.estimatedHours || 0;
     byAssignee[key].actual += task.actualHours || 0;
+  });
+
+  allMyTasks.forEach((task) => {
+    const key = task.assigneeId || "unassigned";
+    if (task.assigneeId) addAssignee(task.assigneeId);
+    if (!byAssignee[key]) byAssignee[key] = { planned: 0, actual: 0 };
+    byAssignee[key].planned += task.estimatedHours || 0;
+  });
+
+  const myTaskAssigneeMap: Record<string, string> = {};
+  allMyTasks.forEach((task) => {
+    if (task.assigneeId) {
+      myTaskAssigneeMap[task.id] = task.assigneeId;
+    }
+  });
+
+  allMyTaskWorklogs.forEach((worklog) => {
+    const assigneeId = myTaskAssigneeMap[worklog.myTaskId];
+    if (!assigneeId) return;
+    addAssignee(assigneeId);
+
+    const dist: Record<string, number> = worklog.hoursDistribution || {};
+    Object.values(dist).forEach((hours) => {
+      byAssignee[assigneeId].actual += Number(hours) || 0;
+    });
   });
 
   return Object.entries(byAssignee)
@@ -97,9 +133,9 @@ function buildTeamMemberData(allTasks: Task[], getUserInfo: any): ResourceMember
 function buildTimesheetData(
   allTasks: Task[],
   allWorklogs: TaskWorklog[],
-  getUserInfo: any,
-  myTasks: MyTask[] = [],
-  myTaskWorklogs: MyTaskWorklog[] = []
+  myTasks: MyTask[],
+  myTaskWorklogs: MyTaskWorklog[],
+  getUserInfo: any
 ): TimesheetRow[] {
 
   // TASK -> ASSIGNEE MAP
@@ -207,46 +243,47 @@ function buildTimesheetData(
   );
 }
 
-// ── Aggregator component for fetching tasks/worklogs across all projects ──
+// ── Per-project fetcher components ──
+// These are separate components so each has a stable, fixed number of hook calls.
 
-function useAllProjectData(projects: Project[]) {
-  // We'll fetch tasks for each project and combine them
-  const projectIds = projects.map((p) => String(p.id));
+type ProjectDataResult = {
+  projectId: string;
+  tasks: Task[];
+  worklogs: TaskWorklog[];
+  isLoading: boolean;
+  isFetching: boolean;
+  isError: boolean;
+};
 
-  // RTK Query hooks — we call them in a consistent order using the project list
-  // Since hooks can't be conditional, we always call them but skip when empty
-  const taskQueries = projectIds.map((pid) =>
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    useGetTasksByProjectQuery(pid, { skip: !pid })
-  );
+/**
+ * A render-prop component that fetches tasks + worklogs for ONE project.
+ * Because it's a component (not a custom hook called inside .map()),
+ * React treats its hooks as belonging to a stable component instance.
+ */
+const ProjectDataFetcher: React.FC<{
+  projectId: string;
+  onData: (result: ProjectDataResult) => void;
+}> = ({ projectId, onData }) => {
+  const { data: tasks = [], isLoading: tLoading, isFetching: tFetching, isError: tError } =
+    useGetTasksByProjectQuery(projectId, { skip: !projectId });
 
-  const worklogQueries = projectIds.map((pid) =>
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    useGetWorklogsByProjectQuery(pid, { skip: !pid })
-  );
+  const { data: worklogs = [], isLoading: wLoading, isFetching: wFetching, isError: wError } =
+    useGetWorklogsByProjectQuery(projectId, { skip: !projectId });
 
-  const allTasks: Task[] = taskQueries.flatMap((q) => q.data ?? []);
-  const allWorklogs: TaskWorklog[] = worklogQueries.flatMap((q) => q.data ?? []);
+  // Report data up via callback on every render
+  React.useEffect(() => {
+    onData({
+      projectId,
+      tasks,
+      worklogs,
+      isLoading: tLoading || wLoading,
+      isFetching: tFetching || wFetching,
+      isError: tError || wError,
+    });
+  }, [projectId, tasks, worklogs, tLoading, wLoading, tFetching, wFetching, tError, wError, onData]);
 
-  // Fetch all myTasks and myTaskWorklogs
-  const { data: allMyTasks = [], isLoading: myTasksLoading, isFetching: myTasksFetching, isError: myTasksError } = useGetAllMyTasksQuery();
-  const { data: allMyTaskWorklogs = [], isLoading: myTaskWorklogsLoading, isFetching: myTaskWorklogsFetching, isError: myTaskWorklogsError } = useGetAllMyTaskWorklogsQuery();
-
-  const isLoading =
-    taskQueries.some((q) => q.isLoading) || worklogQueries.some((q) => q.isLoading) || myTasksLoading || myTaskWorklogsLoading;
-  const isFetching =
-    taskQueries.some((q) => q.isFetching) ||
-    worklogQueries.some((q) => q.isFetching) ||
-    myTasksFetching ||
-    myTaskWorklogsFetching;
-     const isError =
-    taskQueries.some((q) => q.isError) ||
-    worklogQueries.some((q) => q.isError) ||
-    myTasksError ||
-    myTaskWorklogsError;
-
-  return { allTasks, allWorklogs, allMyTasks, allMyTaskWorklogs, isLoading, isFetching, isError };
-}
+  return null; // purely data-fetching, no UI
+};
 
 // ── Main Component ──
 
@@ -255,9 +292,51 @@ const ResourceUtilisationPage: React.FC = () => {
   const [userFilter, setUserFilter] = useState("all");
   const [projectFilter, setProjectFilter] = useState("all");
 
-  const { data: projects = [], isLoading: projectsLoading, isFetching: projectsFetching , isError: projectsError, refetch } = useGetProjectsQuery();
-  const { allTasks, allWorklogs, allMyTasks, allMyTaskWorklogs, isLoading: dataLoading, isFetching: dataFetching, isError: dataError } = useAllProjectData(projects);
-  const { allUsers, getUserInfo, isLoading: usersLoading } = useUserMap();
+  // Aggregated data from all ProjectDataFetcher children
+  const [projectDataMap, setProjectDataMap] = useState<Record<string, ProjectDataResult>>({});
+
+  const {
+    data: projects = [],
+    isLoading: projectsLoading,
+    isFetching: projectsFetching,
+    isError: projectsError,
+    refetch,
+  } = useGetProjectsQuery();
+
+  const { data: allMyTasks = [], isLoading: myTasksLoading, isFetching: myTasksFetching, isError: myTasksError } =
+    useGetAllMyTasksQuery();
+
+  const { data: allMyTaskWorklogs = [], isLoading: myTaskWorklogsLoading, isFetching: myTaskWorklogsFetching, isError: myTaskWorklogsError } =
+    useGetAllMyTaskWorklogsQuery();
+ const { allUsers, getUserInfo, isLoading: usersLoading } = useUserMap();
+
+  // Stable callback — updates only the changed project's slot in the map
+  const handleProjectData = React.useCallback((result: ProjectDataResult) => {
+    setProjectDataMap((prev) => {
+      const existing = prev[result.projectId];
+      // Shallow-compare to avoid infinite loops
+      if (
+        existing &&
+        existing.tasks === result.tasks &&
+        existing.worklogs === result.worklogs &&
+        existing.isLoading === result.isLoading &&
+        existing.isFetching === result.isFetching &&
+        existing.isError === result.isError
+      ) {
+        return prev;
+      }
+      return { ...prev, [result.projectId]: result };
+    });
+  }, []);
+
+  // Flatten all project data
+  const allProjectResults = Object.values(projectDataMap);
+  const allTasks: Task[] = allProjectResults.flatMap((r) => r.tasks);
+  const allWorklogs: TaskWorklog[] = allProjectResults.flatMap((r) => r.worklogs);
+
+  const dataLoading = allProjectResults.some((r) => r.isLoading) || myTasksLoading || myTaskWorklogsLoading;
+  const dataFetching = allProjectResults.some((r) => r.isFetching) || myTasksFetching || myTaskWorklogsFetching;
+  const dataError = allProjectResults.some((r) => r.isError) || myTasksError || myTaskWorklogsError;
 
   const isLoading = projectsLoading || dataLoading || usersLoading;
   const isFetching = projectsFetching || dataFetching;
@@ -273,6 +352,11 @@ const ResourceUtilisationPage: React.FC = () => {
       ...allUsers.map((u) => ({ label: u.name, value: u.id })),
     ];
   }, [allUsers]);
+
+
+  const userComboboxItems = useMemo(() => {
+    return userOptions.map((o) => ({ label: o.label, value: String(o.label) }));
+  }, [userOptions]);
 
   const projectOptions = useMemo(() => {
     return [
@@ -292,8 +376,8 @@ const ResourceUtilisationPage: React.FC = () => {
     if (projectFilter !== "all") {
       filtered = filtered.filter((t) => String(t.projectId) === projectFilter);
     }
-    return buildTeamMemberData(filtered, getUserInfo);
-  }, [allTasks, userFilter, projectFilter, getUserInfo]);
+    return buildTeamMemberData(filtered, allMyTasks, allMyTaskWorklogs,getUserInfo);
+  }, [allTasks, allMyTasks, allMyTaskWorklogs, userFilter, projectFilter, getUserInfo]);
 
   // ── Timesheet data ──
 const timesheetData = useMemo(() => {
@@ -363,27 +447,8 @@ const timesheetData = useMemo(() => {
     myTaskIds.has(w.myTaskId)
   );
 
-  console.log({
-    filteredTasks,
-    filteredWorklogs,
-    filteredMyTasks,
-    filteredMyTaskWorklogs,
-  });
-
-  return buildTimesheetData(
-    filteredTasks,
-    filteredWorklogs, getUserInfo,
-    filteredMyTasks,
-    filteredMyTaskWorklogs
-  );
-}, [
-  allTasks,
-  allWorklogs,
-  allMyTasks,
-  allMyTaskWorklogs,
-  userFilter,
-  projectFilter, getUserInfo,
-]);
+    return buildTimesheetData(filteredTasks, filteredWorklogs, filteredMyTasks, filteredMyTaskWorklogs,getUserInfo);
+  }, [allTasks, allWorklogs, allMyTasks, allMyTaskWorklogs, userFilter, projectFilter, getUserInfo]);
 
   // ── Team view columns ──
 
@@ -467,7 +532,20 @@ const timesheetData = useMemo(() => {
   const goToCurrentWeek = () => setStartDate(new Date());
 
   return (
-     <div className="w-full">     
+    <div className="w-full">
+      {/*
+        Render one ProjectDataFetcher per project.
+        Each is a stable component instance with a fixed number of hooks internally.
+        This replaces the broken hooks-inside-.map() pattern.
+      */}
+      {projects.map((p) => (
+        <ProjectDataFetcher
+          key={String(p.id)}
+          projectId={String(p.id)}
+          onData={handleProjectData}
+        />
+      ))}
+
       {isFetching ? (
         <div className="flex flex-col gap-4">
           {/* Header */}
@@ -512,7 +590,10 @@ const timesheetData = useMemo(() => {
           </Card>
         </div>
       ) : isError ? (
-        <ErrorState message="We couldn’t load the resource utilisation data right now. Please try again after a moment." onRetry={refetch} />
+        <ErrorState
+          message="We couldn't load the resource utilisation data right now. Please try again after a moment."
+          onRetry={refetch}
+        />
       ) : (
         <div className="p-4 space-y-6">
           {/* Header */}
@@ -602,9 +683,19 @@ const timesheetData = useMemo(() => {
                   <div className="w-full md:w-[180px]">
                     <ComboboxInput
                       placeholder="All Users"
-                      items={userOptions}
-                      defaultValue={userFilter}
-                      onSelect={(value) => setUserFilter(value as string)}
+                      items={userComboboxItems}
+                      defaultValue={
+                        userFilter === "all" ? "All Users" : getUserInfo(userFilter).name
+                      }
+                      onSelect={(value) => {
+                        const selectedName = value as string;
+                        if (selectedName === "All Users") {
+                          setUserFilter("all");
+                          return;
+                        }
+                        const match = allUsers.find((u) => u.name === selectedName);
+                        setUserFilter(match ? match.id : "all");
+                      }}
                     />
                   </div>
                   <div className="w-full md:w-[180px]">
@@ -625,34 +716,29 @@ const timesheetData = useMemo(() => {
                     <TableRow>
                       <TableHead>Assignee</TableHead>
                       {weekDates.map((date) => (
-                        <TableHead key={date.toISOString()}>
-                          {formatDate(date)}
-                        </TableHead>
+                        <TableHead key={date.toISOString()}>{formatDate(date)}</TableHead>
                       ))}
                       <TableHead>Total</TableHead>
                     </TableRow>
                   </TableHeader>
-
                   <TableBody>
                     {isLoading ? (
                       <TableRow>
-                    <TableCell colSpan={weekDates.length + 2} className="text-center">
+                        <TableCell colSpan={weekDates.length + 2} className="text-center">
                           Loading timesheet...
                         </TableCell>
                       </TableRow>
                     ) : timesheetData.length === 0 ? (
                       <TableRow>
-                    <TableCell colSpan={weekDates.length + 2} className="text-center">
+                        <TableCell colSpan={weekDates.length + 2} className="text-center">
                           No time logged
                         </TableCell>
                       </TableRow>
                     ) : (
                       timesheetData.map((row) => {
                         const total = weekDates.reduce((sum, date) => {
-                          const key = toKey(date);
-                          return sum + (row.entries[key] || 0);
+                          return sum + (row.entries[toKey(date)] || 0);
                         }, 0);
-
                         return (
                           <TableRow key={row.userId}>
                             <TableCell>{row.name}</TableCell>
@@ -660,14 +746,10 @@ const timesheetData = useMemo(() => {
                               const key = toKey(date);
                               const hrs = row.entries[key] || 0;
                               return (
-                                <TableCell key={key}>
-                                  {hrs ? `${hrs}h` : "-"}
-                                </TableCell>
+                                <TableCell key={key}>{hrs ? `${hrs}h` : "-"}</TableCell>
                               );
                             })}
-                            <TableCell className="font-semibold">
-                                 {total}h
-                            </TableCell>
+                            <TableCell className="font-semibold">{total}h</TableCell>
                           </TableRow>
                         );
                       })
