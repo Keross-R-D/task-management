@@ -33,7 +33,7 @@ export default function RecentTasksTable({
                 <TableBody>
                     {tasks.length === 0 ? (
                         <TableRow>
-                            <TableCell colSpan={2} className="text-center py-4">
+                            <TableCell colSpan={4} className="text-center py-4">
                                 No data available
                             </TableCell>
                         </TableRow>
