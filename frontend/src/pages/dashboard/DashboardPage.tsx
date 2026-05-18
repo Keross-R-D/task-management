@@ -8,6 +8,7 @@ import { useGetMyTasksQuery, userMap } from "@/features/myTasks/mytasksApiSlice"
 import { useGetProjectsQuery } from "@/features/projects/projectsApiSlice";
 import type { Task as ProjectTask } from "@/features/tasks/tasksApiSlice";
 import { useLazyGetTasksByProjectQuery } from "@/features/tasks/tasksApiSlice";
+import { MdBorderColor } from "react-icons/md";
 
 //Types
 type Task = {
@@ -230,7 +231,7 @@ const DashboardPage: React.FC = () => {
         radius: ["60%", "80%"],
         avoidLabelOverlap: false,
         itemStyle: {
-          borderRadius: 6,
+          borderColor: "#000",
           borderWidth: 2,
         },
         label: {
@@ -415,6 +416,8 @@ const DashboardPage: React.FC = () => {
   const formatProjectStatus = (status: string) => {
     return status.replace(/_/g, " ");
   };
+
+console.log(hoursPercentage);
 
   return (
     <div className="p-4">
