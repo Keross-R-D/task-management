@@ -31,26 +31,12 @@ import {
 } from "ikon-react-components-lib";
 import ProjectCard from "./components/ProjectCard";
 import { useNavigate } from "react-router-dom";
-import { useGetMyTasksQuery, userMap } from "@/features/myTasks/mytasksApiSlice";
+import { useGetMyTasksQuery } from "@/features/myTasks/mytasksApiSlice";
 import { useGetProjectsQuery } from "@/features/projects/projectsApiSlice";
 import type { Task as ProjectTask } from "@/features/tasks/tasksApiSlice";
 import { useLazyGetTasksByProjectQuery } from "@/features/tasks/tasksApiSlice";
-<<<<<<< HEAD
-import { MdBorderColor } from "react-icons/md";
-
-//Types
-type Task = {
-    id: string;
-    name: string;
-    actualHours: number,
-    estimatedHours: number,
-    status: "Todo" | "In progress" | "Done" | "Blocked";
-    priority: "Low" | "Medium" | "High";
-    type: "Task" | "Bug" | "Improvement",
-    assignee: string,
-    updatedAt: string
-=======
 import ErrorState from "@/components/ErrorState";
+import { useUserMap } from "@/utils/userMap";
 
 //Types
 type Task = {
@@ -62,7 +48,6 @@ type Task = {
   priority: "Low" | "Medium" | "High";
   type: "Task" | "Bug" | "Improvement";
   assignee: string;
->>>>>>> 8d7a9f9f97040af0a3465c6d16df03b6b5b322cf
 };
 
 type ProjectTaskWithProject = ProjectTask & {
@@ -173,17 +158,6 @@ const DashboardPage: React.FC = () => {
 
 
   const tasks = data?.content?.map((task) => ({
-<<<<<<< HEAD
-        id: task.id,
-        name: task.taskTitle,
-        status: formatStatus(task.taskStatus),
-        actualHours: task.actualHours, //Dummy data for now
-        estimatedHours: task.estimatedHours,
-        priority: formatPriority(task.taskPriority),
-        type: formatType(task.taskType),
-        assignee: mapAssignee(task.assigneeId),
-        updatedAt: task.updatedAt
-=======
     id: task.id,
     name: task.taskTitle,
     status: formatStatus(task.taskStatus),
@@ -192,7 +166,6 @@ const DashboardPage: React.FC = () => {
     priority: formatPriority(task.taskPriority),
     type: formatType(task.taskType),
     assignee: getUserInfo(task.assigneeId).name
->>>>>>> 8d7a9f9f97040af0a3465c6d16df03b6b5b322cf
   })) || [];
 
   const formattedProjectTasks = projectTasks.map((task) => ({
@@ -203,12 +176,7 @@ const DashboardPage: React.FC = () => {
     estimatedHours: task.estimatedHours,
     priority: formatPriority(task.priority.toUpperCase()),
     type: formatType(task.type.toUpperCase()),
-<<<<<<< HEAD
-    assignee: task.assigneeId || "",
-    updatedAt: task.updatedAt || ""
-=======
     assignee: getUserInfo(task.assigneeId).name,
->>>>>>> 8d7a9f9f97040af0a3465c6d16df03b6b5b322cf
   }));
 
   //Calculations
@@ -293,7 +261,7 @@ const DashboardPage: React.FC = () => {
         radius: ["60%", "80%"],
         avoidLabelOverlap: false,
         itemStyle: {
-          borderColor: "#000",
+          borderRadius: 6,
           borderWidth: 2,
         },
         label: {
@@ -307,19 +275,14 @@ const DashboardPage: React.FC = () => {
           },
         },
         data: [
-          { value: todo, name: "Todo", itemStyle: { color: "#3b82f6" } },
+          { value: todo, name: "Todo", itemStyle: { color: "#9ca3af" } },
           { value: done, name: "Done", itemStyle: { color: "#22c55e" } },
-<<<<<<< HEAD
-          { value: inProgress, name: "In Progress", itemStyle: { color: "#9ca3af" } },
-          { value: blocked, name: "Blocked", itemStyle: { color: "#ef4444" } }
-=======
           {
             value: inProgress,
             name: "In Progress",
             itemStyle: { color: "#6366f1" },
           },
           { value: blocked, name: "Blocked", itemStyle: { color: "red" } },
->>>>>>> 8d7a9f9f97040af0a3465c6d16df03b6b5b322cf
         ],
       },
     ],
@@ -489,22 +452,6 @@ const DashboardPage: React.FC = () => {
     );
   };
 
-  //Show only the 5 recent tasks
-  const recentTasks = [...allTasks]
-  .sort(
-    (a, b) =>
-      new Date(b.updatedAt || 0).getTime() -
-      new Date(a.updatedAt || 0).getTime()
-  )
-  .slice(0, 5);
-
-  //Replace '_' with space in project status
-  const formatProjectStatus = (status: string) => {
-    return status.replace(/_/g, " ");
-  };
-
-console.log(hoursPercentage);
-
   return (
     <div className="space-y-6">
       {isFetching ? (
@@ -599,118 +546,6 @@ console.log(hoursPercentage);
               </p>
             </div>
           </div>
-<<<<<<< HEAD
-      </div>
-      <div className="grid mt-5 mb-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-          <StatsCard title="Total" description="Total projects" value={projects.length} color="text-indigo-500" bg="bg-indigo-500/10" Icon={LayoutList} />
-
-          <StatsCard title="Active" description="Active Projects" value={0} color="text-amber-500" bg="bg-amber-500/10" Icon={FolderKanban} />
-
-          <StatsCard title="Total" description="Total tasks" value={total} color="text-indigo-500" bg="bg-indigo-500/10" Icon={NotepadText} />
-
-          <StatsCard title="To Do" description="Pending tasks" value={todo} color="text-blue-500" bg="bg-blue-500/10" Icon={ListTodo} />
-
-          <StatsCard title="In Progress" description="Ongoing tasks" value={inProgress} color="text-yellow-500" bg="bg-yellow-500/10" Icon={LoaderCircle} />
-
-          <StatsCard title="Done" description="Completed tasks" value={done} color="text-green-500" bg="bg-green-500/10" Icon={SquareCheckBig} />
-      </div>
-
-      <div className="grid sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-1 xl:grid-cols-3 gap-6 mb-4">
-        {/* Effort By Project */}
-        <Card className="lg:col-span-2 p-4">
-          <CardTitle className="flex gap-2 items-center text-lg font-semibold"><TrendingUp className="text-indigo-500"/>Effort By Projects</CardTitle>
-          <CardContent className="p-2 space-y-4">
-            <div className="grid lg:grid-cols-2 gap-6 space-y-2">
-                {/* Task Completion */}
-                <div className="col-span-1">
-                  <span className="font-semibold text-muted-foreground text-lg">Task Completion</span>
-                  <div className="flex justify-between mb-2">
-                    <p className="text-2xl font-bold">{done} <span className="text-muted-foreground text-lg font-normal">/ {total}</span></p>
-                    <span className="font-medium text-xl text-green-500">{taskPercentage} %</span>
-                  </div>
-                  <Progress value={taskPercentage} className="[&>div]:bg-green-500"/>
-                </div>
-
-                {/* Hours Logged */}
-                <div className="col-span-1">
-                  <span className="font-semibold text-muted-foreground text-lg">Hours Logged</span>
-                  <div className="flex justify-between mb-2">
-                    <p className="text-2xl font-bold">{totalActualHours} <span className="text-muted-foreground text-lg font-normal">/ {totalEstimatedHours}</span></p>
-                    <span className="font-medium text-xl text-green-500">{hoursPercentage} %</span>
-                  </div>
-                  <Progress value={hoursPercentage} className="[&>div]:bg-green-500"/>
-                </div>
-            </div>
-            <div className="flex items-center justify-center text-muted-foreground">
-              {/* You can place chart / icon here */}
-              <EChart
-                option={optionBar}
-                style={{ height: "380px", width: "100%" }}
-              />
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Task Distribution */}
-        <Card className="p-4">
-          <CardTitle className="flex gap-2 items-center text-lg font-semibold"><ChartPie className="text-blue-500"/>Task Distribution</CardTitle>
-          <CardContent className="p-2 space-y-4">
-            <EChart
-              option={optionPie}
-              style={{ height: "260px", width: "100%" }}
-            />
-            <div>
-              <span className="flex justify-between">
-                <span className="flex gap-3 items-center justify-center font-semibold"><span className="w-2 h-2 rounded-full bg-blue-500" />Todo</span><span className="font-semibold">{todo}</span>
-              </span>
-              <span className="flex justify-between">
-                <span className="flex gap-3 items-center justify-center font-semibold"><span className="w-2 h-2 rounded-full bg-green-500" />Done</span><span className="font-semibold">{done}</span>
-              </span>
-              <span className="flex justify-between">
-                <span className="flex gap-3 items-center justify-center font-semibold"><span className="w-2 h-2 rounded-full bg-yellow-500" />In Progress</span><span className="font-semibold">{inProgress}</span>
-              </span>
-              <span className="flex justify-between">
-                <span className="flex gap-3 items-center justify-center font-semibold"><span className="w-2 h-2 rounded-full bg-red-500" />Blocked</span><span className="font-semibold">{blocked}</span>
-              </span>
-            </div>
-            <Separator />
-            <div>
-              <span className="font-semibold text-sm text-muted-foreground">BY PRIORITY</span>
-              <span className="flex justify-between mt-2">
-                <span className="flex gap-3 items-center justify-center font-semibold"><span className="w-2 h-2 rounded-full bg-green-500" />Low</span><span className="font-semibold">{low}</span>
-              </span>
-              <span className="flex justify-between">
-                <span className="flex gap-3 items-center justify-center font-semibold"><span className="w-2 h-2 rounded-full bg-yellow-500" />Medium</span><span className="font-semibold">{medium}</span>
-              </span>
-              <span className="flex justify-between">
-                <span className="flex gap-3 items-center justify-center font-semibold"><span className="w-2 h-2 rounded-full bg-red-500" />High</span><span className="font-semibold">{high}</span>
-              </span>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="grid sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-1 xl:grid-cols-3 gap-6">
-        {/* Recent Tasks */}
-        <Card className="lg:col-span-2 p-4">
-          <div className="flex justify-between">
-            <CardTitle className="flex gap-2 items-center text-lg font-semibold"><CalendarClock className="text-indigo-500"/>Recent Tasks</CardTitle>
-            <button
-              onClick={() => navigate("/main/tasks")}
-              className="flex items-center gap-2 cursor-pointer text-indigo-500 hover:text-indigo-600"
-            >
-              View All
-            </button>
-          </div>
-          <div>
-            <DataTableLayout data={recentTasks} columns={columns}
-              extraTools={{
-                totalPages: 2,
-                toggleViewMode: true,
-                isLoading: isLoading,
-                gridComponent: renderGrid
-              }}
-=======
           <div className="grid mt-5 mb-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
             <StatsCard
               title="Total"
@@ -764,36 +599,9 @@ console.log(hoursPercentage);
               color="text-green-500"
               bg="bg-green-500/10"
               Icon={SquareCheckBig}
->>>>>>> 8d7a9f9f97040af0a3465c6d16df03b6b5b322cf
             />
           </div>
 
-<<<<<<< HEAD
-        <div className="grid xl:grid-cols-3 gap-6">
-          {/* Projects */}
-          <Card className="p-4 xl:col-span-3">
-            <div className="flex justify-between">
-              <CardTitle className="flex gap-2 items-center text-lg font-semibold"><FolderKanban className="text-amber-500"/>Projects</CardTitle>
-              <button
-                onClick={() => navigate("/main/projects")}
-                className="flex items-center gap-2 cursor-pointer text-indigo-500 hover:text-indigo-600"
-              >
-                View All
-              </button>
-            </div>
-            <CardContent className="p-2 space-y-4 max-h-[420px] overflow-y-auto">
-              {isProjectLoading ? (
-                <p className="text-sm text-muted-foreground flex items-center justify-center">Loading...</p>
-              ) : projects.length === 0 ? (
-                <p className="text-sm text-muted-foreground flex items-center justify-center">No projects found!</p>
-              ) : (
-                projects.map((project) => (
-                  <ProjectCard
-                    key={project.id}
-                    id={String(project.id)}
-                    name={project.projectName}
-                    status={formatProjectStatus(project.projectStatus)}
-=======
           <div className="grid sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-1 xl:grid-cols-3 gap-6 mb-4">
             {/* Effort By Project */}
             <Card className="lg:col-span-2 p-4">
@@ -834,7 +642,6 @@ console.log(hoursPercentage);
                   <EChart
                     option={optionBar}
                     style={{ height: "380px", width: "100%" }}
->>>>>>> 8d7a9f9f97040af0a3465c6d16df03b6b5b322cf
                   />
                 </div>
               </CardContent>
