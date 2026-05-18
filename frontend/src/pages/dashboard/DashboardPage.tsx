@@ -1,34 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import StatsCard from "../myTasks/components/StatsCard";
-import {
-  ArrowDown,
-  ArrowUp,
-  Ban,
-  CalendarClock,
-  ChartPie,
-  CheckCircle2,
-  CircleUser,
-  Clock,
-  Flame,
-  FolderKanban,
-  LayoutList,
-  ListTodo,
-  LoaderCircle,
-  NotepadText,
-  SquareCheckBig,
-  TrendingUp,
-  Users,
-} from "lucide-react";
-import {
-  Card,
-  CardContent,
-  CardTitle,
-  DataTableLayout,
-  EChart,
-  Progress,
-  Separator,
-  Skeleton,
-} from "ikon-react-components-lib";
+import { CalendarClock, ChartPie, FolderKanban, LayoutList, ListTodo, LoaderCircle, NotepadText, SquareCheckBig, TrendingUp, Users } from "lucide-react";
+import { Card, CardContent, CardTitle, EChart, Progress, Separator, Skeleton } from "ikon-react-components-lib";
 import ProjectCard from "./components/ProjectCard";
 import { useNavigate } from "react-router-dom";
 import { useGetMyTasksQuery } from "@/features/myTasks/mytasksApiSlice";
@@ -37,6 +10,7 @@ import type { Task as ProjectTask } from "@/features/tasks/tasksApiSlice";
 import { useLazyGetTasksByProjectQuery } from "@/features/tasks/tasksApiSlice";
 import ErrorState from "@/components/ErrorState";
 import { useUserMap } from "@/utils/userMap";
+import RecentTasksTable from "./components/RecentTasksTable";
 
 //Types
 type Task = {
@@ -48,6 +22,7 @@ type Task = {
   priority: "Low" | "Medium" | "High";
   type: "Task" | "Bug" | "Improvement";
   assignee: string;
+  updatedAt: string;
 };
 
 type ProjectTaskWithProject = ProjectTask & {
@@ -155,17 +130,16 @@ const DashboardPage: React.FC = () => {
     }
   };
 
-
-
   const tasks = data?.content?.map((task) => ({
     id: task.id,
     name: task.taskTitle,
     status: formatStatus(task.taskStatus),
-    actualHours: task.actualHours, //Dummy data for now
+    actualHours: task.actualHours,
     estimatedHours: task.estimatedHours,
     priority: formatPriority(task.taskPriority),
     type: formatType(task.taskType),
-    assignee: getUserInfo(task.assigneeId).name
+    assignee: getUserInfo(task.assigneeId).name,
+    updatedAt: task.updatedAt
   })) || [];
 
   const formattedProjectTasks = projectTasks.map((task) => ({
@@ -177,6 +151,7 @@ const DashboardPage: React.FC = () => {
     priority: formatPriority(task.priority.toUpperCase()),
     type: formatType(task.type.toUpperCase()),
     assignee: getUserInfo(task.assigneeId).name,
+    updatedAt: task.updatedAt
   }));
 
   //Calculations
@@ -261,8 +236,7 @@ const DashboardPage: React.FC = () => {
         radius: ["60%", "80%"],
         avoidLabelOverlap: false,
         itemStyle: {
-          borderRadius: 6,
-          borderWidth: 2,
+          borderWidth: 1,
         },
         label: {
           show: false,
@@ -303,154 +277,14 @@ const DashboardPage: React.FC = () => {
     ],
   };
 
-  //Recent Task DataTable columns
-  const columns = [
-    {
-      accessorKey: "name",
-      header: "Task",
-      cell: ({ row }: { row: { original: Task } }) => (
-        <span className="font-medium">{row.original.name}</span>
-      ),
-    },
-    {
-      accessorKey: "status",
-      header: "Status",
-      cell: ({ row }: { row: { original: Task } }) => {
-        const status = row.original.status;
-
-        const styles: Record<Task["status"], string> = {
-          Todo: "bg-blue-500/10 text-blue-500",
-          "In progress": "bg-yellow-500/10 text-yellow-500",
-          Done: "bg-green-500/10 text-green-500",
-          Blocked: "bg-red-500/10 text-red-500",
-        };
-
-        return (
-          <span
-            className={`px-2 py-1 rounded-md text-sm font-medium ${styles[status]}`}
-          >
-            {status}
-          </span>
-        );
-      },
-    },
-    {
-      accessorKey: "priority",
-      header: "Priority",
-      cell: ({ row }: { row: { original: Task } }) => {
-        const priority = row.original.priority;
-
-        const styles: Record<Task["priority"], string> = {
-          Low: "text-green-500",
-          Medium: "text-yellow-500",
-          High: "text-red-500",
-        };
-
-        return (
-          <span className={`font-semibold ${styles[priority]}`}>
-            {priority}
-          </span>
-        );
-      },
-    },
-    {
-      accessorKey: "assignee",
-      header: "Assignee",
-      cell: ({ row }: { row: { original: Task } }) => {
-        const assignee = row.original.assignee
-          .split(" ")
-          .map(
-            (word) =>
-              word.charAt(0).toUpperCase() + word.slice(1).toLowerCase(),
-          )
-          .join(" ");
-
-        return (
-          <span className="flex gap-1 items-center font-semibold bg-muted w-fit rounded-md px-1.5 py-1">
-            {assignee}
-          </span>
-        );
-      },
-    },
-  ];
-
-  //Recent Task grid view
-  const renderGrid = (data: Task[]) => {
-    const statusIcons: Record<Task["status"], React.ReactNode> = {
-      Todo: <ListTodo className="h-3.5 w-3.5" />,
-      "In progress": <Clock className="h-3.5 w-3.5" />,
-      Done: <CheckCircle2 className="h-3.5 w-3.5" />,
-      Blocked: <Ban className="h-3.5 w-3.5" />,
-    };
-
-    const priorityIcons: Record<Task["priority"], React.ReactNode> = {
-      Low: <ArrowDown className="h-4 w-4" />,
-      Medium: <ArrowUp className="h-4 w-4" />,
-      High: <Flame className="h-4 w-4" />,
-    };
-
-    const statusStyles: Record<Task["status"], string> = {
-      Todo: "text-indigo-500",
-      "In progress": "text-yellow-500",
-      Done: "text-green-500",
-      Blocked: "text-red-500",
-    };
-
-    const statusBorderStyles: Record<Task["status"], string> = {
-      Todo: "border-t-indigo-500",
-      "In progress": "border-t-yellow-500",
-      Done: "border-t-green-500",
-      Blocked: "border-t-red-500",
-    };
-
-    const priorityStyles: Record<Task["priority"], string> = {
-      Low: "bg-green-500/10 text-green-500",
-      Medium: "bg-yellow-500/10 text-yellow-500",
-      High: "bg-red-500/10 text-red-500",
-    };
-
-    return (
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {data.map((task) => (
-          <div
-            key={task.id}
-            className={`p-5 border rounded-xl shadow-muted bg-muted/30 relative border-t-2 ${statusBorderStyles[task.status]}`}
-          >
-            <h3 className="text-lg font-semibold px-0.5 mb-1">{task.name}</h3>
-
-            <div
-              className={`flex gap-1 items-center text-sm font-semibold mb-4 ${statusStyles[task.status]}`}
-            >
-              {statusIcons[task.status]}
-              {task.status}
-            </div>
-
-            <div
-              className={`flex gap-1 items-center px-2 py-1 mt-1 rounded-md text-sm font-medium w-fit ${priorityStyles[task.priority]}`}
-            >
-              {priorityIcons[task.priority]}
-              {task.priority}
-            </div>
-
-            <div className="flex items-center gap-2 mt-3 text-sm text-muted-foreground">
-              <CircleUser className="h-3 w-3" />
-              Assigned to:{" "}
-              <span className="font-medium">
-                {task.assignee
-                  .split(" ")
-                  .map(
-                    (word) =>
-                      word.charAt(0).toUpperCase() +
-                      word.slice(1).toLowerCase(),
-                  )
-                  .join(" ") || "Unassigned"}
-              </span>
-            </div>
-          </div>
-        ))}
-      </div>
-    );
-  };
+  //Show only the 5 recent tasks
+  const recentTasks = [...allTasks]
+    .sort(
+      (a, b) =>
+        new Date(b.updatedAt || 0).getTime() -
+        new Date(a.updatedAt || 0).getTime()
+    )
+    .slice(0, 5);
 
   return (
     <div className="space-y-6">
@@ -613,28 +447,22 @@ const DashboardPage: React.FC = () => {
                 <div className="grid lg:grid-cols-2 gap-6 space-y-3">
                   {/* Task Completion */}
                   <div className="col-span-1">
-                    <span className="font-semibold text-lg">
-                      Task Completion
-                    </span>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span className="text-muted-foreground">
-                        {done} / {total}
-                      </span>
-                      <span className="font-medium">{taskPercentage} %</span>
+                    <span className="font-semibold text-muted-foreground">Task Completion</span>
+                    <div className="flex justify-between mb-2">
+                      <p className="text-2xl font-bold">{done} <span className="text-muted-foreground text-lg font-normal">/ {total}</span></p>
+                      <span className="font-medium text-xl text-green-500">{taskPercentage} %</span>
                     </div>
-                    <Progress value={taskPercentage} />
+                    <Progress value={taskPercentage} className="[&>div]:bg-green-500"/>
                   </div>
 
                   {/* Hours Logged */}
                   <div className="col-span-1">
-                    <span className="font-semibold text-lg">Hours Logged</span>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span className="text-muted-foreground">
-                        {totalActualHours} / {totalEstimatedHours}
-                      </span>
-                      <span className="font-medium">{hoursPercentage} %</span>
+                    <span className="font-semibold text-muted-foreground">Hours Logged</span>
+                    <div className="flex justify-between mb-2">
+                      <p className="text-2xl font-bold">{totalActualHours} <span className="text-muted-foreground text-lg font-normal">/ {totalEstimatedHours}</span></p>
+                      <span className="font-medium text-xl text-green-500">{hoursPercentage} %</span>
                     </div>
-                    <Progress value={hoursPercentage} />
+                    <Progress value={hoursPercentage} className="[&>div]:bg-green-500"/>
                   </div>
                 </div>
                 <div className="flex items-center justify-center text-muted-foreground">
@@ -732,15 +560,9 @@ const DashboardPage: React.FC = () => {
                 </button>
               </div>
               <div>
-                <DataTableLayout
-                  data={allTasks}
-                  columns={columns}
-                  extraTools={{
-                    totalPages: 2,
-                    toggleViewMode: true,
-                    isLoading: isLoading,
-                    gridComponent: renderGrid,
-                  }}
+                <RecentTasksTable
+                  tasks={recentTasks}
+                  isLoading={isLoading}
                 />
               </div>
               <CardContent className="p-2 space-y-4"></CardContent>
@@ -761,7 +583,7 @@ const DashboardPage: React.FC = () => {
                     View All
                   </button>
                 </div>
-                <CardContent className="p-2 space-y-4">
+                <CardContent className="p-2 space-y-4 max-h-[420px] overflow-y-auto">
                   {isProjectLoading ? (
                     <p className="text-sm text-muted-foreground">Loading...</p>
                   ) : projects.length === 0 ? (
