@@ -5,6 +5,7 @@ import {
   type Task,
 } from "@/features/tasks/tasksApiSlice";
 import {
+  Button,
   Card,
   CardContent,
   CardHeader,
@@ -22,15 +23,15 @@ import {
   ChartColumn,
   Clock,
   Target,
-
   CircleCheck,
   CircleAlert,
+  Download,
 } from "lucide-react";
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import WeekSprintTable from "./WeekSprintTable";
-
-
+import { PDFDownloadLink } from "@react-pdf/renderer";
+import ProjectStatusPdf from "./ProjectStatusPdf";
 
 //Types
 type OverdueTask = {
@@ -312,14 +313,66 @@ const ProjectStatusDetailPage: React.FC = () => {
 
   return (
     <div className="flex flex-col gap-6 p-4">
-      <div className="mb-3">
+      <div className="flex justify-between mb-2">
         <button
           className="flex gap-2 text-sm font-bold cursor-pointer"
           onClick={() => navigate(-1)}
         >
           <ChevronLeft />
-          <div className="flex items-center">Back to reports</div>
+          <div className="mt-0.5">Back to reports</div>
         </button>
+
+        <div className="flex justify-end">
+          <PDFDownloadLink
+            document={
+              <ProjectStatusPdf
+                project={{
+                  projectName: computedData.projectName,
+                  startDate: formatDate(computedData.startDate),
+                  endDate: formatDate(computedData.endDate),
+                  projectStatus: computedData.status,
+                  progress: computedData.progress,
+                  estimatedHours: computedData.estimatedHours,
+                  actualHours: computedData.actualHours,
+                  overallStatus: status === "on_time" ? "ON_TIME" : status === "slight_delay" ? "SLIGHT_DELAY" : "DELAY",
+                }}
+
+                executiveSummary={{
+                  runningOutOfTime: overdueTasks.length,
+                  risks: 0,
+                  completedTasks: computedData.tasksDone,
+                  remainingTasks: computedData.remainingTasks,
+                  totalTasks: computedData.tasksTotal,
+                }}
+
+                overdueTasks={overdueTasks}
+
+                currentWeek={currentWeekData}
+
+                previousWeek={previousWeekSprints.map((s) => ({
+                  sprintName: s.name,
+                  progress: getProgress(s.id),
+                }))}
+
+                upcomingWeek={upcomingWeekData}
+
+                risks={[]}
+
+                issues={[]}
+
+                remarks="Project is progressing according to the current sprint plan."
+              />
+            }
+            fileName={`PSR of ${computedData.projectName} - ${formatDate(today)}.pdf`}
+          >
+            {({ loading }) => (
+              <Button className="px-4 py-2 rounded-lg text-sm">
+                <Download />
+                {loading ? "Generating PDF..." : "Download PDF"}
+              </Button>
+            )}
+          </PDFDownloadLink>
+        </div>
       </div>
       <div>
         <div className="grid grid-cols-1 lg:grid-cols-2! x gap-6">
