@@ -1,10 +1,4 @@
-import {
-    Document,
-    Page,
-    Text,
-    View,
-    StyleSheet,
-} from "@react-pdf/renderer";
+import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
 
 interface OverdueTask {
     sprintName: string;
@@ -16,7 +10,10 @@ interface OverdueTask {
 
 interface WeeklySprint {
     sprintName: string;
+    plannedStartDate: string,
     plannedEndDate: string;
+    progress: number;
+    status: string;
 }
 
 interface ProjectStatusPdfProps {
@@ -25,9 +22,13 @@ interface ProjectStatusPdfProps {
         startDate: string;
         endDate: string;
         projectStatus: string;
-        progress: number;
-        estimatedHours: number;
-        actualHours: number;
+        type: string;
+        progress: number,
+        estimatedHours: number,
+        actualHours: number,
+        managerName: string,
+        managerDelegateName: string,
+        clientName: string;
         overallStatus: "ON_TIME" | "SLIGHT_DELAY" | "DELAY";
     };
 
@@ -90,14 +91,15 @@ const styles = StyleSheet.create({
     },
 
     section: {
-        marginBottom: 16,
+        marginBottom: 12,
         border: `1px solid ${colors.border}`,
         borderRadius: 8,
-        overflow: "hidden",
     },
 
     sectionHeader: {
         backgroundColor: colors.cyan,
+        borderTopLeftRadius: 8,
+        borderTopRightRadius: 8,
         padding: 10,
     },
 
@@ -110,6 +112,7 @@ const styles = StyleSheet.create({
     sectionBody: {
         padding: 14,
         backgroundColor: colors.card,
+        borderRadius: 8,
     },
 
     row: {
@@ -136,7 +139,7 @@ const styles = StyleSheet.create({
         paddingVertical: 4,
         paddingHorizontal: 4,
         borderRadius: 4,
-        fontSize: 10,
+        fontSize: 9,
         fontWeight: 700,
         color: "#fff",
     },
@@ -148,8 +151,9 @@ const styles = StyleSheet.create({
 
     tableHeader: {
         flexDirection: "row",
-        backgroundColor: colors.muted,
-        color: "#fff",
+        backgroundColor: "#bbeffa",
+        fontWeight: 600,
+        color: "#000",
         paddingVertical: 8,
         paddingHorizontal: 6,
         borderBottom: `1px solid ${colors.border}`,
@@ -210,9 +214,6 @@ export default function ProjectStatusPdf({
     currentWeek,
     previousWeek,
     upcomingWeek,
-    risks = [],
-    issues = [],
-    remarks = "",
 }: ProjectStatusPdfProps) {
     return (
         <Document>
@@ -255,6 +256,7 @@ export default function ProjectStatusPdf({
                                         backgroundColor: getStatusColor(
                                             project.overallStatus
                                         ),
+                                        alignSelf: "flex-start",
                                     }}
                                 >
                                     {project.overallStatus.replace("_", " ")}
@@ -266,30 +268,46 @@ export default function ProjectStatusPdf({
                             <View style={styles.column}>
                                 <Text style={styles.label}>Status</Text>
                                 <Text style={styles.value}>
-                                    {project.projectStatus}
+                                    {project.projectStatus.replace("_", " ")}
                                 </Text>
                             </View>
 
                             <View style={styles.column}>
-                                <Text style={styles.label}>Progress</Text>
+                                <Text style={styles.label}>Start Date</Text>
                                 <Text style={styles.value}>
-                                    {project.progress}%
+                                    {project.startDate}
                                 </Text>
                             </View>
                         </View>
 
                         <View style={styles.row}>
                             <View style={styles.column}>
-                                <Text style={styles.label}>Estimated Hours</Text>
+                                <Text style={styles.label}>Manager Name</Text>
                                 <Text style={styles.value}>
-                                    {project.estimatedHours}h
+                                    {project.managerName || "Unassigned"}
                                 </Text>
                             </View>
 
                             <View style={styles.column}>
-                                <Text style={styles.label}>Actual Hours</Text>
+                                <Text style={styles.label}>Type</Text>
                                 <Text style={styles.value}>
-                                    {project.actualHours}h
+                                    {project.type}
+                                </Text>
+                            </View>
+                        </View>
+
+                        <View style={styles.row}>
+                            <View style={styles.column}>
+                                <Text style={styles.label}>Manager Delegate</Text>
+                                <Text style={styles.value}>
+                                    {project.managerDelegateName || "Unassigned"}
+                                </Text>
+                            </View>
+
+                            <View style={styles.column}>
+                                <Text style={styles.label}>Client</Text>
+                                <Text style={styles.value}>
+                                    {project.clientName}
                                 </Text>
                             </View>
                         </View>
@@ -309,9 +327,7 @@ export default function ProjectStatusPdf({
                             style={{
                                 ...styles.summaryItem,
                                 color:
-                                    executiveSummary.runningOutOfTime > 0
-                                        ? colors.red
-                                        : colors.green,
+                                    executiveSummary.runningOutOfTime > 0 ? colors.red : colors.green,
                             }}
                         >
                             • {executiveSummary.runningOutOfTime} sprint(s) running out of time
@@ -320,10 +336,7 @@ export default function ProjectStatusPdf({
                         <Text
                             style={{
                                 ...styles.summaryItem,
-                                color:
-                                    executiveSummary.risks > 0
-                                        ? colors.yellow
-                                        : colors.green,
+                                color: executiveSummary.risks > 0 ? colors.yellow : colors.green,
                             }}
                         >
                             • {executiveSummary.risks} risk(s) associated with project
@@ -335,124 +348,178 @@ export default function ProjectStatusPdf({
                                 color: colors.blue,
                             }}
                         >
-                            • {executiveSummary.completedTasks}/
-                            {executiveSummary.totalTasks} tasks completed
+                            • {executiveSummary.completedTasks}/{executiveSummary.totalTasks} tasks completed
                         </Text>
                     </View>
                 </View>
 
                 {/* OVERDUE TASKS */}
                 <View style={styles.section}>
-                    <View style={styles.sectionHeader}>
-                        <Text style={styles.sectionHeaderText}>
-                            Overdue Tasks
-                        </Text>
+                    <View wrap={false} minPresenceAhead={20}>
+                        <View style={styles.sectionHeader}>
+                            <Text style={styles.sectionHeaderText}>
+                                Overdue Tasks
+                            </Text>
+                        </View>
                     </View>
 
-                    <View style={styles.sectionBody}>
-                        {overdueTasks.length === 0 ? (
-                            <Text style={styles.noData}>
-                                No overdue tasks available
-                            </Text>
-                        ) : (
-                            <>
+                    {overdueTasks.length === 0 ? (
+                        <Text style={styles.noData}>
+                            No overdue tasks available
+                        </Text>
+                    ) : (
+                        <>
+                            <View wrap={false} minPresenceAhead={10}>
                                 <View style={styles.tableHeader}>
                                     <Text style={styles.cell}>Sprint</Text>
-                                    <Text style={styles.cell}>Start Date</Text>
-                                    <Text style={styles.cell}>End Date</Text>
+                                    <Text style={styles.cell}>Planned Start Date</Text>
+                                    <Text style={styles.cell}>Planned End Date</Text>
                                     <Text style={styles.cell}>Overdue</Text>
                                     <Text style={styles.cell}>Progress</Text>
                                 </View>
+                            </View>
 
-                                {overdueTasks.map((task, index) => (
-                                    <View key={index} style={styles.tableRow}>
-                                        <Text style={styles.cell}>
-                                            {task.sprintName}
-                                        </Text>
+                            {overdueTasks.map((task, index) => (
+                                <View key={index} style={{...styles.tableRow, borderBottom: index === overdueTasks.length - 1 ? "none" : `1px solid ${colors.border}`}}>
+                                    <Text style={styles.cell}>
+                                        {task.sprintName}
+                                    </Text>
 
-                                        <Text style={styles.cell}>
-                                            {task.plannedStartDate}
-                                        </Text>
+                                    <Text style={styles.cell}>
+                                        {task.plannedStartDate}
+                                    </Text>
 
-                                        <Text style={styles.cell}>
-                                            {task.plannedEndDate}
-                                        </Text>
+                                    <Text style={styles.cell}>
+                                        {task.plannedEndDate}
+                                    </Text>
 
-                                        <Text
-                                            style={{
-                                                ...styles.cell,
-                                                color: colors.red,
-                                            }}
-                                        >
-                                            {task.overdueDays} days
-                                        </Text>
+                                    <Text
+                                        style={{
+                                            ...styles.cell,
+                                            color: colors.red,
+                                        }}
+                                    >
+                                        {task.overdueDays} days
+                                    </Text>
 
-                                        <Text style={styles.cell}>
-                                            {task.progress}%
-                                        </Text>
-                                    </View>
-                                ))}
-                            </>
-                        )}
-                    </View>
-                </View>
-
-                {/* PREVIOUS WEEK */}
-                <View style={styles.section}>
-                    <View style={styles.sectionHeader}>
-                        <Text style={styles.sectionHeaderText}>
-                            Previous Week
-                        </Text>
-                    </View>
-
-                    <View style={styles.sectionBody}>
-                        {previousWeek.length === 0 ? (
-                            <Text style={styles.noData}>
-                                No data available
-                            </Text>
-                        ) : (
-                            <>
-                                <View style={styles.tableHeader}>
-                                    <Text style={styles.cell}>Sprint Name</Text>
-                                    <Text style={styles.cell}>Planned End Date</Text>
+                                    <Text style={{...styles.cell, color: "green"}}>
+                                        {task.progress}%
+                                    </Text>
                                 </View>
-                                {previousWeek.map((item, index) => (
-                                    <View key={index} style={styles.tableRow}>
-                                        <Text style={styles.cell}>
-                                            {item.sprintName}
-                                        </Text>
-
-                                        <Text style={styles.cell}>
-                                            {item.plannedEndDate}
-                                        </Text>
-                                    </View>
-                                ))}
-                            </>
-                        )}
-                    </View>
+                            ))}
+                        </>
+                    )}
                 </View>
 
                 {/* CURRENT WEEK */}
                 <View style={styles.section}>
-                    <View style={styles.sectionHeader}>
-                        <Text style={styles.sectionHeaderText}>
-                            Current Week
-                        </Text>
+                    <View wrap={false} minPresenceAhead={20}>
+                        <View style={styles.sectionHeader}>
+                            <Text style={styles.sectionHeaderText}>
+                                Current Week
+                            </Text>
+                        </View>
                     </View>
 
-                    <View style={styles.sectionBody}>
-                        {currentWeek.length === 0 ? (
-                            <Text style={styles.noData}>
-                                No data available
+                    {currentWeek.length === 0 ? (
+                        <Text style={styles.noData}>
+                            No data available
+                        </Text>
+                    ) : (
+                        <>
+                            <View wrap={false} minPresenceAhead={10}>
+                                <View style={styles.tableHeader}>
+                                    <Text style={styles.cell}>Sprint Name</Text>
+                                    <Text style={styles.cell}>Planned Start Date</Text>
+                                    <Text style={styles.cell}>Planned End Date</Text>
+                                    <Text style={styles.cell}>Progress</Text>
+                                    <Text style={styles.cell}>Status</Text>
+                                </View>
+                            </View>
+                            {currentWeek.map((item, index) => (
+                            <View key={index} style={{...styles.tableRow, borderBottom: index === currentWeek.length - 1 ? "none" : `1px solid ${colors.border}`}}>
+                                <Text style={styles.cell}>
+                                    {item.sprintName}
+                                </Text>
+                                <Text style={styles.cell}>
+                                    {item.plannedStartDate}
+                                </Text>
+                                <Text style={styles.cell}>
+                                    {item.plannedEndDate}
+                                </Text>
+                                <Text style={{...styles.cell, color: "green"}}>
+                                    {item.progress}%
+                                </Text>
+                                <Text style={styles.cell}>
+                                    {item.status}
+                                </Text>
+                            </View>
+                        ))}
+                        </>
+                    )}
+                </View>
+
+                {/* PREVIOUS WEEK */}
+                <View style={styles.section}>
+                    <View wrap={false} minPresenceAhead={20}>
+                        <View style={styles.sectionHeader}>
+                            <Text style={styles.sectionHeaderText}>
+                                Previous Week
                             </Text>
-                        ) : (
-                            <>
+                        </View>
+                    </View>
+                    
+                    {previousWeek.length === 0 ? (
+                        <Text style={styles.noData}>
+                            No data available
+                        </Text>
+                    ) : (
+                        <>
+                            <View wrap={false} minPresenceAhead={10}>
+                                <View style={styles.tableHeader}>
+                                    <Text style={styles.cell}>Sprint Name</Text>
+                                    <Text style={styles.cell}>Progress</Text>
+                                </View>
+                            </View>
+                            {previousWeek.map((item, index) => (
+                                <View key={index} style={{...styles.tableRow, borderBottom: index === previousWeek.length - 1 ? "none" : `1px solid ${colors.border}`}}>
+                                    <Text style={styles.cell}>
+                                        {item.sprintName}
+                                    </Text>
+
+                                    <Text style={{...styles.cell, color: "green"}}>
+                                        {item.progress}%
+                                    </Text>
+                                </View>
+                            ))}
+                        </>
+                    )}
+                </View>
+
+                {/* UPCOMING WEEK */}
+                <View style={styles.section}>
+                    <View wrap={false} minPresenceAhead={20}>
+                        <View style={styles.sectionHeader}>
+                            <Text style={styles.sectionHeaderText}>
+                                Upcoming Week
+                            </Text>
+                        </View>
+                    </View>
+
+                    {upcomingWeek.length === 0 ? (
+                        <Text style={styles.noData}>
+                            No data available
+                        </Text>
+                    ) : (
+                        <>
+                            <View wrap={false} minPresenceAhead={10}>
                                 <View style={styles.tableHeader}>
                                     <Text style={styles.cell}>Sprint Name</Text>
                                     <Text style={styles.cell}>Planned End Date</Text>
                                 </View>
-                                {currentWeek.map((item, index) => (
-                                <View key={index} style={styles.tableRow}>
+                            </View>
+                            {upcomingWeek.map((item, index) => (
+                                <View key={index} style={{...styles.tableRow, borderBottom: index === upcomingWeek.length - 1 ? "none" : `1px solid ${colors.border}`}}>
                                     <Text style={styles.cell}>
                                         {item.sprintName}
                                     </Text>
@@ -461,129 +528,9 @@ export default function ProjectStatusPdf({
                                     </Text>
                                 </View>
                             ))}
-                            </>
-                        )}
-                    </View>
+                        </>
+                    )}
                 </View>
-
-                {/* UPCOMING WEEK */}
-                <View style={styles.section}>
-                    <View style={styles.sectionHeader}>
-                        <Text style={styles.sectionHeaderText}>
-                            Upcoming Week
-                        </Text>
-                    </View>
-
-                    <View style={styles.sectionBody}>
-                        {upcomingWeek.length === 0 ? (
-                            <Text style={styles.noData}>
-                                No data available
-                            </Text>
-                        ) : (
-                            <>
-                                <View style={styles.tableHeader}>
-                                    <Text style={styles.cell}>Sprint Name</Text>
-                                    <Text style={styles.cell}>Planned End Date</Text>
-                                </View>
-                                {upcomingWeek.map((item, index) => (
-                                    <View key={index} style={styles.tableRow}>
-                                        <Text style={styles.cell}>
-                                            {item.sprintName}
-                                        </Text>
-                                        <Text style={styles.cell}>
-                                            {item.plannedEndDate}
-                                        </Text>
-                                    </View>
-                                ))}
-                            </>
-                            
-                        )}
-                    </View>
-                </View>
-
-                {/* RISKS */}
-                <View style={styles.section}>
-                    <View style={styles.sectionHeader}>
-                        <Text style={styles.sectionHeaderText}>
-                            Risks
-                        </Text>
-                    </View>
-
-                    <View style={styles.sectionBody}>
-                        {risks.length === 0 ? (
-                            <Text style={styles.noData}>
-                                No risks available
-                            </Text>
-                        ) : (
-                            risks.map((risk, index) => (
-                                <Text
-                                    key={index}
-                                    style={{
-                                        marginBottom: 8,
-                                        color: colors.yellow,
-                                    }}
-                                >
-                                    • {risk}
-                                </Text>
-                            ))
-                        )}
-                    </View>
-                </View>
-
-                {/* ISSUES */}
-                <View style={styles.section}>
-                    <View style={styles.sectionHeader}>
-                        <Text style={styles.sectionHeaderText}>
-                            Issues
-                        </Text>
-                    </View>
-
-                    <View style={styles.sectionBody}>
-                        {issues.length === 0 ? (
-                            <Text style={styles.noData}>
-                                No issues available
-                            </Text>
-                        ) : (
-                            issues.map((issue, index) => (
-                                <Text
-                                    key={index}
-                                    style={{
-                                        marginBottom: 8,
-                                        color: colors.red,
-                                    }}
-                                >
-                                    • {issue}
-                                </Text>
-                            ))
-                        )}
-                    </View>
-                </View>
-
-                {/* REMARKS */}
-                <View style={styles.section}>
-                    <View style={styles.sectionHeader}>
-                        <Text style={styles.sectionHeaderText}>
-                            Remarks
-                        </Text>
-                    </View>
-
-                    <View style={styles.sectionBody}>
-                        <Text
-                            style={{
-                                color: colors.text,
-                                lineHeight: 1.5,
-                            }}
-                        >
-                            {remarks || "No remarks added."}
-                        </Text>
-                    </View>
-                </View>
-
-                {/* FOOTER */}
-                <Text style={styles.footer}>
-                    Generated by IKON Task Management System
-                </Text>
-
             </Page>
         </Document>
     );

@@ -46,52 +46,52 @@ const WeekSprintTable: React.FC<Props> = ({ title, data, formatDate }) => {
         </div>
 
         {/* RIGHT SEARCH */}
-        <div className="flex items-center border rounded-md px-3 dark:bg-[#0a0a0a]">
-          <Search size={16} />
+        <div className="flex items-center border rounded-md px-3 bg-muted">
+          <Search size={16}/>
           <Input
             placeholder="Search..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="border-none focus-visible:ring-0 dark:bg-[#0a0a0a]"
+            className="border-none focus-visible:ring-0 dark:bg-transparent!"
           />
         </div>
       </CardHeader>
 
-      <CardContent>
-        <Table className="w-full">
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-1/2 text-left">
-                Sprint Name
-              </TableHead>
-              <TableHead className="w-1/2 text-left">
-                Planned End Date
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-
-          <TableBody>
-            {filteredData.length === 0 ? (
+        <CardContent>
+          <Table className="w-full">
+            <TableHeader>
               <TableRow>
-                <TableCell colSpan={2} className="text-center py-4">
-                  No data available
-                </TableCell>
+                <TableHead className="w-1/2 text-left">
+                  Sprint Name
+                </TableHead>
+                <TableHead className="w-1/2 text-left">
+                  Planned End Date
+                </TableHead>
               </TableRow>
-            ) : (
-              filteredData.map((item, index) => (
-                <TableRow key={index}>
-                  <TableCell className="w-1/2">
-                    {item.name}
-                  </TableCell>
-                  <TableCell className="w-1/2">
-                    {formatDate(item.endDate)}
+            </TableHeader>
+
+            <TableBody>
+              {filteredData.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={2} className="text-center py-4">
+                    No data available
                   </TableCell>
                 </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </CardContent>
+              ) : (
+                filteredData.map((item, index) => (
+                  <TableRow key={index}>
+                    <TableCell className="w-1/2">
+                      {item.name}
+                    </TableCell>
+                    <TableCell className="w-1/2">
+                      {formatDate(item.endDate)}
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </CardContent>
     </Card>
   );
 };

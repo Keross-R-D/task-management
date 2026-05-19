@@ -113,7 +113,7 @@ const ProjectStatusReportPage: React.FC = () => {
         return (
           <div className="flex items-center gap-2">
             <div className="w-24">
-              <Progress value={value} />
+              <Progress value={value} className="[&>div]:bg-green-500"/>
             </div>
             <span className="text-sm">{value}%</span>
           </div>

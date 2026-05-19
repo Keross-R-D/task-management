@@ -137,38 +137,6 @@ const ProjectsPage: React.FC = () => {
   const [createProject, { isLoading: isCreating }] = useCreateProjectMutation();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const navigates = useNavigate();
-
-  const columnsa = [
-    {
-      accessorKey: "projectName",
-      header: () => <div className="text-left font-semibold">Project Name</div>,
-      cell: ({ row }: any) => (
-        <span
-          className="font-medium cursor-pointer"
-          onClick={() => navigates(`/main/projects/${row.original.id}`)}
-        >
-          {row.original.projectName}
-        </span>
-      ),
-    },
-    {
-      accessorKey: "clientName",
-      header: () => <div className="text-left font-semibold">Client Name</div>,
-      cell: ({ row }: any) => <span>{row.original.clientName}</span>,
-    },
-    {
-      accessorKey: "projectStatus",
-      header: () => <div className="text-left font-semibold">Status</div>,
-      cell: ({ row }: any) => <span>{row.original.projectStatus}</span>,
-    },
-    {
-      accessorKey: "startDate",
-      header: () => <div className="text-left font-semibold">Start Date</div>,
-      cell: ({ row }: any) => <span>{row.original.startDate}</span>,
-    },
-  ];
-
   const handleCreateProject = async (data: ProjectFormValues) => {
     try {
       await createProject({

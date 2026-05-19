@@ -11,7 +11,6 @@ import {
   CardHeader,
   CardTitle,
   DataTableLayout,
-  
   Progress,
 } from "ikon-react-components-lib";
 import {
@@ -46,16 +45,15 @@ const ProjectStatusDetailPage: React.FC = () => {
 
   const { id = "" } = useParams();
   const navigate = useNavigate();
-  const { data: projects = [] } = useGetProjectsQuery();
+  const { data: projects = [], isLoading: isProjectLoading } = useGetProjectsQuery();
   const project = projects.find((p) => String(p.id) === id);
   const {
     data: sprints = [],
-    isLoading,
-  
+    isLoading: isSprintLoading,
   } = useGetSprintsByProjectQuery(id);
   console.log("SPRINTS:", sprints);
 
-  const { data: tasks = [] } = useGetTasksByProjectQuery(id, { skip: !id });
+  const { data: tasks = [], isLoading: isTaskLoading } = useGetTasksByProjectQuery(id, { skip: !id });
 
   //Get the project data
   const computedData = React.useMemo(() => {
@@ -82,6 +80,8 @@ const ProjectStatusDetailPage: React.FC = () => {
       startDate: project?.startDate || "",
       endDate: project?.endDate || "",
       status: project?.projectStatus || "",
+      type: project?.type || "",
+      clientName: project?.clientName || "",
       progress,
       estimatedHours,
       actualHours,
@@ -181,7 +181,7 @@ const ProjectStatusDetailPage: React.FC = () => {
         return (
           <div className="flex items-center gap-2">
             <div className="w-24">
-              <Progress value={value} />
+              <Progress value={value} className="[&>div]:bg-green-500"/>
             </div>
             <span className="text-sm">{value}%</span>
           </div>
@@ -301,15 +301,20 @@ const ProjectStatusDetailPage: React.FC = () => {
   const currentWeekData = currentWeekSprints.map((s) => ({
     sprintName: s.name,
     progress: getProgress(s.id),
+    plannedStartDate: s.startDate,
+    plannedEndDate: s.endDate,
+    status: s.status
   }));
-  console.log("CURRENT WEEK SPRINTS:", currentWeekData);
 
   const upcomingWeekData = upcomingWeekSprints.map((s) => ({
     sprintName: s.name,
+    progress: getProgress(s.id),
+    plannedStartDate: s.startDate,
     plannedEndDate: s.endDate,
+    status: s.status
   }));
 
-  console.log("OVERDUE TASKS:", upcomingWeekData);
+  const isReportReady = !isProjectLoading && !isTaskLoading && !isSprintLoading && !!project;
 
   return (
     <div className="flex flex-col gap-6 p-4">
@@ -334,6 +339,8 @@ const ProjectStatusDetailPage: React.FC = () => {
                   progress: computedData.progress,
                   estimatedHours: computedData.estimatedHours,
                   actualHours: computedData.actualHours,
+                  type: computedData.type,
+                  clientName: computedData.clientName,
                   overallStatus: status === "on_time" ? "ON_TIME" : status === "slight_delay" ? "SLIGHT_DELAY" : "DELAY",
                 }}
 
@@ -352,25 +359,23 @@ const ProjectStatusDetailPage: React.FC = () => {
                 previousWeek={previousWeekSprints.map((s) => ({
                   sprintName: s.name,
                   progress: getProgress(s.id),
+                  plannedStartDate: s.startDate,
+                  plannedEndDate: s.endDate,
+                  status: s.status
                 }))}
 
                 upcomingWeek={upcomingWeekData}
-
-                risks={[]}
-
-                issues={[]}
-
-                remarks="Project is progressing according to the current sprint plan."
               />
             }
             fileName={`PSR of ${computedData.projectName} - ${formatDate(today)}.pdf`}
           >
-            {({ loading }) => (
-              <Button className="px-4 py-2 rounded-lg text-sm">
-                <Download />
-                {loading ? "Generating PDF..." : "Download PDF"}
-              </Button>
-            )}
+            <Button
+              disabled={!isReportReady}
+              className="px-4 py-2 rounded-lg text-sm"
+            >
+              <Download />
+              {!isReportReady ? "Generating Report..." : "Download Report"}
+            </Button>
           </PDFDownloadLink>
         </div>
       </div>
@@ -416,7 +421,7 @@ const ProjectStatusDetailPage: React.FC = () => {
 
               <p className="flex items-center gap-2">
                 <ChartColumn className="h-4" />
-                <span className=" flex items-center gap-1font-bold">
+                <span className=" flex items-center gap-1 font-bold">
                   Status:
                 </span>{" "}
                 <span className="text-sm">
@@ -546,7 +551,7 @@ const ProjectStatusDetailPage: React.FC = () => {
                 data={overdueTasks}
                 extraTools={{
                   totalPages: 1,
-                  isLoading: isLoading,
+                  isLoading: isSprintLoading,
                   fileName: "Overdue Tasks Report",
                 }}
               />
