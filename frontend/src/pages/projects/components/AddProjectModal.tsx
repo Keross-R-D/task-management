@@ -20,7 +20,6 @@ import {
   SelectValue,
   SelectContent,
   SelectItem,
-  Textarea,
   FormMultiComboboxInput,
 } from "ikon-react-components-lib";
 import { ProjectEnum } from "@/enums/project.constants";
@@ -30,7 +29,8 @@ const projectSchema = z
   .object({
     projectName: z.string().min(1, "Project name is required"),
     clientName: z.string().min(1, "Client name is required"),
-    managerId: z.string().optional(),
+    managerId: z.string().min(1, "Client name is required"),
+    managerDelegateId: z.string().min(1, "Client name is required"),
     startDate: z.string().min(1, "Start date is required"),
     endDate: z.string().min(1, "End date is required"),
     projectStatus: z.string().min(1, "Status is required"),
@@ -78,7 +78,8 @@ export default function AddProjectModal({
     defaultValues: {
       projectName: "",
       clientName: "",
-      managerId: "00000000-0000-0000-0000-000000000000", // Dummy UUID for now
+      managerId: "",
+      managerDelegateId: "",
       startDate: "",
       endDate: "",
       projectStatus: "",
@@ -93,6 +94,7 @@ export default function AddProjectModal({
   };
 
   const handleCreate = (data: ProjectFormValues) => {
+    console.log(data);
     onSubmit(data);
     form.reset();
   };
@@ -284,6 +286,76 @@ export default function AddProjectModal({
                 label: `${user.name} (${user.email})`,
               }))}
             />
+
+            <div className="grid grid-cols-2 gap-4">
+              {/* Manager */}
+              <FormField
+                control={form.control}
+                name="managerId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Manager <span className="text-red-500">*</span>
+                    </FormLabel>
+
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select Manager" />
+                        </SelectTrigger>
+                      </FormControl>
+
+                      <SelectContent>
+                        {allUsers.map((user) => (
+                          <SelectItem key={user.id} value={user.id}>
+                            {user.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Manager Delegate */}
+              <FormField
+                control={form.control}
+                name="managerDelegateId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Manager Delegate <span className="text-red-500">*</span>
+                    </FormLabel>
+
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select Manager Delegate" />
+                        </SelectTrigger>
+                      </FormControl>
+
+                      <SelectContent>
+                        {allUsers.map((user) => (
+                          <SelectItem key={user.id} value={user.id}>
+                            {user.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
             <div className="flex justify-end gap-3 pt-4">
               <Button type="button" variant="secondary" onClick={handleClose}>

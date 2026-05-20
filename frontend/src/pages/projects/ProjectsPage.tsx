@@ -21,9 +21,11 @@ import AddProjectModal, {
   type ProjectFormValues,
 } from "./components/AddProjectModal";
 import ErrorState from "@/components/ErrorState";
+import { useUserMap } from "@/utils/userMap";
 
 export function ProjectsGrid({ data }: { data: any[] }) {
   const navigate = useNavigate();
+  const { getUserInfo } = useUserMap();
   return (
     <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-4">
       {data.map((project, idx) => (
@@ -96,36 +98,85 @@ const ProjectsPage: React.FC = () => {
       {
         accessorKey: "projectName",
         header: () => (
-          <div className="text-left font-semibold">Project Name</div>
+          <div className="text-left font-semibold">
+            Project Name
+          </div>
         ),
         cell: ({ row }: any) => (
           <span
             className="font-medium cursor-pointer"
-            onClick={() => navigate(`/main/projects/${row.original.id}`)}
+            onClick={() =>
+              navigate(`/main/projects/${row.original.id}`)
+            }
           >
             {row.original.projectName}
           </span>
         ),
       },
+
       {
         accessorKey: "clientName",
         header: () => (
-          <div className="text-left font-semibold">Client Name</div>
+          <div className="text-left font-semibold">
+            Client Name
+          </div>
         ),
-        cell: ({ row }: any) => <span>{row.original.clientName}</span>,
+        cell: ({ row }: any) => (
+          <span>{row.original.clientName}</span>
+        ),
       },
+
+      {
+        accessorKey: "managerName",
+        header: () => (
+          <div className="text-left font-semibold">
+            Manager
+          </div>
+        ),
+        cell: ({ row }: any) => (
+          <span>
+            {row.original.managerId ||"Unassigned"}
+          </span>
+        ),
+      },
+
       {
         accessorKey: "projectStatus",
-        header: () => <div className="text-left font-semibold">Status</div>,
-        cell: ({ row }: any) => <span>{row.original.projectStatus}</span>,
+        header: () => (
+          <div className="text-left font-semibold">
+            Status
+          </div>
+        ),
+        cell: ({ row }: any) => (
+          <span>{row.original.projectStatus}</span>
+        ),
       },
+
       {
         accessorKey: "startDate",
-        header: () => <div className="text-left font-semibold">Start Date</div>,
-        cell: ({ row }: any) => <span>{row.original.startDate}</span>,
+        header: () => (
+          <div className="text-left font-semibold">
+            Start Date
+          </div>
+        ),
+        cell: ({ row }: any) => (
+          <span>{row.original.startDate}</span>
+        ),
+      },
+
+      {
+        accessorKey: "endDate",
+        header: () => (
+          <div className="text-left font-semibold">
+            End Date
+          </div>
+        ),
+        cell: ({ row }: any) => (
+          <span>{row.original.endDate}</span>
+        ),
       },
     ],
-    [navigate],
+    [navigate]
   );
   const {
     data: projects = [],
@@ -142,6 +193,7 @@ const ProjectsPage: React.FC = () => {
       await createProject({
         ...data,
         managerId: data.managerId || "00000000-0000-0000-0000-000000000000",
+        managerDelegateId: data.managerDelegateId,
         teamMemberIds: data.teamMemberIds,
       }).unwrap();
       setIsModalOpen(false);

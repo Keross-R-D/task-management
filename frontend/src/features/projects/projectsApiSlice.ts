@@ -5,6 +5,7 @@ export interface Project {
   projectName: string;
   clientName: string;
   managerId: string;
+  managerDelegateId: string;
   startDate: string;
   endDate: string;
   projectStatus: string;
@@ -18,6 +19,7 @@ export interface CreateProjectRequest {
   projectName: string;
   clientName: string;
   managerId: string;
+  managerDelegateId: string;
   startDate: string;
   endDate: string;
   projectStatus: string;

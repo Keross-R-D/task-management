@@ -443,7 +443,7 @@ const DashboardPage: React.FC = () => {
                 <TrendingUp className="text-indigo-500" />
                 Effort By Projects
               </CardTitle>
-              <CardContent className="p-2 space-y-4">
+              <CardContent className="px-2 space-y-4">
                 <div className="grid lg:grid-cols-2 gap-6 space-y-3">
                   {/* Task Completion */}
                   <div className="col-span-1">
@@ -583,8 +583,8 @@ const DashboardPage: React.FC = () => {
                     View All
                   </button>
                 </div>
-                <CardContent className="p-2 space-y-4 max-h-[420px] overflow-y-auto" style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
-                  <style>{`div::-webkit-scrollbar { display: none; }`}</style>
+                <CardContent className="p-2 space-y-4 max-h-[420px] overflow-y-auto">
+                  {/* <style>{`div::-webkit-scrollbar { display: none; }`}</style> */}
                   {isProjectLoading ? (
                     <p className="text-sm text-muted-foreground">Loading...</p>
                   ) : projects.length === 0 ? (

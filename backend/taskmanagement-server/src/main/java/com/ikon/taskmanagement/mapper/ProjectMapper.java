@@ -24,6 +24,7 @@ public class ProjectMapper {
         project.setProjectName(dto.getProjectName());
         project.setClientName(dto.getClientName());
         project.setManagerId(dto.getManagerId());
+        project.setManagerDelegateId(dto.getManagerDelegateId());
         project.setStartDate(dto.getStartDate());
         project.setEndDate(dto.getEndDate());
         project.setProjectStatus(dto.getProjectStatus());
@@ -42,6 +43,7 @@ public class ProjectMapper {
         dto.setProjectName(project.getProjectName());
         dto.setClientName(project.getClientName());
         dto.setManagerId(project.getManagerId());
+        dto.setManagerDelegateId(project.getManagerDelegateId());
         dto.setStartDate(project.getStartDate());
         dto.setEndDate(project.getEndDate());
         dto.setProjectStatus(project.getProjectStatus());

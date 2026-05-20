@@ -33,6 +33,7 @@ import DatePickerWithRange from "./DateRangePicker";
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import ProjectStatusPdf from "./ProjectStatusPdf";
 import { type DateRange } from "react-day-picker";
+import { useUserMap } from "@/utils/userMap";
 //Types
 type OverdueTask = {
   sprintName: string;
@@ -45,6 +46,7 @@ type OverdueTask = {
 const ProjectStatusDetailPage: React.FC = () => {
   const { id = "" } = useParams();
   const navigate = useNavigate();
+  const { getUserInfo } = useUserMap();
   const { data: projects = [], isLoading: isProjectLoading } = useGetProjectsQuery();
   const project = projects.find((p) => String(p.id) === id);
   const {
@@ -83,7 +85,7 @@ const ProjectStatusDetailPage: React.FC = () => {
   });
 
   // Handle date selection with max 7 days restriction
- const handleDateRangeChange = (range: DateRange | undefined) => {
+  const handleDateRangeChange = (range: DateRange | undefined) => {
   if (!range?.from) {
     setDateRange(range);
     return;
@@ -146,6 +148,12 @@ const ProjectStatusDetailPage: React.FC = () => {
       ? { start: dateRange.from, end: dateRange.to }
       : { start: currentWeek.start, end: currentWeek.end };
 
+  //Get the manager data
+  const manager = project?.managerId ? getUserInfo(project.managerId) : null;
+
+  //Get the manager delegate data
+  const managerDelegate = project?.managerDelegateId ? getUserInfo(project.managerDelegateId) : null;
+
   // Get the project data
   const computedData = React.useMemo(() => {
     const tasksTotal = tasks.length;
@@ -173,6 +181,8 @@ const ProjectStatusDetailPage: React.FC = () => {
       status: project?.projectStatus || "",
       type: project?.type || "",
       clientName: project?.clientName || "",
+      managerName: manager?.name || "",
+      managerDelegateName: managerDelegate?.name || "",
       progress,
       estimatedHours,
       actualHours,
@@ -180,7 +190,7 @@ const ProjectStatusDetailPage: React.FC = () => {
       tasksDone,
       remainingTasks,
     };
-  }, [project, tasks]);
+  }, [project, tasks, manager, managerDelegate]);
 
   //Style for status
   const getStatusClass = (status: string) => {
@@ -433,6 +443,8 @@ const ProjectStatusDetailPage: React.FC = () => {
                   endDate: formatDate(computedData.endDate),
                   projectStatus: computedData.status,
                   progress: computedData.progress,
+                  managerName: computedData.managerName,
+                  managerDelegateName: computedData.managerDelegateName,
                   estimatedHours: computedData.estimatedHours,
                   actualHours: computedData.actualHours,
                   type: computedData.type,

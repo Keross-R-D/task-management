@@ -38,6 +38,10 @@ public class Project {
     private UUID managerId;
 
     @Column
+    @JdbcTypeCode(SqlTypes.UUID)
+    private UUID managerDelegateId;
+
+    @Column
     private LocalDate startDate;
 
     @Column

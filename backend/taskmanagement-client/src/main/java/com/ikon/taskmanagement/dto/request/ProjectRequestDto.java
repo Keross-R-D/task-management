@@ -13,6 +13,7 @@ public class ProjectRequestDto {
     private String projectName;
     private String clientName;
     private UUID managerId;
+    private UUID managerDelegateId;
     private LocalDate startDate;
     private LocalDate endDate;
     private ProjectStatus projectStatus;
