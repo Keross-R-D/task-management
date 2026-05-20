@@ -6,7 +6,7 @@ import {
   closestCenter,
   useDroppable,
   useDraggable,
-  DragOverlay, // ✅ added
+  DragOverlay, //  added
 } from "@dnd-kit/core";
 
 import type { DragEndEvent } from "@dnd-kit/core";
@@ -87,14 +87,14 @@ function DraggableItem({ item, column, sprints }: any) {
     listeners,
     setNodeRef,
     transform,
-    isDragging, // ✅ added
+    isDragging, //
   } = useDraggable({
     id: item.id,
     data: { column },
   });
 
   const style = isDragging
-    ? { opacity: 0 } // ✅ hide original while dragging
+    ? { opacity: 0 } //  hide original while dragging
     : {
         transform: transform
           ? `translate(${transform.x}px, ${transform.y}px)`

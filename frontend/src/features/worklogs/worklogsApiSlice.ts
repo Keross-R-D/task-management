@@ -15,6 +15,7 @@ export type CreateWorklogRequest = Omit<
 >;
 export type UpdateWorklogRequest = Partial<CreateWorklogRequest> & {
   id: string;
+  taskId: string;
 };
 
 export const worklogsApiSlice = apiSlice.injectEndpoints({
@@ -26,8 +27,12 @@ export const worklogsApiSlice = apiSlice.injectEndpoints({
           ? [
               ...result.map(({ id }) => ({ type: "Worklog" as const, id })),
               { type: "Worklog", id: `LIST_TASK_${taskId}` },
+              { type: "Worklog", id: "LIST" },
             ]
-          : [{ type: "Worklog", id: `LIST_TASK_${taskId}` }],
+          : [
+              { type: "Worklog", id: `LIST_TASK_${taskId}` },
+              { type: "Worklog", id: "LIST" },
+            ],
     }),
     createWorklog: builder.mutation<TaskWorklog, CreateWorklogRequest>({
       query: (worklog) => ({
@@ -37,8 +42,10 @@ export const worklogsApiSlice = apiSlice.injectEndpoints({
           data: worklog,
         },
       }),
-      invalidatesTags: (result, error, arg) => [
-        { type: "Worklog", id: `LIST_TASK_${arg.taskId}` },
+      invalidatesTags: (_result, _error, arg) => [
+        { type: "Worklog" as const, id: `LIST_TASK_${arg.taskId}` },
+        { type: "Worklog" as const, id: "LIST" },
+        "Worklog",
         { type: "Task", id: arg.taskId }, // Invalidate task to update actualHours
       ],
     }),
@@ -50,9 +57,12 @@ export const worklogsApiSlice = apiSlice.injectEndpoints({
           data: patch,
         },
       }),
-      invalidatesTags: (result, error, arg) => [
-        { type: "Worklog", id: arg.id },
-        { type: "Task", id: arg.taskId || "UNKNOWN" }, // Invalidate task if taskId available
+      invalidatesTags: (_result, _error, arg) => [
+        { type: "Worklog" as const, id: arg.id },
+        { type: "Worklog" as const, id: `LIST_TASK_${arg.taskId}` },
+        { type: "Worklog" as const, id: "LIST" },
+        "Worklog",
+        { type: "Task", id: arg.taskId },
       ],
     }),
     deleteWorklog: builder.mutation<void, { id: string; taskId: string }>({
@@ -60,9 +70,10 @@ export const worklogsApiSlice = apiSlice.injectEndpoints({
         apiUrl: `/worklogs/${id}`,
         config: { method: "DELETE" },
       }),
-      invalidatesTags: (result, error, arg) => [
-        "Worklog",
-        { type: "Task", id: arg.taskId }, // Invalidate task
+      invalidatesTags: (_result, _error, arg) => [
+        { type: "Worklog" as const, id: arg.id },
+        { type: "Worklog" as const, id: `LIST_TASK_${arg.taskId}` },
+        { type: "Worklog" as const, id: "LIST" },   "Worklog",  { type: "Task", id: arg.taskId },
       ],
     }),
     getWorklogsByProject: builder.query<TaskWorklog[], string>({
@@ -72,8 +83,12 @@ export const worklogsApiSlice = apiSlice.injectEndpoints({
           ? [
               ...result.map(({ id }) => ({ type: "Worklog" as const, id })),
               { type: "Worklog", id: `LIST_PROJECT_${projectId}` },
+              { type: "Worklog", id: "LIST" },
             ]
-          : [{ type: "Worklog", id: `LIST_PROJECT_${projectId}` }],
+          : [
+              { type: "Worklog", id: `LIST_PROJECT_${projectId}` },
+              { type: "Worklog", id: "LIST" },
+            ],
     }),
   }),
 });

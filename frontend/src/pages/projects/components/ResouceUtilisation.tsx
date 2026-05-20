@@ -263,6 +263,7 @@ export default function ResourceUtilization({ tasks, epics }: Props) {
   const [selectedAssignees, setSelectedAssignees] = useState<string[]>([]);
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
+  const { getUserInfo } = useUserMap();
 
   // Build an epicId → epic lookup for quick access
   const epicMap = useMemo(() => {
@@ -359,7 +360,7 @@ export default function ResourceUtilization({ tasks, epics }: Props) {
         epicBreakdown,
       };
     });
-  }, [tasks, epicMap, dateFrom, dateTo]);
+  }, [tasks, epicMap, dateFrom, dateTo, getUserInfo]);
 
   // Assignee options for the dropdown (derived from actual data)
   const assigneeOptions = useMemo(

@@ -40,8 +40,12 @@ export const myTaskWorklogsApiSlice = apiSlice.injectEndpoints({
                     ? [
                         ...result.map(({ id }) => ({ type: "MyTaskWorklog" as const, id })),
                         { type: "MyTaskWorklog", id: `LIST_MYTASK_${myTaskId}` },
+                        { type: "MyTaskWorklog", id: "LIST" },
                     ]
-                    : [{ type: "MyTaskWorklog", id: `LIST_MYTASK_${myTaskId}` }],
+                    : [
+                        { type: "MyTaskWorklog", id: `LIST_MYTASK_${myTaskId}` },
+                        { type: "MyTaskWorklog", id: "LIST" },
+                    ],
         }),
 
         createMyTaskWorklog: builder.mutation<MyTaskWorklog, CreateMyTaskWorklogRequest>({
@@ -53,9 +57,8 @@ export const myTaskWorklogsApiSlice = apiSlice.injectEndpoints({
                 },
             }),
             invalidatesTags: (_result, _error, arg) => [
-                { type: "MyTaskWorklog", id: `LIST_MYTASK_${arg.myTaskId}` },
-                { type: "MyTask", id: arg.myTaskId },
-                { type: "MyTask", id: "LIST" },
+                { type: "MyTaskWorklog" as const, id: `LIST_MYTASK_${arg.myTaskId}` },
+                { type: "MyTaskWorklog" as const, id: "LIST" },
             ],
         }),
 
@@ -68,10 +71,9 @@ export const myTaskWorklogsApiSlice = apiSlice.injectEndpoints({
                 },
             }),
             invalidatesTags: (_result, _error, arg) => [
-                { type: "MyTaskWorklog", id: arg.id },
-                { type: "MyTaskWorklog", id: `LIST_MYTASK_${arg.myTaskId}` },
-                { type: "MyTask", id: arg.myTaskId },
-                { type: "MyTask", id: "LIST" },
+                { type: "MyTaskWorklog" as const, id: arg.id },
+                { type: "MyTaskWorklog" as const, id: `LIST_MYTASK_${arg.myTaskId}` },
+                { type: "MyTaskWorklog" as const, id: "LIST" },
             ],
         }),
 
@@ -81,10 +83,10 @@ export const myTaskWorklogsApiSlice = apiSlice.injectEndpoints({
                 config: { method: "DELETE" },
             }),
             invalidatesTags: (_result, _error, arg) => [
-                { type: "MyTaskWorklog", id: `LIST_MYTASK_${arg.myTaskId}` },
-                { type: "MyTask", id: arg.myTaskId },
-                { type: "MyTask", id: "LIST" },
-            ]
+                { type: "MyTaskWorklog" as const, id: arg.id },
+                { type: "MyTaskWorklog" as const, id: `LIST_MYTASK_${arg.myTaskId}` },
+                { type: "MyTaskWorklog" as const, id: "LIST" },
+            ],
         }),
     }),
 });

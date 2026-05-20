@@ -30,14 +30,13 @@ const WeekSprintTable: React.FC<Props> = ({ title, data, formatDate }) => {
 
   const filteredData = React.useMemo(() => {
     if (!search.trim()) return data;
-
     return data.filter((item) =>
       item.name.toLowerCase().includes(search.toLowerCase())
     );
   }, [search, data]);
 
   return (
-    <Card>
+    <Card className="pb-2">
       <CardHeader className="flex flex-row items-center justify-between">
         {/* LEFT */}
         <div className="flex items-center gap-2">
@@ -57,19 +56,24 @@ const WeekSprintTable: React.FC<Props> = ({ title, data, formatDate }) => {
         </div>
       </CardHeader>
 
-        <CardContent>
-          <Table className="w-full">
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-1/2 text-left">
-                  Sprint Name
-                </TableHead>
-                <TableHead className="w-1/2 text-left">
-                  Planned End Date
-                </TableHead>
-              </TableRow>
-            </TableHeader>
+      <CardContent className="h-[300px]">
+        {/* Sticky header — outside the scroll container */}
+        <Table className="w-full">
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-1/2 text-left">Sprint Name</TableHead>
+              <TableHead className="w-1/2 text-left">Planned End Date</TableHead>
+            </TableRow>
+          </TableHeader>
+        </Table>
 
+        {/* Scrollable body */}
+        <div
+          className="max-h-[260px] overflow-y-auto"
+          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+        >
+          <style>{`div::-webkit-scrollbar { display: none; }`}</style>
+          <Table className="w-full">
             <TableBody>
               {filteredData.length === 0 ? (
                 <TableRow>
@@ -80,9 +84,7 @@ const WeekSprintTable: React.FC<Props> = ({ title, data, formatDate }) => {
               ) : (
                 filteredData.map((item, index) => (
                   <TableRow key={index}>
-                    <TableCell className="w-1/2">
-                      {item.name}
-                    </TableCell>
+                    <TableCell className="w-1/2">{item.name}</TableCell>
                     <TableCell className="w-1/2">
                       {formatDate(item.endDate)}
                     </TableCell>
@@ -91,7 +93,8 @@ const WeekSprintTable: React.FC<Props> = ({ title, data, formatDate }) => {
               )}
             </TableBody>
           </Table>
-        </CardContent>
+        </div>
+      </CardContent>
     </Card>
   );
 };
