@@ -5,7 +5,6 @@ import { Card, CardContent, CardTitle, EChart, Progress, Separator, Skeleton } f
 import ProjectCard from "./components/ProjectCard";
 import { useNavigate } from "react-router-dom";
 import { useGetMyTasksQuery } from "@/features/myTasks/mytasksApiSlice";
-import { useGetMyTasksQuery } from "@/features/myTasks/mytasksApiSlice";
 import { useGetProjectsQuery } from "@/features/projects/projectsApiSlice";
 import type { Task as ProjectTask } from "@/features/tasks/tasksApiSlice";
 import { useLazyGetTasksByProjectQuery } from "@/features/tasks/tasksApiSlice";
@@ -584,7 +583,8 @@ const DashboardPage: React.FC = () => {
                     View All
                   </button>
                 </div>
-                <CardContent className="p-2 space-y-4 max-h-[420px] overflow-y-auto">
+                <CardContent className="p-2 space-y-4 max-h-[420px] overflow-y-auto" style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
+                  <style>{`div::-webkit-scrollbar { display: none; }`}</style>
                   {isProjectLoading ? (
                     <p className="text-sm text-muted-foreground">Loading...</p>
                   ) : projects.length === 0 ? (
