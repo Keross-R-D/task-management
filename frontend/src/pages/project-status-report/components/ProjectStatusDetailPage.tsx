@@ -448,6 +448,10 @@ const ProjectStatusDetailPage: React.FC = () => {
                   totalTasks: computedData.tasksTotal,
                 }}
 
+                currentWeekStart={formatDate(currentWeekStart)}
+
+                currentWeekEnd={formatDate(currentWeekEnd)}
+
                 overdueTasks={overdueTasks}
 
                 currentWeek={currentWeekData}

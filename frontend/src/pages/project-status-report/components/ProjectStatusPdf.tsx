@@ -40,6 +40,9 @@ interface ProjectStatusPdfProps {
         totalTasks: number;
     };
 
+    currentWeekStart: string,
+    currentWeekEnd: string,
+
     overdueTasks: OverdueTask[];
 
     currentWeek: WeeklySprint[];
@@ -210,6 +213,8 @@ const getStatusColor = (
 export default function ProjectStatusPdf({
     project,
     executiveSummary,
+    currentWeekStart,
+    currentWeekEnd,
     overdueTasks,
     currentWeek,
     previousWeek,
@@ -226,7 +231,7 @@ export default function ProjectStatusPdf({
                     </Text>
 
                     <Text style={styles.subtitle}>
-                        {project.startDate} - {project.endDate}
+                        {currentWeekStart} - {currentWeekEnd}
                     </Text>
                 </View>
 
