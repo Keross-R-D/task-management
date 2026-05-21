@@ -21,6 +21,9 @@ import {
   SelectContent,
   SelectItem,
   FormMultiComboboxInput,
+  FormDateInput,
+  FormComboboxInput,
+  CustomComboboxInput,
 } from "ikon-react-components-lib";
 import { ProjectEnum } from "@/enums/project.constants";
 import { useUserMap } from "@/utils/userMap";
@@ -31,8 +34,12 @@ const projectSchema = z
     clientName: z.string().min(1, "Client name is required"),
     managerId: z.string().min(1, "Client name is required"),
     managerDelegateId: z.string().min(1, "Client name is required"),
-    startDate: z.string().min(1, "Start date is required"),
-    endDate: z.string().min(1, "End date is required"),
+    startDate: z.date({
+      error: "Start date is required",
+    }),
+    endDate: z.date({
+      error: "End date is required",
+    }),
     projectStatus: z.string().min(1, "Status is required"),
     type: z.string().min(1, "Type is required"),
     teamMemberIds: z.array(z.string()).default([]),
@@ -80,8 +87,8 @@ export default function AddProjectModal({
       clientName: "",
       managerId: "",
       managerDelegateId: "",
-      startDate: "",
-      endDate: "",
+      startDate: undefined,
+      endDate: undefined,
       projectStatus: "",
       type: "",
       teamMemberIds: [],
@@ -102,7 +109,7 @@ export default function AddProjectModal({
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>Add New Project</DialogTitle>
+          <DialogTitle className="flex font-bold text-2xl">Add New Project</DialogTitle>
         </DialogHeader>
 
         <Form {...form}>
@@ -143,35 +150,25 @@ export default function AddProjectModal({
             />
 
             <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
+              <FormDateInput
+                formControl={form.control}
                 name="startDate"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      Start Date <span className="text-red-500">*</span>
-                    </FormLabel>
-                    <FormControl>
-                      <Input type="date" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                label={
+                  <>
+                    Start Date <span className="text-red-500">*</span>
+                  </>
+                }
+                placeholder="Select start date"
               />
-              <FormField
-                control={form.control}
+              <FormDateInput
+                formControl={form.control}
                 name="endDate"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      End Date <span className="text-red-500">*</span>
-                    </FormLabel>
-                    <FormControl>
-                      <Input type="date" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                label={
+                  <>
+                    End Date <span className="text-red-500">*</span>
+                  </>
+                }
+                placeholder="Select end date"
               />
             </div>
 
@@ -186,14 +183,14 @@ export default function AddProjectModal({
                     </FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger className="w-full">
                           <SelectValue placeholder="Select Status" />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent>
+                      <SelectContent position="popper">
                         {Object.values(ProjectEnum.Status).map((status) => (
                           <SelectItem key={status} value={status}>
-                            {status.replace("_", " ")}
+                            {status.toLowerCase().replace(/_/g, " ").replace(/\b\w/g, (char) => char.toUpperCase())}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -213,14 +210,14 @@ export default function AddProjectModal({
                     </FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger className="w-full">
                           <SelectValue placeholder="Select Type" />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent>
+                      <SelectContent position="popper">
                         {Object.values(ProjectEnum.Type).map((type) => (
                           <SelectItem key={type} value={type}>
-                            {type}
+                            {type.toLowerCase().replace(/_/g, " ").replace(/\b\w/g, (char) => char.toUpperCase())}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -229,47 +226,8 @@ export default function AddProjectModal({
                   </FormItem>
                 )}
               />
-
-              {/* <FormField
-                control={form.control}
-                name="teamMemberIds"
-                render={({ field }) => (
-                  <FormItem className="col-span-2">
-                    <FormLabel>Team Members</FormLabel>
-                    <FormControl>
-                      <div className="border rounded-md p-2 max-h-40 overflow-y-auto space-y-2">
-                        {usersLoading ? (
-                          <div className="text-sm text-muted-foreground p-2">Loading users...</div>
-                        ) : allUsers.length === 0 ? (
-                          <div className="text-sm text-muted-foreground p-2">No users available</div>
-                        ) : (
-                          allUsers.map((user) => (
-                            <label key={user.id} className="flex items-center space-x-2 cursor-pointer p-1 hover:bg-muted rounded">
-                              <input
-                                type="checkbox"
-                                className="rounded border-gray-300 w-4 h-4"
-                                checked={field.value.includes(user.id)}
-                                onChange={(e) => {
-                                  const checked = e.target.checked;
-                                  if (checked) {
-                                    field.onChange([...field.value, user.id]);
-                                  } else {
-                                    field.onChange(field.value.filter((id) => id !== user.id));
-                                  }
-                                }}
-                              />
-                              <span className="text-sm">{user.name} <span className="text-muted-foreground text-xs">({user.email})</span></span>
-                            </label>
-                          ))
-                        )}
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              /> */}
-              {/* <Textarea /> */}
             </div>
+
             <FormMultiComboboxInput
               formControl={form.control}
               name="teamMemberIds"
@@ -302,12 +260,12 @@ export default function AddProjectModal({
                       value={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger className="w-full">
                           <SelectValue placeholder="Select Manager" />
                         </SelectTrigger>
                       </FormControl>
 
-                      <SelectContent>
+                      <SelectContent position="popper">
                         {allUsers.map((user) => (
                           <SelectItem key={user.id} value={user.id}>
                             {user.name}
@@ -336,12 +294,12 @@ export default function AddProjectModal({
                       value={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger className="w-full">
                           <SelectValue placeholder="Select Manager Delegate" />
                         </SelectTrigger>
                       </FormControl>
 
-                      <SelectContent>
+                      <SelectContent position="popper">
                         {allUsers.map((user) => (
                           <SelectItem key={user.id} value={user.id}>
                             {user.name}

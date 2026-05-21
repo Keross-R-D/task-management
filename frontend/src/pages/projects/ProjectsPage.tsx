@@ -11,6 +11,8 @@ import {
   ClipboardCheck,
   ArrowUpRight,
   FolderOpen,
+  CalendarDays,
+  User,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -23,6 +25,7 @@ import AddProjectModal, {
 import ErrorState from "@/components/ErrorState";
 import { useUserMap } from "@/utils/userMap";
 
+//Applying style based on project status
 const getProjectStatusStyles = (status: string) => {
   switch (status) {
     case "PLANNED":
@@ -42,10 +45,25 @@ const getProjectStatusStyles = (status: string) => {
   }
 };
 
+//Format date
+const formatDate = (date?: string | Date | null) => {
+  if (!date) return "—";
+  const d = typeof date === "string" ? new Date(date) : date;
+  if (isNaN(d.getTime())) return "—";
+
+  return d.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+};
+
 export function ProjectsGrid({ data }: { data: any[] }) {
   const navigate = useNavigate();
+  const { getUserInfo } = useUserMap();
+  
   return (
-    <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-4">
+    <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 py-4">
       {data.map((project, idx) => (
         <div
           key={project.id || idx}
@@ -84,14 +102,20 @@ export function ProjectsGrid({ data }: { data: any[] }) {
                 </span>
               </div>
               <div className="flex items-center text-sm text-muted-foreground">
-                <span className="w-4 h-4 mr-2.5 flex items-center justify-center font-bold text-[10px] text-muted-foreground/70">
-                  🗓
+                <User className="w-4 h-4 mr-2.5 text-muted-foreground/70" />
+                <span className="truncate">
+                  {getUserInfo(project.managerId).name || "Unassigned"}
                 </span>
-                <span>{project.startDate || "No start date"}</span>
+              </div>
+              <div className="flex items-center text-sm text-muted-foreground">
+                <span className="w-4 h-4 mr-2.5 flex items-center justify-center font-bold text-[10px] text-muted-foreground/70">
+                  <CalendarDays />
+                </span>
+                <span>{formatDate(project.startDate)} - {formatDate(project.endDate)}</span>
               </div>
             </div>
 
-            <div className="flex items-center justify-center w-full py-2.5 px-4 bg-muted/30 hover:bg-muted text-foreground text-sm font-medium rounded-lg transition-colors border border-border/50">
+            <div className="flex items-center justify-center w-full py-2.5 px-4 bg-muted/30 hover:bg-muted text-foreground text-sm font-medium rounded-lg transition-colors border border-border/70">
               View Details
               <ArrowUpRight className="w-4 h-4 ml-2 opacity-50 font-bold" />
             </div>
@@ -147,7 +171,7 @@ const ProjectsPage: React.FC = () => {
           </div>
         ),
         cell: ({ row }: any) => (
-          <span>
+          <span className="flex gap-1 items-center font-semibold bg-muted w-fit rounded-md px-1.5 py-1">
             {getUserInfo(row.original.managerId).name ||"Unassigned"}
           </span>
         ),
@@ -205,6 +229,8 @@ const ProjectsPage: React.FC = () => {
     try {
       await createProject({
         ...data,
+        startDate: data.startDate.toISOString().split("T")[0],
+        endDate: data.endDate.toISOString().split("T")[0],
         managerId: data.managerId,
         managerDelegateId: data.managerDelegateId,
         teamMemberIds: data.teamMemberIds,
