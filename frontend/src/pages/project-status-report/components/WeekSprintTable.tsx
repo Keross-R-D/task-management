@@ -1,3 +1,5 @@
+// WeekSprintTable.tsx — full replacement
+
 import React from "react";
 import {
   Card,
@@ -5,6 +7,7 @@ import {
   CardTitle,
   CardContent,
   Input,
+  Progress,
   Table,
   TableBody,
   TableCell,
@@ -14,39 +17,35 @@ import {
 } from "ikon-react-components-lib";
 import { Info, Search } from "lucide-react";
 
-type Sprint = {
+type SprintRow = {
   name: string;
-  endDate: string | Date;
+  progress: number;
 };
 
 type Props = {
   title: string;
-  data: Sprint[];
-  formatDate: (date?: string | Date | null) => string;
+  data: SprintRow[];
 };
 
-const WeekSprintTable: React.FC<Props> = ({ title, data, formatDate }) => {
+const WeekSprintTable: React.FC<Props> = ({ title, data }) => {
   const [search, setSearch] = React.useState("");
 
   const filteredData = React.useMemo(() => {
     if (!search.trim()) return data;
     return data.filter((item) =>
-      item.name.toLowerCase().includes(search.toLowerCase())
+      item.name.toLowerCase().includes(search.toLowerCase()),
     );
   }, [search, data]);
 
   return (
     <Card className="pb-2">
       <CardHeader className="flex flex-row items-center justify-between">
-        {/* LEFT */}
         <div className="flex items-center gap-2">
           <CardTitle className="font-medium">{title}</CardTitle>
           <Info size={16} />
         </div>
-
-        {/* RIGHT SEARCH */}
-        <div className="flex items-center border rounded-md px-3 bg-muted">
-          <Search size={16}/>
+        <div className="flex items-center border rounded-md px-3 dark:bg-[#0a0a0a]">
+          <Search size={16} />
           <Input
             placeholder="Search..."
             value={search}
@@ -57,12 +56,12 @@ const WeekSprintTable: React.FC<Props> = ({ title, data, formatDate }) => {
       </CardHeader>
 
       <CardContent className="h-[300px]">
-        {/* Sticky header — outside the scroll container */}
+        {/* Sticky header */}
         <Table className="w-full">
           <TableHeader>
             <TableRow>
               <TableHead className="w-1/2 text-left">Sprint Name</TableHead>
-              <TableHead className="w-1/2 text-left">Planned End Date</TableHead>
+              <TableHead className="w-1/2 text-left">Progress</TableHead>
             </TableRow>
           </TableHeader>
         </Table>
@@ -86,7 +85,12 @@ const WeekSprintTable: React.FC<Props> = ({ title, data, formatDate }) => {
                   <TableRow key={index}>
                     <TableCell className="w-1/2">{item.name}</TableCell>
                     <TableCell className="w-1/2">
-                      {formatDate(item.endDate)}
+                      <div className="flex items-center gap-2">
+                        <div className="w-24">
+                          <Progress value={item.progress} />
+                        </div>
+                        <span className="text-sm">{item.progress}%</span>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))
@@ -100,3 +104,4 @@ const WeekSprintTable: React.FC<Props> = ({ title, data, formatDate }) => {
 };
 
 export default WeekSprintTable;
+
