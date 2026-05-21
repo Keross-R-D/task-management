@@ -3,6 +3,7 @@ import { Outlet, useLocation } from "react-router-dom";
 import { RenderSidebarNav } from "ikon-react-components-lib";
 import { User } from "lucide-react";
 import { mainRoutes } from "@/routes";
+import { AppBreadcrumbs } from "@/components/AppBreadcrumbs";
 
 export const MainLayout: React.FC = () => {
   const location = useLocation();
@@ -34,6 +35,7 @@ export const MainLayout: React.FC = () => {
         {/* <div className="flex-1 overflow-auto bg-slate-50 dark:bg-zinc-900"> */}
         <div className="flex-1 overflow-auto">
           <main className="p-6">
+            <AppBreadcrumbs />
             <Outlet />
           </main>
         </div>
