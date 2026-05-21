@@ -94,7 +94,6 @@ export default function AddProjectModal({
   };
 
   const handleCreate = (data: ProjectFormValues) => {
-    console.log(data);
     onSubmit(data);
     form.reset();
   };
@@ -194,7 +193,7 @@ export default function AddProjectModal({
                       <SelectContent>
                         {Object.values(ProjectEnum.Status).map((status) => (
                           <SelectItem key={status} value={status}>
-                            {status}
+                            {status.replace("_", " ")}
                           </SelectItem>
                         ))}
                       </SelectContent>

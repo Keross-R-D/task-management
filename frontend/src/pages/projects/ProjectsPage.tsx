@@ -23,9 +23,27 @@ import AddProjectModal, {
 import ErrorState from "@/components/ErrorState";
 import { useUserMap } from "@/utils/userMap";
 
+const getProjectStatusStyles = (status: string) => {
+  switch (status) {
+    case "PLANNED":
+      return "bg-indigo-500/10 text-indigo-500 border border-indigo-500/20";
+
+    case "IN_PROGRESS":
+      return "bg-blue-500/10 text-blue-500 border border-blue-500/20";
+
+    case "COMPLETED":
+      return "bg-green-500/10 text-green-500 border border-green-500/20";
+
+    case "ON_HOLD":
+      return "bg-yellow-500/10 text-yellow-500 border border-yellow-500/20";
+
+    default:
+      return "bg-muted text-muted-foreground border border-border";
+  }
+};
+
 export function ProjectsGrid({ data }: { data: any[] }) {
   const navigate = useNavigate();
-  const { getUserInfo } = useUserMap();
   return (
     <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-4">
       {data.map((project, idx) => (
@@ -41,15 +59,9 @@ export function ProjectsGrid({ data }: { data: any[] }) {
               </div>
               <div className="flex items-center gap-2">
                 <div
-                  className={`px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider ${
-                    project.projectStatus === "COMPLETED"
-                      ? "bg-green-500/10 text-green-500"
-                      : project.projectStatus === "IN_PROGRESS"
-                        ? "bg-blue-500/10 text-blue-500"
-                        : "bg-gray-500/10 text-gray-500"
-                  }`}
+                  className={`px-2 py-1 rounded-md text-xs font-semibold w-fit ${getProjectStatusStyles(project.projectStatus)}`}
                 >
-                  {project.projectStatus}
+                  {project.projectStatus.replace("_", " ")}
                 </div>
               </div>
             </div>
@@ -92,6 +104,7 @@ export function ProjectsGrid({ data }: { data: any[] }) {
 
 const ProjectsPage: React.FC = () => {
   const navigate = useNavigate();
+  const { getUserInfo } = useUserMap();
 
   const columns = useMemo(
     () => [
@@ -130,12 +143,12 @@ const ProjectsPage: React.FC = () => {
         accessorKey: "managerName",
         header: () => (
           <div className="text-left font-semibold">
-            Manager
+            Manager Name
           </div>
         ),
         cell: ({ row }: any) => (
           <span>
-            {row.original.managerId ||"Unassigned"}
+            {getUserInfo(row.original.managerId).name ||"Unassigned"}
           </span>
         ),
       },
@@ -148,7 +161,7 @@ const ProjectsPage: React.FC = () => {
           </div>
         ),
         cell: ({ row }: any) => (
-          <span>{row.original.projectStatus}</span>
+          <span className={`px-2 py-1 rounded-md text-xs font-semibold w-fit ${getProjectStatusStyles(row.original.projectStatus)}`}>{row.original.projectStatus.replace("_", " ")}</span>
         ),
       },
 
@@ -176,7 +189,7 @@ const ProjectsPage: React.FC = () => {
         ),
       },
     ],
-    [navigate]
+    [navigate, getUserInfo]
   );
   const {
     data: projects = [],
@@ -192,7 +205,7 @@ const ProjectsPage: React.FC = () => {
     try {
       await createProject({
         ...data,
-        managerId: data.managerId || "00000000-0000-0000-0000-000000000000",
+        managerId: data.managerId,
         managerDelegateId: data.managerDelegateId,
         teamMemberIds: data.teamMemberIds,
       }).unwrap();
