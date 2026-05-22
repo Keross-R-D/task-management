@@ -182,7 +182,7 @@ export default function LogTimeModal({ open, task, onClose }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-md border my-6">
+      <DialogContent className="max-w-md border my-6 onInteractOutside={(e) => e.preventDefault()">
         <DialogHeader className="my-2 border-b border-gray-800 pb-4">
           <DialogTitle className="flex items-center gap-2">
             Log Time

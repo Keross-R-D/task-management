@@ -599,25 +599,23 @@ const timesheetData = useMemo(() => {
           {/* Header */}
           <div>
             <h1 className="text-2xl font-bold">Resource Utilisation</h1>
-            <p className="text-muted-foreground">
+            <p className="text-muted-foreground mt-0.5">
               Monitor team capacity and workload across all projects.
             </p>
           </div>
 
           {/* Tabs */}
           <Tabs defaultValue="team">
-            <TabsList>
-              <TabsTrigger value="team" className="flex gap-2 items-center">
-                <Users className="h-4 w-4" /> Team Member View
+            <TabsList className="border rounded-xl p-1 flex gap-1 w-fit py-4.5!">
+              <TabsTrigger value="team" className="bg-transparent rounded-lg dark:data-[state=active]:bg-[#0a0a0a] dark:data-[state=active]:text-white px-3 py-3.5!">
+                <Users size={16} /> Team Member View
               </TabsTrigger>
-              <TabsTrigger value="project" className="flex gap-2 items-center">
-                <FolderKanban className="h-4 w-4" /> Project View
+              <TabsTrigger value="project" className="bg-transparent rounded-lg dark:data-[state=active]:bg-[#0a0a0a] dark:data-[state=active]:text-white px-3 py-3.5!">
+                <FolderKanban size={16} /> Project View
               </TabsTrigger>
               <TabsTrigger
-                value="timesheet"
-                className="flex gap-2 items-center"
-              >
-                <CalendarDays className="h-4 w-4" /> Timesheet
+                value="timesheet" className="bg-transparent rounded-lg dark:data-[state=active]:bg-[#0a0a0a] dark:data-[state=active]:text-white px-3 py-3.5!">
+                <CalendarDays size={16} /> Timesheet
               </TabsTrigger>
             </TabsList>
 

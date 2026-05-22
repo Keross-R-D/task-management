@@ -44,7 +44,7 @@ const WeekSprintTable: React.FC<Props> = ({ title, data }) => {
           <CardTitle className="font-medium">{title}</CardTitle>
           <Info size={16} />
         </div>
-        <div className="flex items-center border rounded-md px-3 dark:bg-[#0a0a0a]">
+        <div className="flex items-center border rounded-md px-3 ">
           <Search size={16} />
           <Input
             placeholder="Search..."

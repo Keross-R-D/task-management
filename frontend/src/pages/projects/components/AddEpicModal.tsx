@@ -25,14 +25,19 @@ import {
   SelectContent,
   SelectItem,
   Textarea,
+  FormDateInput,
 } from "ikon-react-components-lib";
 
 const baseEpicSchema = z.object({
   name: z.string().min(3, "Epic name is required"),
   description: z.string().min(5, "Description is required"),
   status: z.string().min(4, "Status is required"),
-  startDate: z.string().min(1, "Start date is required"),
-  endDate: z.string().min(1, "End date is required"),
+  startDate: z.date({
+    error: "Start date is required",
+  }),
+  endDate: z.date({
+    error: "End date is required",
+  }),
 });
 
 export type EpicFormValues = z.infer<typeof baseEpicSchema>;
@@ -59,17 +64,61 @@ export default function AddEpicModal({
 
   const isLoading = isCreating || isUpdating;
 
+  //Function to normalize the dates
+  const normalizeDate = (date: Date) => {
+    const normalized = new Date(date);
+    normalized.setHours(0, 0, 0, 0);
+    return normalized;
+  };
+
+  //Validation to check whether the start and end dates are valid or not
   const dynamicSchema = React.useMemo(() => {
     return baseEpicSchema.superRefine((data, ctx) => {
-      if (data.startDate && data.endDate && new Date(data.startDate) > new Date(data.endDate)) {
-        ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Start Date must not be later than End Date", path: ["startDate"] });
-        ctx.addIssue({ code: z.ZodIssueCode.custom, message: "End Date must not be earlier than Start Date", path: ["endDate"] });
+
+      const epicStart = normalizeDate(data.startDate);
+      const epicEnd = normalizeDate(data.endDate);
+
+      const projectStart = projectStartDate
+        ? normalizeDate(new Date(projectStartDate))
+        : null;
+
+      const projectEnd = projectEndDate
+        ? normalizeDate(new Date(projectEndDate))
+        : null;
+
+      // Epic start must not be after epic end
+      if (epicStart > epicEnd) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message:
+            "Start Date must not be later than End Date",
+          path: ["startDate"],
+        });
+
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message:
+            "End Date must not be earlier than Start Date",
+          path: ["endDate"],
+        });
       }
-      if (projectStartDate && data.startDate && new Date(data.startDate) < new Date(projectStartDate)) {
-        ctx.addIssue({ code: z.ZodIssueCode.custom, message: `Cannot be earlier than project start date (${projectStartDate})`, path: ["startDate"] });
+
+      // Epic cannot start before project start
+      if (projectStart && epicStart < projectStart) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: `Cannot be earlier than project start date (${projectStartDate})`,
+          path: ["startDate"],
+        });
       }
-      if (projectEndDate && data.endDate && new Date(data.endDate) > new Date(projectEndDate)) {
-        ctx.addIssue({ code: z.ZodIssueCode.custom, message: `Cannot be later than project end date (${projectEndDate})`, path: ["endDate"] });
+
+      // Epic cannot end after project end
+      if (projectEnd && epicEnd > projectEnd) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: `Cannot be later than project end date (${projectEndDate})`,
+          path: ["endDate"],
+        });
       }
     });
   }, [projectStartDate, projectEndDate]);
@@ -80,8 +129,8 @@ export default function AddEpicModal({
       name: "",
       description: "",
       status: "",
-      startDate: "",
-      endDate: "",
+      startDate: undefined,
+      endDate: undefined,
     },
   });
 
@@ -93,19 +142,19 @@ export default function AddEpicModal({
           description: epic.description || "",
           status: epic.status || "",
           startDate: epic.startDate
-            ? new Date(epic.startDate).toISOString().split("T")[0]
-            : "",
+            ? new Date(epic.startDate)
+            : undefined,
           endDate: epic.endDate
-            ? new Date(epic.endDate).toISOString().split("T")[0]
-            : "",
+            ? new Date(epic.endDate)
+            : undefined,
         });
       } else {
         form.reset({
           name: "",
           description: "",
           status: "",
-          startDate: "",
-          endDate: "",
+          startDate: undefined,
+          endDate: undefined,
         });
       }
     }
@@ -116,17 +165,35 @@ export default function AddEpicModal({
     onClose();
   };
 
+  const formatLocalDate = (date: Date) => {
+    const year = date.getFullYear();
+
+    const month = String(
+      date.getMonth() + 1
+    ).padStart(2, "0");
+
+    const day = String(
+      date.getDate()
+    ).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+  };
+
   const handleCreateOrUpdate = async (data: EpicFormValues) => {
     try {
       if (epic && epic.id) {
         await updateEpic({
           id: epic.id,
           ...data,
+          startDate: formatLocalDate(data.startDate),
+          endDate: formatLocalDate(data.endDate),
           projectId,
         }).unwrap();
       } else {
         await createEpic({
           ...data,
+          startDate: formatLocalDate(data.startDate),
+          endDate: formatLocalDate(data.endDate),
           projectId,
         }).unwrap();
       }
@@ -139,14 +206,15 @@ export default function AddEpicModal({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-lg">
-        <DialogHeader className="my-3">
-          <DialogTitle>{epic ? "Edit Epic" : "Add Epic"}</DialogTitle>
-          <span className="text-gray-400">
-            {epic
-              ? "Update details for the epic."
-              : "Create a new epic for this project."}
-          </span>
+      <DialogContent className="max-w-lg" onInteractOutside={(e) => e.preventDefault()}>
+        <DialogHeader className="my-1">
+          <DialogTitle><div className="text-xl">{epic ? "Edit Epic" : "Add Epic"}</div>
+            <div className="text-muted-foreground text-sm">
+              {epic
+                ? "Update details for the epic."
+                : "Create a new epic for this project."}
+            </div>
+          </DialogTitle>
         </DialogHeader>
 
         <Form {...form}>
@@ -210,10 +278,10 @@ export default function AddEpicModal({
                       </SelectTrigger>
                     </FormControl>
 
-                    <SelectContent>
+                    <SelectContent position="popper">
                       {Object.values(EpicEnum.Status).map((status) => (
                         <SelectItem key={status} value={status}>
-                          {status}
+                          {status.toLowerCase().replace(/_/g, " ").replace(/\b\w/g, (char) => char.toUpperCase())}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -226,36 +294,25 @@ export default function AddEpicModal({
 
             {/* Dates */}
             <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
+              <FormDateInput
+                formControl={form.control}
                 name="startDate"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      Start Date <span className="text-red-500">*</span>
-                    </FormLabel>
-                    <FormControl>
-                      <Input type="date" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                label={
+                  <>
+                    Start Date <span className="text-red-500">*</span>
+                  </>
+                }
+                placeholder="Select start date"
               />
-
-              <FormField
-                control={form.control}
+              <FormDateInput
+                formControl={form.control}
                 name="endDate"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      End Date <span className="text-red-500">*</span>
-                    </FormLabel>
-                    <FormControl>
-                      <Input type="date" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                label={
+                  <>
+                    End Date <span className="text-red-500">*</span>
+                  </>
+                }
+                placeholder="Select end date"
               />
             </div>
 

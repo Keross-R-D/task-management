@@ -168,7 +168,7 @@ export default function MyTaskLogTimeModal({ open, task, onClose }: Props) {
 
     return (
         <Dialog open={open} onOpenChange={handleClose}>
-            <DialogContent className="max-w-md">
+            <DialogContent className="max-w-md onInteractOutside={(e) => e.preventDefault()">
                 <DialogHeader className="my-2 border-b border-gray-800 pb-4">
                     <DialogTitle>Log Time</DialogTitle>
                     <span className="text-gray-500 text-sm">

@@ -100,7 +100,7 @@ export default function ViewTimeLogsModal({
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-w-lg onInteractOutside={(e) => e.preventDefault()">
         <DialogHeader className="my-2 border-b pb-4">
           <DialogTitle className="flex items-center gap-2">
             <History className="h-5 w-5" /> Time Logs

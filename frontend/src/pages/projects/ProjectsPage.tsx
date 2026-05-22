@@ -11,6 +11,8 @@ import {
   ClipboardCheck,
   ArrowUpRight,
   FolderOpen,
+  CalendarDays,
+  User,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -23,6 +25,7 @@ import AddProjectModal, {
 import ErrorState from "@/components/ErrorState";
 import { useUserMap } from "@/utils/userMap";
 
+//Applying style based on project status
 const getProjectStatusStyles = (status: string) => {
   switch (status) {
     case "PLANNED":
@@ -42,10 +45,25 @@ const getProjectStatusStyles = (status: string) => {
   }
 };
 
+//Format date
+const formatDate = (date?: string | Date | null) => {
+  if (!date) return "—";
+  const d = typeof date === "string" ? new Date(date) : date;
+  if (isNaN(d.getTime())) return "—";
+
+  return d.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+};
+
 export function ProjectsGrid({ data }: { data: any[] }) {
   const navigate = useNavigate();
+  const { getUserInfo } = useUserMap();
+  
   return (
-    <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-4">
+    <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 py-4">
       {data.map((project, idx) => (
         <div
           key={project.id || idx}
@@ -84,14 +102,20 @@ export function ProjectsGrid({ data }: { data: any[] }) {
                 </span>
               </div>
               <div className="flex items-center text-sm text-muted-foreground">
-                <span className="w-4 h-4 mr-2.5 flex items-center justify-center font-bold text-[10px] text-muted-foreground/70">
-                  🗓
+                <User className="w-4 h-4 mr-2.5 text-muted-foreground/70" />
+                <span className="truncate">
+                  {getUserInfo(project.managerId).name || "Unassigned"}
                 </span>
-                <span>{project.startDate || "No start date"}</span>
+              </div>
+              <div className="flex items-center text-sm text-muted-foreground">
+                <span className="w-4 h-4 mr-2.5 flex items-center justify-center font-bold text-[10px] text-muted-foreground/70">
+                  <CalendarDays />
+                </span>
+                <span>{formatDate(project.startDate)} - {formatDate(project.endDate)}</span>
               </div>
             </div>
 
-            <div className="flex items-center justify-center w-full py-2.5 px-4 bg-muted/30 hover:bg-muted text-foreground text-sm font-medium rounded-lg transition-colors border border-border/50">
+            <div className="flex items-center justify-center w-full py-2.5 px-4 bg-muted/30 hover:bg-muted text-foreground text-sm font-medium rounded-lg transition-colors border border-border/70">
               View Details
               <ArrowUpRight className="w-4 h-4 ml-2 opacity-50 font-bold" />
             </div>
@@ -137,8 +161,8 @@ const ProjectsPage: React.FC = () => {
           <div className="text-left font-semibold">Manager Name</div>
         ),
         cell: ({ row }: any) => (
-          <span>
-            {getUserInfo(row.original.managerId).name || "Unassigned"}
+          <span className="flex gap-1 items-center font-semibold bg-muted w-fit rounded-md px-1.5 py-1">
+            {getUserInfo(row.original.managerId).name ||"Unassigned"}
           </span>
         ),
       },
@@ -179,10 +203,26 @@ const ProjectsPage: React.FC = () => {
   const [createProject, { isLoading: isCreating }] = useCreateProjectMutation();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const formatLocalDate = (date: Date) => {
+    const year = date.getFullYear();
+
+    const month = String(
+      date.getMonth() + 1
+    ).padStart(2, "0");
+
+    const day = String(
+      date.getDate()
+    ).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+  };
+
   const handleCreateProject = async (data: ProjectFormValues) => {
     try {
       await createProject({
         ...data,
+        startDate: formatLocalDate(data.startDate),
+        endDate: formatLocalDate(data.endDate),
         managerId: data.managerId,
         managerDelegateId: data.managerDelegateId,
         teamMemberIds: data.teamMemberIds,
@@ -203,7 +243,7 @@ const ProjectsPage: React.FC = () => {
   );
 
   return (
-    <div className="p-6">
+    <>
       {isFetching ? (
         <div className="flex flex-col gap-6">
           {/* Header */}
@@ -252,10 +292,10 @@ const ProjectsPage: React.FC = () => {
           onRetry={() => refetch()}
         />
       ) : (
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-6 p-4">
           <div>
-            <h1 className="text-xl font-bold">Projects</h1>
-            <p className="text-sm text-gray-400 mt-1">
+            <h1 className="text-2xl font-bold">Projects</h1>
+            <p className="text-sm text-muted-foreground mt-0.5">
               {projects.length} of {projects.length} projects
             </p>
           </div>
@@ -286,7 +326,7 @@ const ProjectsPage: React.FC = () => {
           />
         </div>
       )}
-    </div>
+    </>
   );
 };
 

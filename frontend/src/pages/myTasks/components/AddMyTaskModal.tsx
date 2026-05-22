@@ -75,9 +75,9 @@ export default function AddMyTaskModal({
 
     return (
         <Dialog open={open} onOpenChange={handleClose}>
-            <DialogContent className="max-w-xl">
+            <DialogContent className="max-w-xl" onInteractOutside={(e) => e.preventDefault()}>
                 <DialogHeader>
-                    <DialogTitle className="flex justify-center font-bold text-2xl">Add Task</DialogTitle>
+                    <DialogTitle className="flex font-bold text-xl">Add Task</DialogTitle>
                 </DialogHeader>
 
                 <Form {...form}>
@@ -131,11 +131,11 @@ export default function AddMyTaskModal({
                                         </FormLabel>
                                         <Select onValueChange={field.onChange} value={field.value}>
                                             <FormControl>
-                                                <SelectTrigger>
+                                                <SelectTrigger className="w-full">
                                                     <SelectValue placeholder="Select Type" />
                                                 </SelectTrigger>
                                             </FormControl>
-                                            <SelectContent>
+                                            <SelectContent position="popper">
                                                 <SelectItem value="task">Task</SelectItem>
                                                 <SelectItem value="bug">Bug</SelectItem>
                                                 <SelectItem value="improvement">
@@ -158,11 +158,11 @@ export default function AddMyTaskModal({
                                         </FormLabel>
                                         <Select onValueChange={field.onChange} value={field.value}>
                                             <FormControl>
-                                                <SelectTrigger>
+                                                <SelectTrigger className="w-full">
                                                     <SelectValue placeholder="Select Priority" />
                                                 </SelectTrigger>
                                             </FormControl>
-                                            <SelectContent>
+                                            <SelectContent position="popper">
                                                 <SelectItem value="low">Low</SelectItem>
                                                 <SelectItem value="medium">Medium</SelectItem>
                                                 <SelectItem value="high">High</SelectItem>
@@ -186,11 +186,11 @@ export default function AddMyTaskModal({
                                         </FormLabel>
                                         <Select onValueChange={field.onChange} value={field.value}>
                                             <FormControl>
-                                                <SelectTrigger>
+                                                <SelectTrigger className="w-full">
                                                     <SelectValue placeholder="Select Status" />
                                                 </SelectTrigger>
                                             </FormControl>
-                                            <SelectContent>
+                                            <SelectContent position="popper">
                                                 <SelectItem value="todo">To Do</SelectItem>
                                                 <SelectItem value="in_progress">In Progress</SelectItem>
                                                 <SelectItem value="done">Done</SelectItem>
@@ -239,11 +239,11 @@ export default function AddMyTaskModal({
                                     </FormLabel>
                                     <Select onValueChange={field.onChange} value={field.value}>
                                         <FormControl>
-                                            <SelectTrigger>
+                                            <SelectTrigger className="w-full">
                                                 <SelectValue placeholder="Select Assignee" />
                                             </SelectTrigger>
                                         </FormControl>
-                                        <SelectContent>
+                                        <SelectContent position="popper">
                                             {allUsers.map((user) => (
                                                 <SelectItem key={user.id} value={user.id}>
                                                     {user.name}

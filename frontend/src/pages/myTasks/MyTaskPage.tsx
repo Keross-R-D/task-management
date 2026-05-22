@@ -632,7 +632,7 @@ const TasksPage: React.FC = () => {
   };
 
   return (
-    <div className="p-6">
+    <>
       {isFetching ? (
         <div className="p-4 overflow-hidden">
           <div className="flex justify-between items-center">
@@ -692,7 +692,7 @@ const TasksPage: React.FC = () => {
           <div className="flex justify-between items-center">
             <div>
               <h1 className="text-2xl font-bold">My Tasks</h1>
-              <p className="text-muted-foreground">
+              <p className="text-muted-foreground mt-0.5">
                 Personal tasks not associated with any project.
               </p>
             </div>
@@ -831,7 +831,7 @@ const TasksPage: React.FC = () => {
           />
         </div>
       )}
-    </div>
+    </>
   );
 };
 
