@@ -149,24 +149,24 @@ export default function ProjectDetailPage() {
       <div className="mt-6 flex flex-col gap-4">
         <Tabs defaultValue="task" className="w-full">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <TabsList className="border rounded-xl p-1 flex gap-1 w-fit !py-5">
+            <TabsList className="border rounded-xl p-1 flex gap-1 w-fit py-4.5!">
               <TabsTrigger
                 value="task"
-                className="bg-transparent dark:data-[state=active]:bg-[#0a0a0a] dark:data-[state=active]:text-white px-3 !py-3.5"
+                className="bg-transparent rounded-lg dark:data-[state=active]:bg-[#0a0a0a] dark:data-[state=active]:text-white px-3 py-3.5!"
               >
                 <List size={16} /> Task List
               </TabsTrigger>
 
               <TabsTrigger
                 value="board"
-                className="bg-transparent dark:data-[state=active]:bg-[#0a0a0a] dark:data-[state=active]:text-white px-3 !py-3.5"
+                className="bg-transparent rounded-lg dark:data-[state=active]:bg-[#0a0a0a] dark:data-[state=active]:text-white px-3 py-3.5!"
               >
                 <LayoutGrid size={16} /> Board
               </TabsTrigger>
 
               <TabsTrigger
                 value="resource"
-                className="bg-transparent dark:data-[state=active]:bg-[#0a0a0a] dark:data-[state=active]:text-white px-3 !py-3.5"
+                className="bg-transparent rounded-lg dark:data-[state=active]:bg-[#0a0a0a] dark:data-[state=active]:text-white px-3 py-3.5!"
               >
                 <Users size={16} /> Resource Utilisation
               </TabsTrigger>
