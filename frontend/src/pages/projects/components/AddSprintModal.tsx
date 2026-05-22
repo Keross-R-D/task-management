@@ -24,6 +24,7 @@ import {
   SelectContent,
   SelectItem,
   Textarea,
+  FormDateInput,
 } from "ikon-react-components-lib";
 import { SprintEnum } from "@/enums/sprint.constants";
 
@@ -31,8 +32,12 @@ const baseSprintSchema = z.object({
   name: z.string().min(2, "Sprint name is required"),
   goal: z.string().min(3, "Goal is required"),
   status: z.string().min(3, "Status is required"),
-  startDate: z.string().min(1, "Start date is required"),
-  endDate: z.string().min(1, "End date is required"),
+  startDate: z.date({
+    error: "Start date is required",
+  }),
+  endDate: z.date({
+    error: "End date is required",
+  }),
 });
 
 export type SprintFormValues = z.infer<typeof baseSprintSchema>;
@@ -61,17 +66,61 @@ export default function AddSprintModal({
 
   const isLoading = isCreating || isUpdating;
 
+  //Function to normalize the date
+  const normalizeDate = (date: Date) => {
+    const normalized = new Date(date);
+    normalized.setHours(0, 0, 0, 0);
+    return normalized;
+  };
+
+  //Validation to check whether the start and end dates are valid or not
   const dynamicSchema = React.useMemo(() => {
     return baseSprintSchema.superRefine((data, ctx) => {
-      if (data.startDate && data.endDate && new Date(data.startDate) > new Date(data.endDate)) {
-        ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Start Date must not be later than End Date", path: ["startDate"] });
-        ctx.addIssue({ code: z.ZodIssueCode.custom, message: "End Date must not be earlier than Start Date", path: ["endDate"] });
+
+      const sprintStart = normalizeDate(data.startDate);
+      const sprintEnd = normalizeDate(data.endDate);
+
+      const epicStart = epicStartDate
+        ? normalizeDate(new Date(epicStartDate))
+        : null;
+
+      const epicEnd = epicEndDate
+        ? normalizeDate(new Date(epicEndDate))
+        : null;
+
+      // Sprint start must not be after sprint end
+      if (sprintStart > sprintEnd) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message:
+            "Start Date must not be later than End Date",
+          path: ["startDate"],
+        });
+
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message:
+            "End Date must not be earlier than Start Date",
+          path: ["endDate"],
+        });
       }
-      if (epicStartDate && data.startDate && new Date(data.startDate) < new Date(epicStartDate)) {
-        ctx.addIssue({ code: z.ZodIssueCode.custom, message: `Cannot be earlier than Epic start date (${epicStartDate})`, path: ["startDate"] });
+
+      // Sprint cannot start before epic start
+      if (epicStart && sprintStart < epicStart) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: `Cannot be earlier than Epic start date (${epicStartDate})`,
+          path: ["startDate"],
+        });
       }
-      if (epicEndDate && data.endDate && new Date(data.endDate) > new Date(epicEndDate)) {
-        ctx.addIssue({ code: z.ZodIssueCode.custom, message: `Cannot be later than Epic end date (${epicEndDate})`, path: ["endDate"] });
+
+      // Sprint cannot end after epic end
+      if (epicEnd && sprintEnd > epicEnd) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: `Cannot be later than Epic end date (${epicEndDate})`,
+          path: ["endDate"],
+        });
       }
     });
   }, [epicStartDate, epicEndDate]);
@@ -82,8 +131,8 @@ export default function AddSprintModal({
       name: "",
       goal: "",
       status: "",
-      startDate: "",
-      endDate: "",
+      startDate: undefined,
+      endDate: undefined,
     },
   });
 
@@ -95,19 +144,19 @@ export default function AddSprintModal({
           goal: sprint.goal || "",
           status: sprint.status || "",
           startDate: sprint.startDate
-            ? new Date(sprint.startDate).toISOString().split("T")[0]
-            : "",
+            ? new Date(sprint.startDate)
+            : undefined,
           endDate: sprint.endDate
-            ? new Date(sprint.endDate).toISOString().split("T")[0]
-            : "",
+            ? new Date(sprint.endDate)
+            : undefined,
         });
       } else {
         form.reset({
           name: "",
           goal: "",
           status: "",
-          startDate: "",
-          endDate: "",
+          startDate: undefined,
+          endDate: undefined,
         });
       }
     }
@@ -118,18 +167,36 @@ export default function AddSprintModal({
     onClose();
   };
 
+  const formatLocalDate = (date: Date) => {
+    const year = date.getFullYear();
+
+    const month = String(
+      date.getMonth() + 1
+    ).padStart(2, "0");
+
+    const day = String(
+      date.getDate()
+    ).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+  };
+
   const handleCreateOrUpdate = async (data: SprintFormValues) => {
     try {
       if (sprint && sprint.id) {
         await updateSprint({
           id: sprint.id,
           ...data,
+          startDate: formatLocalDate(data.startDate),
+          endDate: formatLocalDate(data.endDate),
           projectId,
           epicId,
         }).unwrap();
       } else {
         await createSprint({
           ...data,
+          startDate: formatLocalDate(data.startDate),
+          endDate: formatLocalDate(data.endDate),
           projectId,
           epicId,
         }).unwrap();
@@ -143,14 +210,15 @@ export default function AddSprintModal({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-lg">
-        <DialogHeader className="my-3">
-          <DialogTitle>{sprint ? "Edit Sprint" : "Add Sprint"}</DialogTitle>
-          <span className="text-gray-400">
-            {sprint
-              ? "Update details for the sprint."
-              : "Create a new sprint within this epic."}
-          </span>
+      <DialogContent className="max-w-lg" onInteractOutside={(e) => e.preventDefault()}>
+        <DialogHeader className="my-1">
+          <DialogTitle><div className="text-xl">{sprint ? "Edit Sprint" : "Add Sprint"}</div>
+            <div className="text-muted-foreground text-sm">
+              {sprint
+                ? "Update details for the sprint."
+                : "Create a new sprint within this epic."}
+            </div>
+          </DialogTitle>
         </DialogHeader>
 
         <Form {...form}>
@@ -213,10 +281,10 @@ export default function AddSprintModal({
                       </SelectTrigger>
                     </FormControl>
 
-                    <SelectContent>
+                    <SelectContent position="popper">
                       {Object.values(SprintEnum.Status).map((status) => (
                         <SelectItem key={status} value={status}>
-                          {status}
+                          {status.toLowerCase().replace(/_/g, " ").replace(/\b\w/g, (char) => char.toUpperCase())}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -229,36 +297,25 @@ export default function AddSprintModal({
 
             {/* Dates */}
             <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
+              <FormDateInput
+                formControl={form.control}
                 name="startDate"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      Start Date <span className="text-red-500">*</span>
-                    </FormLabel>
-                    <FormControl>
-                      <Input type="date" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                label={
+                  <>
+                    Start Date <span className="text-red-500">*</span>
+                  </>
+                }
+                placeholder="Select start date"
               />
-
-              <FormField
-                control={form.control}
+              <FormDateInput
+                formControl={form.control}
                 name="endDate"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      End Date <span className="text-red-500">*</span>
-                    </FormLabel>
-                    <FormControl>
-                      <Input type="date" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                label={
+                  <>
+                    End Date <span className="text-red-500">*</span>
+                  </>
+                }
+                placeholder="Select end date"
               />
             </div>
 

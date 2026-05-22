@@ -227,7 +227,7 @@ const ProjectStatusReportPage: React.FC = () => {
         <div className="flex flex-col gap-6 p-4">
           <div className="mb-3">
             <h1 className="text-2xl font-bold">Project Status Report</h1>
-            <p className="text-muted-foreground">
+            <p className="text-muted-foreground mt-0.5">
               Detailed performance and variance analysis. Click on a project
               name to view its full status report.
             </p>

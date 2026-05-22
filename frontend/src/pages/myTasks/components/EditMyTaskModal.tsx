@@ -33,7 +33,7 @@ const taskSchema = z.object({
     type: z.string().min(1, "Type is required"),
     priority: z.string().min(1, "Priority is required"),
     status: z.string().min(1, "Status is required"),
-    estimatedHours: z.coerce.number().min(0.5, "Minimum 0.5 hours"),
+    estimatedHours: z.number().min(0.5, "Minimum 0.5 hours"),
     assignee: z.string().min(1, "Assignee is required"),
 });
 
@@ -86,7 +86,7 @@ export default function EditMyTaskModal({
     /* Prefill form when task changes */
     useEffect(() => {
         if (task) {
-            console.log(task.estimatedHours);
+            console.log(task.assignee);
             form.reset({
                 title: task.name,
                 description: task.description || "",
@@ -94,10 +94,12 @@ export default function EditMyTaskModal({
                 status: task.status === "Todo" ? "todo" : task.status === "In progress" ? "in_progress" : task.status.toLowerCase(),
                 type: task.type === "Task" ? "task" : task.type === "Bug" ? "bug" : task.type.toLowerCase(),
                 estimatedHours: task.estimatedHours !== undefined && task.estimatedHours !== null ? task.estimatedHours : 0.5,
-                assignee: task.assignee || "",
+                assignee: allUsers.find(
+                    (user) => user.name === task.assignee
+                )?.id || "",
             });
         }
-    }, [task, form]);
+    }, [task, form, allUsers]);
 
     const handleClose = () => {
         form.reset();
@@ -111,7 +113,7 @@ export default function EditMyTaskModal({
 
     return (
         <Dialog open={open} onOpenChange={handleClose}>
-            <DialogContent className="max-w-xl">
+            <DialogContent className="max-w-xl" onInteractOutside={(e) => e.preventDefault()}>
                 <DialogHeader>
                     <DialogTitle className="flex justify-center font-bold text-2xl">
                         Edit Task
@@ -162,14 +164,14 @@ export default function EditMyTaskModal({
                                 name="type"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Type</FormLabel>
+                                        <FormLabel>Type <span className="text-red-500">*</span></FormLabel>
                                         <Select onValueChange={field.onChange} value={field.value}>
                                             <FormControl>
-                                                <SelectTrigger>
+                                                <SelectTrigger className="w-full">
                                                     <SelectValue />
                                                 </SelectTrigger>
                                             </FormControl>
-                                            <SelectContent>
+                                            <SelectContent position="popper">
                                                 <SelectItem value="task">Task</SelectItem>
                                                 <SelectItem value="bug">Bug</SelectItem>
                                                 <SelectItem value="improvement">
@@ -186,14 +188,14 @@ export default function EditMyTaskModal({
                                 name="priority"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Priority</FormLabel>
+                                        <FormLabel>Priority <span className="text-red-500">*</span></FormLabel>
                                         <Select onValueChange={field.onChange} value={field.value}>
                                             <FormControl>
-                                                <SelectTrigger>
+                                                <SelectTrigger className="w-full">
                                                     <SelectValue />
                                                 </SelectTrigger>
                                             </FormControl>
-                                            <SelectContent>
+                                            <SelectContent position="popper">
                                                 <SelectItem value="low">Low</SelectItem>
                                                 <SelectItem value="medium">Medium</SelectItem>
                                                 <SelectItem value="high">High</SelectItem>
@@ -211,14 +213,14 @@ export default function EditMyTaskModal({
                                 name="status"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Status</FormLabel>
+                                        <FormLabel>Status <span className="text-red-500">*</span></FormLabel>
                                         <Select onValueChange={field.onChange} value={field.value}>
                                             <FormControl>
-                                                <SelectTrigger>
+                                                <SelectTrigger className="w-full">
                                                     <SelectValue />
                                                 </SelectTrigger>
                                             </FormControl>
-                                            <SelectContent>
+                                            <SelectContent position="popper">
                                                 <SelectItem value="todo">To Do</SelectItem>
                                                 <SelectItem value="in_progress">
                                                     In Progress
@@ -236,7 +238,7 @@ export default function EditMyTaskModal({
                                 name="estimatedHours"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Estimated Hours</FormLabel>
+                                        <FormLabel>Estimated Hours <span className="text-red-500">*</span></FormLabel>
                                         <FormControl>
                                             <Input
                                                 type="number"
@@ -262,14 +264,14 @@ export default function EditMyTaskModal({
                             name="assignee"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Assignee</FormLabel>
+                                    <FormLabel>Assignee <span className="text-red-500">*</span></FormLabel>
                                     <Select onValueChange={field.onChange} value={field.value}>
                                         <FormControl>
-                                            <SelectTrigger>
+                                            <SelectTrigger className="w-full">
                                                 <SelectValue />
                                             </SelectTrigger>
                                         </FormControl>
-                                        <SelectContent>
+                                        <SelectContent position="popper">
                                             {allUsers.map((user) => (
                                                 <SelectItem key={user.id} value={user.id}>
                                                     {user.name}

@@ -22,8 +22,6 @@ import {
   SelectItem,
   FormMultiComboboxInput,
   FormDateInput,
-  FormComboboxInput,
-  CustomComboboxInput,
 } from "ikon-react-components-lib";
 import { ProjectEnum } from "@/enums/project.constants";
 import { useUserMap } from "@/utils/userMap";
@@ -48,7 +46,7 @@ const projectSchema = z
     if (
       data.startDate &&
       data.endDate &&
-      new Date(data.startDate) > new Date(data.endDate)
+      data.startDate > data.endDate
     ) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
@@ -107,9 +105,9 @@ export default function AddProjectModal({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-w-lg" onInteractOutside={(e) => e.preventDefault()}>
         <DialogHeader>
-          <DialogTitle className="flex font-bold text-2xl">Add New Project</DialogTitle>
+          <DialogTitle className="flex font-bold text-xl">Add New Project</DialogTitle>
         </DialogHeader>
 
         <Form {...form}>

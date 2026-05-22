@@ -225,12 +225,26 @@ const ProjectsPage: React.FC = () => {
   const [createProject, { isLoading: isCreating }] = useCreateProjectMutation();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const formatLocalDate = (date: Date) => {
+    const year = date.getFullYear();
+
+    const month = String(
+      date.getMonth() + 1
+    ).padStart(2, "0");
+
+    const day = String(
+      date.getDate()
+    ).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+  };
+
   const handleCreateProject = async (data: ProjectFormValues) => {
     try {
       await createProject({
         ...data,
-        startDate: data.startDate.toISOString().split("T")[0],
-        endDate: data.endDate.toISOString().split("T")[0],
+        startDate: formatLocalDate(data.startDate),
+        endDate: formatLocalDate(data.endDate),
         managerId: data.managerId,
         managerDelegateId: data.managerDelegateId,
         teamMemberIds: data.teamMemberIds,
@@ -251,7 +265,7 @@ const ProjectsPage: React.FC = () => {
   );
 
   return (
-    <div className="p-6">
+    <>
       {isFetching ? (
         <div className="flex flex-col gap-6">
           {/* Header */}
@@ -297,10 +311,10 @@ const ProjectsPage: React.FC = () => {
       ) : isError ? (
         <ErrorState message="We couldn’t load the projects data right now. Please try again after a moment." onRetry={() => refetch()} />
       ) : (
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-6 p-4">
           <div>
-            <h1 className="text-xl font-bold">Projects</h1>
-            <p className="text-sm text-gray-400 mt-1">
+            <h1 className="text-2xl font-bold">Projects</h1>
+            <p className="text-sm text-muted-foreground mt-0.5">
               {projects.length} of {projects.length} projects
             </p>
           </div>
@@ -331,7 +345,7 @@ const ProjectsPage: React.FC = () => {
           />
         </div>
       )}
-    </div>
+    </>
   );
 };
 

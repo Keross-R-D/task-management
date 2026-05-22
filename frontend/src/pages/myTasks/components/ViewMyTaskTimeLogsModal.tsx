@@ -110,7 +110,7 @@ export default function ViewMyTaskTimeLogsModal({
 
     return (
         <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
-            <DialogContent className="max-w-lg bg-[#0b0c10] text-gray-100 border-gray-800">
+            <DialogContent className="max-w-lg bg-[#0b0c10] text-gray-100 border-gray-800" onInteractOutside={(e) => e.preventDefault()}>
                 <DialogHeader className="my-2 border-b border-gray-800 pb-4">
                     <DialogTitle className="flex items-center gap-2">
                         <History className="h-5 w-5" /> Time Logs

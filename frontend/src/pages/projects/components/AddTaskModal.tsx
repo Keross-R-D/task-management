@@ -27,6 +27,7 @@ import {
   SelectContent,
   SelectItem,
   Textarea,
+  FormDateInput,
 } from "ikon-react-components-lib";
 
 const baseTaskSchema = z.object({
@@ -40,12 +41,22 @@ const baseTaskSchema = z.object({
   assigneeId: z.string().min(1, "Assignee is required"),
   reporterId: z.string().min(1, "Reporter is required"),
 
-  estimatedHours: z.number().min(1, "Must be greater than 0"),
+  estimatedHours: z.coerce.number({
+      error: "Estimated hours is required",
+    })
+    .min(0.5, "Minimum 0.5 hours"),
 
-  plannedDuration: z.number().min(1, "Must be greater than 0"),
+  plannedDuration: z.coerce.number({
+      error: "Planned duration is required",
+    })
+    .min(1, "Must be greater than or equals to 1"),
 
-  startDate: z.string().min(1, "Start date is required"),
-  endDate: z.string().min(1, "End date is required"),
+  startDate: z.date({
+    error: "Start date is required",
+  }),
+  endDate: z.date({
+    error: "End date is required",
+  }),
 });
 
 export type TaskFormValues = z.infer<typeof baseTaskSchema>;
@@ -85,17 +96,59 @@ export default function AddTaskModal({
 
   const isLoading = isCreating || isUpdating;
 
+  const normalizeDate = (date: Date) => {
+    const normalized = new Date(date);
+    normalized.setHours(0, 0, 0, 0);
+    return normalized;
+  };
+
   const dynamicSchema = React.useMemo(() => {
     return baseTaskSchema.superRefine((data, ctx) => {
-      if (data.startDate && data.endDate && new Date(data.startDate) > new Date(data.endDate)) {
-        ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Start Date must not be later than End Date", path: ["startDate"] });
-        ctx.addIssue({ code: z.ZodIssueCode.custom, message: "End Date must not be earlier than Start Date", path: ["endDate"] });
+
+      const taskStart = normalizeDate(data.startDate);
+      const taskEnd = normalizeDate(data.endDate);
+
+      const sprintStart = sprintStartDate
+        ? normalizeDate(new Date(sprintStartDate))
+        : null;
+
+      const sprintEnd = sprintEndDate
+        ? normalizeDate(new Date(sprintEndDate))
+        : null;
+
+      // Task start must not be after task end
+      if (taskStart > taskEnd) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message:
+            "Start Date must not be later than End Date",
+          path: ["startDate"],
+        });
+
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message:
+            "End Date must not be earlier than Start Date",
+          path: ["endDate"],
+        });
       }
-      if (sprintStartDate && data.startDate && new Date(data.startDate) < new Date(sprintStartDate)) {
-        ctx.addIssue({ code: z.ZodIssueCode.custom, message: `Cannot be earlier than Sprint start date (${sprintStartDate})`, path: ["startDate"] });
+
+      // Task cannot start before sprint start
+      if (sprintStart && taskStart < sprintStart) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: `Cannot be earlier than Sprint start date (${sprintStartDate})`,
+          path: ["startDate"],
+        });
       }
-      if (sprintEndDate && data.endDate && new Date(data.endDate) > new Date(sprintEndDate)) {
-        ctx.addIssue({ code: z.ZodIssueCode.custom, message: `Cannot be later than Sprint end date (${sprintEndDate})`, path: ["endDate"] });
+
+      // Task cannot end after sprint end
+      if (sprintEnd && taskEnd > sprintEnd) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: `Cannot be later than Sprint end date (${sprintEndDate})`,
+          path: ["endDate"],
+        });
       }
     });
   }, [sprintStartDate, sprintEndDate]);
@@ -112,8 +165,8 @@ export default function AddTaskModal({
       reporterId: "",
       estimatedHours: undefined,
       plannedDuration: undefined,
-      startDate: "",
-      endDate: "",
+      startDate: undefined,
+      endDate: undefined,
     },
   });
 
@@ -131,11 +184,11 @@ export default function AddTaskModal({
           estimatedHours: task.estimatedHours || undefined,
           plannedDuration: task.plannedDuration || undefined,
           startDate: task.startDate
-            ? new Date(task.startDate).toISOString().split("T")[0]
-            : "",
+            ? new Date(task.startDate)
+            : undefined,
           endDate: task.endDate
-            ? new Date(task.endDate).toISOString().split("T")[0]
-            : "",
+            ? new Date(task.endDate)
+            : undefined,
         });
       } else {
         form.reset({
@@ -148,8 +201,8 @@ export default function AddTaskModal({
           reporterId: "",
           estimatedHours: undefined,
           plannedDuration: undefined,
-          startDate: "",
-          endDate: "",
+          startDate: undefined,
+          endDate: undefined,
         });
       }
     }
@@ -160,12 +213,28 @@ export default function AddTaskModal({
     onClose();
   };
 
+  const formatLocalDate = (date: Date) => {
+    const year = date.getFullYear();
+
+    const month = String(
+      date.getMonth() + 1
+    ).padStart(2, "0");
+
+    const day = String(
+      date.getDate()
+    ).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+  };
+
   const handleCreateOrUpdate = async (data: TaskFormValues) => {
     try {
       if (task && task.id) {
         await updateTask({
           id: task.id,
           ...data,
+          startDate: formatLocalDate(data.startDate),
+          endDate: formatLocalDate(data.endDate),
           projectId: task.projectId || projectId,
           epicId: epicId || task.epicId || null,
           sprintId: sprintId || task.sprintId || null,
@@ -173,6 +242,8 @@ export default function AddTaskModal({
       } else {
         await createTask({
           ...data,
+          startDate: formatLocalDate(data.startDate),
+          endDate: formatLocalDate(data.endDate),
           projectId,
           epicId: epicId || null,
           sprintId: sprintId || null,
@@ -187,9 +258,15 @@ export default function AddTaskModal({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-2xl" onInteractOutside={(e) => e.preventDefault()}>
         <DialogHeader>
-          <DialogTitle>{task ? "Edit Task" : "Add Task"}</DialogTitle>
+          <DialogTitle><div className="text-xl">{task ? "Edit Task" : "Add Task"}</div>
+            <div className="text-muted-foreground text-sm">
+              {task
+                ? "Update details for the task."
+                : "Create a new task within this sprint."}
+            </div>
+          </DialogTitle>
         </DialogHeader>
 
         <Form {...form}>
@@ -203,7 +280,7 @@ export default function AddTaskModal({
               name="title"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Title *</FormLabel>
+                  <FormLabel>Title <span className="text-red-500">*</span></FormLabel>
                   <FormControl>
                     <Input placeholder="Enter task title" {...field} />
                   </FormControl>
@@ -218,7 +295,7 @@ export default function AddTaskModal({
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Description</FormLabel>
+                  <FormLabel>Description <span className="text-red-500">*</span></FormLabel>
                   <FormControl>
                     <Textarea {...field} />
                   </FormControl>
@@ -235,20 +312,20 @@ export default function AddTaskModal({
                 name="type"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Type *</FormLabel>
+                    <FormLabel>Type <span className="text-red-500">*</span></FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       value={field.value || ""}
                     >
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger className="w-full">
                           <SelectValue placeholder="Select Type" />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent>
+                      <SelectContent position="popper">
                         {Object.values(TaskEnum.Type).map((type) => (
                           <SelectItem key={type} value={type}>
-                            {type}
+                            {type.toLowerCase().replace(/_/g, " ").replace(/\b\w/g, (char) => char.toUpperCase())}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -264,20 +341,20 @@ export default function AddTaskModal({
                 name="priority"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Priority *</FormLabel>
+                    <FormLabel>Priority <span className="text-red-500">*</span></FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       value={field.value || ""}
                     >
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger className="w-full">
                           <SelectValue placeholder="Select Priority" />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent>
+                      <SelectContent position="popper">
                         {Object.values(TaskEnum.Priority).map((priority) => (
                           <SelectItem key={priority} value={priority}>
-                            {priority}
+                            {priority.toLowerCase().replace(/_/g, " ").replace(/\b\w/g, (char) => char.toUpperCase())}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -293,20 +370,20 @@ export default function AddTaskModal({
                 name="status"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Status *</FormLabel>
+                    <FormLabel>Status <span className="text-red-500">*</span></FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       value={field.value || ""}
                     >
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger className="w-full">
                           <SelectValue placeholder="Select Status" />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent>
+                      <SelectContent position="popper">
                         {Object.values(TaskEnum.Status).map((status) => (
                           <SelectItem key={status} value={status}>
-                            {status}
+                            {status.toLowerCase().replace(/_/g, " ").replace(/\b\w/g, (char) => char.toUpperCase())}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -323,17 +400,17 @@ export default function AddTaskModal({
                 name="assigneeId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Assignee ID *</FormLabel>
+                    <FormLabel>Assignee <span className="text-red-500">*</span></FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       value={field.value || ""}
                     >
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger className="w-full">
                           <SelectValue placeholder="Select Assignee" />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent>
+                      <SelectContent position="popper">
                         {teamMembers.map((member) => (
                           <SelectItem key={member.id} value={member.id}>
                             {member.name}
@@ -351,17 +428,17 @@ export default function AddTaskModal({
                 name="reporterId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Reporter ID *</FormLabel>
+                    <FormLabel>Reporter <span className="text-red-500">*</span></FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       value={field.value || ""}
                     >
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger className="w-full">
                           <SelectValue placeholder="Select Reporter" />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent>
+                      <SelectContent position="popper">
                         {allUsers.map((user) => (
                           <SelectItem key={user.id} value={user.id}>
                             {user.name}
@@ -377,32 +454,25 @@ export default function AddTaskModal({
 
             {/* Dates */}
             <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
+              <FormDateInput
+                formControl={form.control}
                 name="startDate"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Start Date</FormLabel>
-                    <FormControl>
-                      <Input type="date" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                label={
+                  <>
+                    Start Date <span className="text-red-500">*</span>
+                  </>
+                }
+                placeholder="Select start date"
               />
-
-              <FormField
-                control={form.control}
+              <FormDateInput
+                formControl={form.control}
                 name="endDate"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>End Date</FormLabel>
-                    <FormControl>
-                      <Input type="date" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                label={
+                  <>
+                    End Date <span className="text-red-500">*</span>
+                  </>
+                }
+                placeholder="Select end date"
               />
             </div>
 
@@ -413,10 +483,12 @@ export default function AddTaskModal({
                 name="estimatedHours"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Estimated Hours</FormLabel>
+                    <FormLabel>Estimated Hours <span className="text-red-500">*</span></FormLabel>
                     <FormControl>
                       <Input
                         type="number"
+                        step="0.5"
+                        min="0"
                         value={field.value ?? ""}
                         onChange={(e) =>
                           field.onChange(
@@ -437,7 +509,7 @@ export default function AddTaskModal({
                 name="plannedDuration"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Planned Duration</FormLabel>
+                    <FormLabel>Planned Duration <span className="text-red-500">*</span></FormLabel>
                     <FormControl>
                       <Input
                         type="number"

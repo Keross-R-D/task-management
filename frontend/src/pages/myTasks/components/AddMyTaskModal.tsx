@@ -75,9 +75,9 @@ export default function AddMyTaskModal({
 
     return (
         <Dialog open={open} onOpenChange={handleClose}>
-            <DialogContent className="max-w-xl">
+            <DialogContent className="max-w-xl" onInteractOutside={(e) => e.preventDefault()}>
                 <DialogHeader>
-                    <DialogTitle className="flex font-bold text-2xl">Add Task</DialogTitle>
+                    <DialogTitle className="flex font-bold text-xl">Add Task</DialogTitle>
                 </DialogHeader>
 
                 <Form {...form}>

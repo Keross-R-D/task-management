@@ -599,23 +599,23 @@ const timesheetData = useMemo(() => {
           {/* Header */}
           <div>
             <h1 className="text-2xl font-bold">Resource Utilisation</h1>
-            <p className="text-muted-foreground">
+            <p className="text-muted-foreground mt-0.5">
               Monitor team capacity and workload across all projects.
             </p>
           </div>
 
           {/* Tabs */}
           <Tabs defaultValue="team">
-            <TabsList>
-              <TabsTrigger value="team" className="flex gap-2 items-center">
+            <TabsList className="px-1 rounded-lg">
+              <TabsTrigger value="team" className="flex gap-2 items-center px-3 py-1 rounded-md">
                 <Users className="h-4 w-4" /> Team Member View
               </TabsTrigger>
-              <TabsTrigger value="project" className="flex gap-2 items-center">
+              <TabsTrigger value="project" className="flex gap-2 items-center px-3 py-1 rounded-md">
                 <FolderKanban className="h-4 w-4" /> Project View
               </TabsTrigger>
               <TabsTrigger
                 value="timesheet"
-                className="flex gap-2 items-center"
+                className="flex gap-2 items-center px-3 py-1 rounded-md"
               >
                 <CalendarDays className="h-4 w-4" /> Timesheet
               </TabsTrigger>

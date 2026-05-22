@@ -287,7 +287,7 @@ const DashboardPage: React.FC = () => {
     .slice(0, 5);
 
   return (
-    <div className="space-y-6">
+    <>
       {isFetching ? (
         <div className="p-4 overflow-hidden">
           {/* Header */}
@@ -375,7 +375,7 @@ const DashboardPage: React.FC = () => {
           <div className="flex justify-between items-center">
             <div>
               <h1 className="text-2xl font-bold">DashBoard</h1>
-              <p className="text-muted-foreground">
+              <p className="text-muted-foreground mt-0.5">
                 Welcome back. Here's what's happening across your projects.
               </p>
             </div>
@@ -621,7 +621,7 @@ const DashboardPage: React.FC = () => {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 };
 
