@@ -1,4 +1,3 @@
-
 import { useGetProjectsQuery } from "@/features/projects/projectsApiSlice";
 import { useGetSprintsByProjectQuery } from "@/features/sprints/sprintsApiSlice";
 import {
@@ -27,8 +26,10 @@ import {
   CircleAlert,
   Download,
 } from "lucide-react";
-import React from "react";
+import React, { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { setBreadcrumbLabel } from "@/features/ui/uiSlice";
 import WeekSprintTable from "./WeekSprintTable";
 import DatePickerWithRange from "./DateRangePicker";
 import { PDFDownloadLink } from "@react-pdf/renderer";
@@ -48,17 +49,26 @@ const ProjectStatusDetailPage: React.FC = () => {
   const { id = "" } = useParams();
   const navigate = useNavigate();
   const { getUserInfo } = useUserMap();
-  const { data: projects = [], isLoading: isProjectLoading } = useGetProjectsQuery();
+  const { data: projects = [], isLoading: isProjectLoading } =
+    useGetProjectsQuery();
   const project = projects.find((p) => String(p.id) === id);
-  const {
-    data: sprints = [],
-    isLoading: isSprintLoading,
-  } = useGetSprintsByProjectQuery(id);
+  const { data: sprints = [], isLoading: isSprintLoading } =
+    useGetSprintsByProjectQuery(id);
   console.log("SPRINTS:", sprints);
 
-  const { data: tasks = [], isLoading: isTaskLoading } = useGetTasksByProjectQuery(id, { skip: !id });
+  const { data: tasks = [], isLoading: isTaskLoading } =
+    useGetTasksByProjectQuery(id, { skip: !id });
 
   const today = new Date();
+
+  const dispatch = useDispatch();
+  useEffect(() => {
+    if (project?.projectName) {
+      dispatch(
+        setBreadcrumbLabel({ id, label: `${project.projectName} Report` }),
+      );
+    }
+  }, [project, id, dispatch]);
 
   // Week range helpers
   const getWeekRange = (date: Date) => {
@@ -83,62 +93,62 @@ const ProjectStatusDetailPage: React.FC = () => {
 
   // Handle date selection with max 7 days restriction
   const handleDateRangeChange = (range: DateRange | undefined) => {
-  if (!range?.from) {
-    setDateRange(range);
-    return;
-  }
+    if (!range?.from) {
+      setDateRange(range);
+      return;
+    }
 
-  // only start selected
-  if (range.from && !range.to) {
-    setDateRange(range);
-    return;
-  }
+    // only start selected
+    if (range.from && !range.to) {
+      setDateRange(range);
+      return;
+    }
 
-  if (range.from && range.to) {
-    const from = new Date(range.from);
-    const to = new Date(range.to);
+    if (range.from && range.to) {
+      const from = new Date(range.from);
+      const to = new Date(range.to);
 
-    from.setHours(0, 0, 0, 0);
-    to.setHours(0, 0, 0, 0);
+      from.setHours(0, 0, 0, 0);
+      to.setHours(0, 0, 0, 0);
 
-    const diffInDays = Math.floor(
-      (to.getTime() - from.getTime()) / (1000 * 60 * 60 * 24),
-    );
+      const diffInDays = Math.floor(
+        (to.getTime() - from.getTime()) / (1000 * 60 * 60 * 24),
+      );
 
-    // max allowed range = 7 days
-    if (diffInDays > 6) {
-      // detect which side user changed
-      if (
-        dateRange?.from &&
-        from.getTime() !== new Date(dateRange.from).setHours(0, 0, 0, 0)
-      ) {
-        // start date changed -> move end date
-        const adjustedTo = new Date(from);
-        adjustedTo.setDate(from.getDate() + 6);
+      // max allowed range = 7 days
+      if (diffInDays > 6) {
+        // detect which side user changed
+        if (
+          dateRange?.from &&
+          from.getTime() !== new Date(dateRange.from).setHours(0, 0, 0, 0)
+        ) {
+          // start date changed -> move end date
+          const adjustedTo = new Date(from);
+          adjustedTo.setDate(from.getDate() + 6);
+
+          setDateRange({
+            from,
+            to: adjustedTo,
+          });
+
+          return;
+        }
+
+        // end date changed -> move start date
+        const adjustedFrom = new Date(to);
+        adjustedFrom.setDate(to.getDate() - 6);
 
         setDateRange({
-          from,
-          to: adjustedTo,
+          from: adjustedFrom,
+          to,
         });
 
         return;
       }
-
-      // end date changed -> move start date
-      const adjustedFrom = new Date(to);
-      adjustedFrom.setDate(to.getDate() - 6);
-
-      setDateRange({
-        from: adjustedFrom,
-        to,
-      });
-
-      return;
     }
-  }
 
-  setDateRange(range);
-};
+    setDateRange(range);
+  };
   // Calculate dynamic week ranges based on selected date range
   const selectedWeek =
     dateRange?.from && dateRange?.to
@@ -149,7 +159,9 @@ const ProjectStatusDetailPage: React.FC = () => {
   const manager = project?.managerId ? getUserInfo(project.managerId) : null;
 
   //Get the manager delegate data
-  const managerDelegate = project?.managerDelegateId ? getUserInfo(project.managerDelegateId) : null;
+  const managerDelegate = project?.managerDelegateId
+    ? getUserInfo(project.managerDelegateId)
+    : null;
 
   // Get the project data
   const computedData = React.useMemo(() => {
@@ -290,7 +302,7 @@ const ProjectStatusDetailPage: React.FC = () => {
         return (
           <div className="flex items-center gap-2">
             <div className="w-24">
-              <Progress value={value} />
+              <Progress value={value} className="[&>div]:bg-green-500" />
             </div>
             <span className="text-sm">{value}%</span>
           </div>
@@ -340,19 +352,45 @@ const ProjectStatusDetailPage: React.FC = () => {
   const status = getProjectStatus(computedData.endDate, overdueTasks.length);
 
   // ── Normalised project date bounds for the date picker ───────────────────
+  const projectStartDate = project?.startDate;
+  const projectEndDate = project?.endDate;
+
   const normalizedMinDate = React.useMemo(() => {
-    if (!project?.startDate) return undefined;
-    const d = new Date(project.startDate);
+    if (!projectStartDate) return undefined;
+
+    const d = new Date(projectStartDate);
     d.setHours(0, 0, 0, 0);
+
     return d;
-  }, [project]);
+  }, [projectStartDate]);
 
   const normalizedMaxDate = React.useMemo(() => {
-    if (!project?.endDate) return undefined;
-    const d = new Date(project.endDate);
+    if (!projectEndDate) return undefined;
+
+    const d = new Date(projectEndDate);
     d.setHours(23, 59, 59, 999);
+
     return d;
-  }, [project]);
+  }, [projectEndDate]);
+  //get current, previous and upcoming week sprints
+  // const currentWeekData = currentWeekSprints.map((s) => ({
+  //   sprintName: s.name,
+  //   progress: getProgress(s.id),
+  //   plannedStartDate: s.startDate,
+  //   plannedEndDate: s.endDate,
+  //   status: s.status,
+  // }));
+
+  // const upcomingWeekData = upcomingWeekSprints.map((s) => ({
+  //   sprintName: s.name,
+  //   progress: getProgress(s.id),
+  //   plannedStartDate: s.startDate,
+  //   plannedEndDate: s.endDate,
+  //   status: s.status,
+  // }));
+
+  // const isReportReady =
+  //   !isProjectLoading && !isTaskLoading && !isSprintLoading && !!project;
 
   // ── Task date helper ──────────────────────────────────────────────────────
   const toDay = (d: string | Date) => {
@@ -460,9 +498,13 @@ const ProjectStatusDetailPage: React.FC = () => {
                   actualHours: computedData.actualHours,
                   type: computedData.type,
                   clientName: computedData.clientName,
-                  overallStatus: status === "on_time" ? "ON_TIME" : status === "slight_delay" ? "SLIGHT_DELAY" : "DELAY",
+                  overallStatus:
+                    status === "on_time"
+                      ? "ON_TIME"
+                      : status === "slight_delay"
+                        ? "SLIGHT_DELAY"
+                        : "DELAY",
                 }}
-
                 executiveSummary={{
                   runningOutOfTime: overdueTasks.length,
                   risks: 0,
@@ -470,23 +512,17 @@ const ProjectStatusDetailPage: React.FC = () => {
                   remainingTasks: computedData.remainingTasks,
                   totalTasks: computedData.tasksTotal,
                 }}
-
                 currentWeekStart={formatDate(currentWeekStart)}
-
                 currentWeekEnd={formatDate(currentWeekEnd)}
-
                 overdueTasks={overdueTasks}
-
                 currentWeek={currentWeekData}
-
                 previousWeek={previousWeekSprints.map((s) => ({
                   sprintName: s.name,
                   progress: getProgress(s.id),
                   plannedStartDate: s.startDate,
                   plannedEndDate: s.endDate,
-                  status: s.status
+                  status: s.status,
                 }))}
-
                 upcomingWeek={upcomingWeekData}
               />
             }
@@ -683,18 +719,9 @@ const ProjectStatusDetailPage: React.FC = () => {
 
         {/* Week Sprint Tables */}
         <div className="grid grid-cols-1 xl:grid-cols-3! gap-6">
-          <WeekSprintTable
-            title="Current Week"
-            data={currentWeekSprints}
-          />
-          <WeekSprintTable
-            title="Previous Week"
-            data={previousWeekSprints}
-          />
-          <WeekSprintTable
-            title="Upcoming Week"
-            data={upcomingWeekSprints}
-          />
+          <WeekSprintTable title="Current Week" data={currentWeekSprints} />
+          <WeekSprintTable title="Previous Week" data={previousWeekSprints} />
+          <WeekSprintTable title="Upcoming Week" data={upcomingWeekSprints} />
         </div>
       </div>
     </div>

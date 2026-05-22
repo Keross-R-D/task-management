@@ -100,8 +100,8 @@ export default function ViewTimeLogsModal({
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
-      <DialogContent className="max-w-lg bg-[#0b0c10] text-gray-100 border-gray-800">
-        <DialogHeader className="my-2 border-b border-gray-800 pb-4">
+      <DialogContent className="max-w-lg">
+        <DialogHeader className="my-2 border-b pb-4">
           <DialogTitle className="flex items-center gap-2">
             <History className="h-5 w-5" /> Time Logs
           </DialogTitle>
@@ -113,27 +113,27 @@ export default function ViewTimeLogsModal({
         <div className="flex flex-col gap-6 mt-2">
           {/* Stats Cards */}
           <div className="grid grid-cols-3 gap-4">
-            <div className="flex flex-col items-center justify-center p-4 rounded-xl border border-gray-800 bg-[#111218]">
+            <div className="flex flex-col items-center justify-center p-4 rounded-xl border">
               <span className="text-xs text-gray-400 font-medium tracking-wide">
                 Estimated
               </span>
-              <span className="text-xl font-bold mt-1 text-white">
+              <span className="text-xl font-bold mt-1">
                 {estimated}h
               </span>
             </div>
-            <div className="flex flex-col items-center justify-center p-4 rounded-xl border border-indigo-900/50 bg-[#111218]">
-              <span className="text-xs text-indigo-300 font-medium tracking-wide">
+            <div className="flex flex-col items-center justify-center p-4 rounded-xl border">
+              <span className="text-xs text-indigo-400 font-medium tracking-wide">
                 Logged
               </span>
-              <span className="text-xl font-bold mt-1 text-indigo-400">
+              <span className="text-xl font-bold mt-1 text-indigo-500">
                 {totalLogged.toFixed(1)}h
               </span>
             </div>
-            <div className="flex flex-col items-center justify-center p-4 rounded-xl border border-gray-800 bg-[#111218]">
+            <div className="flex flex-col items-center justify-center p-4 rounded-xl border">
               <span className="text-xs text-gray-400 font-medium tracking-wide">
                 Remaining
               </span>
-              <span className="text-xl font-bold mt-1 text-white">
+              <span className="text-xl font-bold mt-1">
                 {remaining.toFixed(1)}h
               </span>
             </div>
@@ -183,11 +183,11 @@ export default function ViewTimeLogsModal({
                   return (
                     <div
                       key={`${log.worklogId}-${log.date}-${index}`}
-                      className="group relative p-4 rounded-xl border border-gray-800 bg-[#111218] hover:border-gray-700 transition-colors"
+                      className="group relative p-4 rounded-xl border hover:border-gray-700 transition-colors"
                     >
                       <div className="flex justify-between items-start">
                         <div className="flex items-center gap-2">
-                          <span className="font-bold text-white">
+                          <span className="font-bold">
                             {log.hours}h
                           </span>
                           <span className="text-sm text-gray-500">
@@ -203,13 +203,13 @@ export default function ViewTimeLogsModal({
                         </button>
                       </div>
 
-                      <div className="flex items-center gap-2 mt-2 text-sm text-gray-400">
+                      <div className="flex items-center gap-2 mt-2 text-sm text-gray-500">
                         <User className="h-3 w-3" />
                         <span>Current User</span>
                       </div>
 
                       {log.description && (
-                        <p className="mt-3 text-sm text-gray-300">
+                        <p className="mt-3 text-sm text-gray-500">
                           {log.description}
                         </p>
                       )}
@@ -224,13 +224,12 @@ export default function ViewTimeLogsModal({
           <div className="flex justify-end items-center gap-3 pt-4 border-t border-gray-800 mt-2">
             <Button
               variant="ghost"
-              className="text-gray-400 hover:text-white"
+              className= "border"
               onClick={onClose}
             >
               Close
             </Button>
             <Button
-              className="bg-indigo-600 hover:bg-indigo-700 text-white"
               onClick={() => {
                 onClose();
                 onLogMoreTime();
