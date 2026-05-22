@@ -253,10 +253,7 @@ export default function AddProjectModal({
                       Manager <span className="text-red-500">*</span>
                     </FormLabel>
 
-                    <Select
-                      onValueChange={field.onChange}
-                      value={field.value}
-                    >
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger className="w-full">
                           <SelectValue placeholder="Select Manager" />
@@ -287,10 +284,7 @@ export default function AddProjectModal({
                       Manager Delegate <span className="text-red-500">*</span>
                     </FormLabel>
 
-                    <Select
-                      onValueChange={field.onChange}
-                      value={field.value}
-                    >
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger className="w-full">
                           <SelectValue placeholder="Select Manager Delegate" />

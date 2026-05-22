@@ -29,7 +29,7 @@ import { useUserMap } from "@/utils/userMap";
 const getProjectStatusStyles = (status: string) => {
   switch (status) {
     case "PLANNED":
-      return "bg-indigo-500/10 text-indigo-500 border border-indigo-500/20";
+      return "bg-[rgba(59,130,246,0.2)] text-[#60a5fa] border border-[rgba(59,130,246,0.3)]";
 
     case "IN_PROGRESS":
       return "bg-blue-500/10 text-blue-500 border border-blue-500/20";
@@ -135,16 +135,12 @@ const ProjectsPage: React.FC = () => {
       {
         accessorKey: "projectName",
         header: () => (
-          <div className="text-left font-semibold">
-            Project Name
-          </div>
+          <div className="text-left font-semibold ">Project Name</div>
         ),
         cell: ({ row }: any) => (
           <span
-            className="font-medium cursor-pointer"
-            onClick={() =>
-              navigate(`/main/projects/${row.original.id}`)
-            }
+            className="font-medium cursor-pointer hover:underline"
+            onClick={() => navigate(`/main/projects/${row.original.id}`)}
           >
             {row.original.projectName}
           </span>
@@ -154,21 +150,15 @@ const ProjectsPage: React.FC = () => {
       {
         accessorKey: "clientName",
         header: () => (
-          <div className="text-left font-semibold">
-            Client Name
-          </div>
+          <div className="text-left font-semibold">Client Name</div>
         ),
-        cell: ({ row }: any) => (
-          <span>{row.original.clientName}</span>
-        ),
+        cell: ({ row }: any) => <span>{row.original.clientName}</span>,
       },
 
       {
         accessorKey: "managerName",
         header: () => (
-          <div className="text-left font-semibold">
-            Manager Name
-          </div>
+          <div className="text-left font-semibold">Manager Name</div>
         ),
         cell: ({ row }: any) => (
           <span className="flex gap-1 items-center font-semibold bg-muted w-fit rounded-md px-1.5 py-1">
@@ -179,41 +169,29 @@ const ProjectsPage: React.FC = () => {
 
       {
         accessorKey: "projectStatus",
-        header: () => (
-          <div className="text-left font-semibold">
-            Status
-          </div>
-        ),
+        header: () => <div className="text-left font-semibold">Status</div>,
         cell: ({ row }: any) => (
-          <span className={`px-2 py-1 rounded-md text-xs font-semibold w-fit ${getProjectStatusStyles(row.original.projectStatus)}`}>{row.original.projectStatus.replace("_", " ")}</span>
+          <span
+            className={`px-2 py-1 rounded-md text-xs font-semibold w-fit ${getProjectStatusStyles(row.original.projectStatus)}`}
+          >
+            {row.original.projectStatus.replace("_", " ")}
+          </span>
         ),
       },
 
       {
         accessorKey: "startDate",
-        header: () => (
-          <div className="text-left font-semibold">
-            Start Date
-          </div>
-        ),
-        cell: ({ row }: any) => (
-          <span>{row.original.startDate}</span>
-        ),
+        header: () => <div className="text-left font-semibold">Start Date</div>,
+        cell: ({ row }: any) => <span>{row.original.startDate}</span>,
       },
 
       {
         accessorKey: "endDate",
-        header: () => (
-          <div className="text-left font-semibold">
-            End Date
-          </div>
-        ),
-        cell: ({ row }: any) => (
-          <span>{row.original.endDate}</span>
-        ),
+        header: () => <div className="text-left font-semibold">End Date</div>,
+        cell: ({ row }: any) => <span>{row.original.endDate}</span>,
       },
     ],
-    [navigate, getUserInfo]
+    [navigate, getUserInfo],
   );
   const {
     data: projects = [],
@@ -309,7 +287,10 @@ const ProjectsPage: React.FC = () => {
           </Card>
         </div>
       ) : isError ? (
-        <ErrorState message="We couldn’t load the projects data right now. Please try again after a moment." onRetry={() => refetch()} />
+        <ErrorState
+          message="We couldn’t load the projects data right now. Please try again after a moment."
+          onRetry={() => refetch()}
+        />
       ) : (
         <div className="flex flex-col gap-6 p-4">
           <div>

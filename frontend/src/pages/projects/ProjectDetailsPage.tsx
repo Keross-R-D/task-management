@@ -14,8 +14,10 @@ import SearchAndFilter, {
 import TaskBoard from "./components/TaskBoard";
 import ResourceUtilization from "./components/ResouceUtilisation";
 import { SimpleWidget } from "ikon-react-components-lib";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import AddEpicModal from "./components/AddEpicModal";
+import { useDispatch } from "react-redux";
+import { setBreadcrumbLabel } from "@/features/ui/uiSlice";
 import { useGetEpicsByProjectQuery } from "@/features/epics/epicsApiSlice";
 import { useGetSprintsByProjectQuery } from "@/features/sprints/sprintsApiSlice";
 import {
@@ -57,6 +59,13 @@ export default function ProjectDetailPage() {
   // ── Filter state — one per tab so they don't interfere ──
   const [boardFilters, setBoardFilters] =
     useState<FilterState>(DEFAULT_FILTERS);
+
+  const dispatch = useDispatch();
+  useEffect(() => {
+    if (project?.projectName) {
+      dispatch(setBreadcrumbLabel({ id: projectId, label: project.projectName }));
+    }
+  }, [project, projectId, dispatch]);
 
   const isLoading =
     epicsLoading || sprintsLoading || tasksLoading || backlogLoading;
