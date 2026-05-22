@@ -10,9 +10,14 @@ interface OverdueTask {
 
 interface WeeklySprint {
     sprintName: string;
-    plannedStartDate: string,
-    plannedEndDate: string;
     progress: number;
+}
+
+interface CurrentWeekTask {
+    sprintName: string;
+    taskName: string;
+    plannedStartDate: string;
+    plannedEndDate: string;
     status: string;
 }
 
@@ -45,7 +50,7 @@ interface ProjectStatusPdfProps {
 
     overdueTasks: OverdueTask[];
 
-    currentWeek: WeeklySprint[];
+    currentWeek: CurrentWeekTask[];
     previousWeek: WeeklySprint[];
     upcomingWeek: WeeklySprint[];
 
@@ -191,6 +196,41 @@ const styles = StyleSheet.create({
         fontSize: 10,
     },
 });
+
+const getTaskStatusStyle = (status: string) => {
+    switch (status.toUpperCase()) {
+
+        case "DONE":
+            return {
+                backgroundColor: "#dcfce7",
+                color: "#166534",
+            };
+
+        case "IN_PROGRESS":
+            return {
+                backgroundColor: "#fef3c7",
+                color: "#ca8a04",
+            };
+
+        case "TO_DO":
+            return {
+                backgroundColor: "#dbeafe",
+                color: "#1d4ed8",
+            };
+
+        case "BLOCKED":
+            return {
+                backgroundColor: "#fee2e2",
+                color: "#b91c1c",
+            };
+
+        default:
+            return {
+                backgroundColor: "#e5e7eb",
+                color: "#111827",
+            };
+    }
+};
 
 const getStatusColor = (
     status: "ON_TIME" | "SLIGHT_DELAY" | "DELAY"
@@ -435,31 +475,57 @@ export default function ProjectStatusPdf({
                             <View wrap={false} minPresenceAhead={10}>
                                 <View style={styles.tableHeader}>
                                     <Text style={styles.cell}>Sprint Name</Text>
+                                    <Text style={styles.cell}>Task Name</Text>
                                     <Text style={styles.cell}>Planned Start Date</Text>
                                     <Text style={styles.cell}>Planned End Date</Text>
-                                    <Text style={styles.cell}>Progress</Text>
                                     <Text style={styles.cell}>Status</Text>
                                 </View>
                             </View>
                             {currentWeek.map((item, index) => (
-                            <View key={index} style={{...styles.tableRow, borderBottom: index === currentWeek.length - 1 ? "none" : `1px solid ${colors.border}`}}>
-                                <Text style={styles.cell}>
-                                    {item.sprintName}
-                                </Text>
-                                <Text style={styles.cell}>
-                                    {item.plannedStartDate}
-                                </Text>
-                                <Text style={styles.cell}>
-                                    {item.plannedEndDate}
-                                </Text>
-                                <Text style={{...styles.cell, color: "green"}}>
-                                    {item.progress}%
-                                </Text>
-                                <Text style={styles.cell}>
-                                    {item.status}
-                                </Text>
-                            </View>
-                        ))}
+                                <View
+                                    key={index}
+                                    style={{
+                                        ...styles.tableRow,
+                                        borderBottom:
+                                            index === currentWeek.length - 1
+                                                ? "none"
+                                                : `1px solid ${colors.border}`,
+                                    }}
+                                >
+                                    <Text style={styles.cell}>
+                                        {item.sprintName}
+                                    </Text>
+
+                                    <Text style={styles.cell}>
+                                        {item.taskName}
+                                    </Text>
+
+                                    <Text style={styles.cell}>
+                                        {item.plannedStartDate}
+                                    </Text>
+
+                                    <Text style={styles.cell}>
+                                        {item.plannedEndDate}
+                                    </Text>
+
+                                    <View
+                                        style={{
+                                            ...styles.cell,
+                                            justifyContent: "center",
+                                            alignItems: "flex-start",
+                                        }}
+                                    >
+                                        <Text
+                                            style={{
+                                                ...styles.badge,
+                                                ...getTaskStatusStyle(item.status),
+                                            }}
+                                        >
+                                            {item.status.replace(/_/g, " ")}
+                                        </Text>
+                                    </View>
+                                </View>
+                            ))}
                         </>
                     )}
                 </View>
@@ -520,7 +586,7 @@ export default function ProjectStatusPdf({
                             <View wrap={false} minPresenceAhead={10}>
                                 <View style={styles.tableHeader}>
                                     <Text style={styles.cell}>Sprint Name</Text>
-                                    <Text style={styles.cell}>Planned End Date</Text>
+                                    <Text style={styles.cell}>Progress</Text>
                                 </View>
                             </View>
                             {upcomingWeek.map((item, index) => (
@@ -528,8 +594,8 @@ export default function ProjectStatusPdf({
                                     <Text style={styles.cell}>
                                         {item.sprintName}
                                     </Text>
-                                    <Text style={styles.cell}>
-                                        {item.plannedEndDate}
+                                    <Text style={{...styles.cell, color: "green"}}>
+                                        {item.progress}%
                                     </Text>
                                 </View>
                             ))}

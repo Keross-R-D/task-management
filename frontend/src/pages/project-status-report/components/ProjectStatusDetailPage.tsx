@@ -25,6 +25,7 @@ import {
   CircleCheck,
   CircleAlert,
   Download,
+  User,
 } from "lucide-react";
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -289,7 +290,7 @@ const ProjectStatusDetailPage: React.FC = () => {
         return (
           <div className="flex items-center gap-2">
             <div className="w-24">
-              <Progress value={value} />
+              <Progress value={value} className="[&>div]:bg-green-500" />
             </div>
             <span className="text-sm">{value}%</span>
           </div>
@@ -422,7 +423,7 @@ const ProjectStatusDetailPage: React.FC = () => {
     });
 
     return Array.from(map.values()).map((e) => ({
-      name: e.sprintName,
+      sprintName: e.sprintName,
       progress: e.total === 0 ? 0 : Math.round((e.done / e.total) * 100),
     }));
   };
@@ -430,6 +431,24 @@ const ProjectStatusDetailPage: React.FC = () => {
   const currentWeekSprints = groupBySprint(currentTasks);
   const previousWeekSprints = groupBySprint(previousTasks);
   const upcomingWeekSprints = groupBySprint(upcomingTasks);
+
+  const currentWeekTaskRows = currentTasks
+  .filter((task) => task.sprintId)
+  .map((task) => {
+    const sprint = sprints.find(
+      (s) => s.id === task.sprintId
+    );
+
+    return {
+      sprintName: sprint?.name || "Unassigned",
+      taskName: task.title || "Untitled Task",
+      plannedStartDate: task.startDate || "-",
+      plannedEndDate: task.endDate || "-",
+      status: task.status,
+    };
+  });
+
+  const isReportReady = !isProjectLoading && !isTaskLoading && !isSprintLoading && !!project;
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
@@ -443,7 +462,7 @@ const ProjectStatusDetailPage: React.FC = () => {
           <div className="mt-0.5">Back to reports</div>
         </button>
 
-        {/* <div className="flex justify-end">
+        <div className="flex justify-end">
           <PDFDownloadLink
             document={
               <ProjectStatusPdf
@@ -476,17 +495,11 @@ const ProjectStatusDetailPage: React.FC = () => {
 
                 overdueTasks={overdueTasks}
 
-                currentWeek={currentWeekData}
+                currentWeek={currentWeekTaskRows}
 
-                previousWeek={previousWeekSprints.map((s) => ({
-                  sprintName: s.name,
-                  progress: getProgress(s.id),
-                  plannedStartDate: s.startDate,
-                  plannedEndDate: s.endDate,
-                  status: s.status
-                }))}
+                previousWeek={previousWeekSprints}
 
-                upcomingWeek={upcomingWeekData}
+                upcomingWeek={upcomingWeekSprints}
               />
             }
             fileName={`PSR of ${computedData.projectName} - ${formatDate(today)}.pdf`}
@@ -499,7 +512,7 @@ const ProjectStatusDetailPage: React.FC = () => {
               {!isReportReady ? "Generating Report..." : "Download Report"}
             </Button>
           </PDFDownloadLink>
-        </div> */}
+        </div>
       </div>
 
       <div>
@@ -521,50 +534,56 @@ const ProjectStatusDetailPage: React.FC = () => {
 
             <CardContent className="space-y-3 text-sm">
               <p className="flex items-center gap-2">
-                <span className="flex items-center gap-1 font-bold">
-                  <FolderKanban className="h-4" /> Project:
-                </span>{" "}
-                {computedData.projectName}
+                <span className="flex items-center gap-1 font-semibold text-muted-foreground">
+                  <FolderKanban className="h-4 font-semibold text-muted-foreground" /> Project:
+                </span>
+                <span className="font-semibold">{computedData.projectName}</span>
               </p>
 
               <p className="flex items-center gap-2">
-                <span className="flex items-center gap-1 font-bold">
-                  <Calendar className="h-4" /> Start Date:
-                </span>{" "}
-                {formatDate(new Date(computedData.startDate))}
+                <span className="flex items-center gap-1 font-semibold text-muted-foreground">
+                  <Calendar className="h-4 font-semibold text-muted-foreground" /> Start Date:
+                </span>
+                <span className="font-semibold">{formatDate(new Date(computedData.startDate))}</span>
               </p>
 
               <p className="flex items-center gap-2">
-                <span className="flex items-center gap-1 font-bold">
-                  <Calendar className="h-4" /> End Date:
-                </span>{" "}
-                {formatDate(new Date(computedData.endDate))}
+                <span className="flex items-center gap-1 font-semibold text-muted-foreground">
+                  <Calendar className="h-4 font-semibold text-muted-foreground" /> End Date:
+                </span>
+                <span className="font-semibold">{formatDate(new Date(computedData.endDate))}</span>
               </p>
 
               <p className="flex items-center gap-2">
-                <ChartColumn className="h-4" />
-                <span className="flex items-center gap-1 font-bold">
-                  Status:
-                </span>{" "}
-                <span className="text-sm">
+                <span className="flex items-center gap-1 font-semibold text-muted-foreground">
+                  <User className="h-4 font-semibold text-muted-foreground" />Manager:
+                </span>
+                <span className="font-semibold">
+                  {computedData.managerName || "Unassigned"}
+                </span>
+              </p>
+
+              <p className="flex items-center gap-2">
+                <span className="flex items-center gap-1 font-semibold text-muted-foreground">
+                  <ChartColumn className="h-4 font-semibold text-muted-foreground" />Status:
+                </span>
+                <span className="text-sm font-semibold bg-muted w-fit px-2 py-0.5 rounded-2xl text-muted">
                   {computedData.status.replace("_", " ")}
                 </span>
               </p>
 
               <p className="flex items-center gap-2">
-                <Target className="h-4" />
-                <span className="flex items-center gap-1 font-bold">
-                  Progress:
-                </span>{" "}
-                <span>{computedData.progress}%</span>
+                <span className="flex items-center gap-1 font-semibold text-muted-foreground">
+                  <Target className="h-4 font-semibold text-muted-foreground" />Progress:
+                </span>
+                <span className="font-semibold text-green-500">{computedData.progress}%</span>
               </p>
 
               <div className="flex items-center gap-2">
-                <Clock className="h-4" />
-                <span className="flex items-center gap-1 font-bold">
-                  Hours:
-                </span>{" "}
-                {computedData.actualHours}h / {computedData.estimatedHours}h
+                <span className="flex items-center gap-1 font-semibold text-muted-foreground">
+                  <Clock className="h-4 font-semibold text-muted-foreground" />Hours:
+                </span>
+                <span className="font-semibold">{computedData.actualHours}h / {computedData.estimatedHours}h</span>
               </div>
 
               <div className="pt-2">
@@ -661,24 +680,24 @@ const ProjectStatusDetailPage: React.FC = () => {
         </div>
 
         {/* Overdue Tasks Table */}
-        {/* <div className="mt-4 mb-4">
+        <div className="mt-4 mb-4">
           <Card>
             <CardHeader>
               <CardTitle className="font-medium">Overdue Tasks</CardTitle>
             </CardHeader>
-            <CardContent className="text-center text-gray-400">
+            <CardContent className="text-center">
               <DataTableLayout
                 columns={overdueTasksColumns}
                 data={overdueTasks}
                 extraTools={{
                   totalPages: 1,
-                  isLoading: isLoading,
+                  isLoading: isSprintLoading,
                   fileName: "Overdue Tasks Report",
                 }}
               />
             </CardContent>
           </Card>
-        </div> */}
+        </div>
 
         {/* Week Sprint Tables */}
         <div className="grid grid-cols-1 xl:grid-cols-3! gap-6">

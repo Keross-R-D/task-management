@@ -264,7 +264,7 @@ export default function AddTaskModal({
             <div className="text-muted-foreground text-sm">
               {task
                 ? "Update details for the task."
-                : "Create a new task within this sprint."}
+                : "Create a new task"}
             </div>
           </DialogTitle>
         </DialogHeader>
@@ -513,6 +513,7 @@ export default function AddTaskModal({
                     <FormControl>
                       <Input
                         type="number"
+                        min="0"
                         value={field.value ?? ""}
                         onChange={(e) =>
                           field.onChange(

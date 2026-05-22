@@ -18,7 +18,7 @@ import {
 import { Info, Search } from "lucide-react";
 
 type SprintRow = {
-  name: string;
+  sprintName: string;
   progress: number;
 };
 
@@ -33,7 +33,7 @@ const WeekSprintTable: React.FC<Props> = ({ title, data }) => {
   const filteredData = React.useMemo(() => {
     if (!search.trim()) return data;
     return data.filter((item) =>
-      item.name.toLowerCase().includes(search.toLowerCase()),
+      item.sprintName.toLowerCase().includes(search.toLowerCase()),
     );
   }, [search, data]);
 
@@ -44,7 +44,7 @@ const WeekSprintTable: React.FC<Props> = ({ title, data }) => {
           <CardTitle className="font-medium">{title}</CardTitle>
           <Info size={16} />
         </div>
-        <div className="flex items-center border rounded-md px-3 dark:bg-[#0a0a0a]">
+        <div className="flex items-center border rounded-md px-3 bg-muted ">
           <Search size={16} />
           <Input
             placeholder="Search..."
@@ -83,11 +83,11 @@ const WeekSprintTable: React.FC<Props> = ({ title, data }) => {
               ) : (
                 filteredData.map((item, index) => (
                   <TableRow key={index}>
-                    <TableCell className="w-1/2">{item.name}</TableCell>
+                    <TableCell className="w-1/2">{item.sprintName}</TableCell>
                     <TableCell className="w-1/2">
                       <div className="flex items-center gap-2">
                         <div className="w-24">
-                          <Progress value={item.progress} />
+                          <Progress value={item.progress} className="[&>div]:bg-green-500"/>
                         </div>
                         <span className="text-sm">{item.progress}%</span>
                       </div>
