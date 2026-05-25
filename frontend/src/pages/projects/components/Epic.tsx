@@ -25,6 +25,12 @@ import {
   Clock,
   CalendarDays,
   Zap,
+  Calendar,
+  CircleCheck,
+  CircleX,
+  SquareCheckBig,
+  Bug,
+  BookOpen,
 } from "lucide-react";
 
 import { TaskEnum } from "@/enums/task.constants";
@@ -81,6 +87,66 @@ function formatDate(dateStr?: string) {
   });
 }
 
+//Apply styles in sprint header based on sprint status
+const getSprintStatusStyle = (status: string) => {
+  switch (status?.toUpperCase()) {
+
+    case "PLANNED":
+      return "bg-slate-500/20 border-slate-500/20";
+
+    case "ACTIVE":
+      return "bg-blue-500/10 text-blue-500 border-blue-500/20";
+
+    case "COMPLETED":
+      return "bg-green-500/10 text-green-500 border-green-500/20";
+
+    case "CANCELLED":
+      return "bg-red-500/10 text-red-500 border-red-500/20";
+
+    default:
+      return "bg-muted text-muted-foreground border-border";
+  }
+};
+
+//Apply icons based on sprint status
+const getSprintStatusIcon = (status: string) => {
+  switch (status?.toUpperCase()) {
+
+    case "PLANNED":
+      return <Calendar className="h-3 w-3" />;
+
+    case "ACTIVE":
+      return <Play className="h-3 w-3 fill-current" />;
+
+    case "COMPLETED":
+      return <CircleCheck className="h-3 w-3" />;
+
+    case "CANCELLED":
+      return <CircleX className="h-3 w-3" />;
+
+    default:
+      return null;
+  }
+};
+
+//Apply icons based on task type
+const getTaskTypeIcon = (type: string) => {
+  switch (type?.toUpperCase()) {
+
+    case "TASK":
+      return <SquareCheckBig className="h-4 w-4 shrink-0 text-indigo-500" />;
+
+    case "BUG":
+      return <Bug className="h-4 w-4 shrink-0 text-red-500" />;
+
+    case "STORY":
+      return <BookOpen className="h-4 w-4 shrink-0 text-green-500" />;
+
+    default:
+      return <Zap className="h-4 w-4 shrink-0 text-yellow-500" />;
+  }
+};
+
 // ── Task Row ──
 function TaskRow({
   task,
@@ -112,10 +178,10 @@ function TaskRow({
 
   return (
     <>
-      <div className="w-full border hover:bg-[#272b2f]/50 px-6 my-2 py-2 flex items-center justify-between rounded-md">
+      <div className="w-full border hover:bg-muted px-4 my-2 py-2 flex items-center justify-between rounded-lg">
         {/* LEFT SIDE */}
         <div className="flex items-center gap-3">
-          <Zap className="text-yellow-400 h-4 w-4 shrink-0" />
+          {getTaskTypeIcon(task.type)}
           <div className="flex flex-col gap-2">
             <h1 className="text-sm font-semibold">{task.title}</h1>
             <div className="flex items-center gap-3 text-sm">
@@ -123,7 +189,7 @@ function TaskRow({
                 <span
                   className={`${statusColor(task.status)} px-2 py-[2px] rounded-md text-xs font-semibold`}
                 >
-                  {task.status?.toUpperCase()}
+                  {task.status?.toUpperCase().replace("_", " ")}
                 </span>
                 <span
                   className={`${priorityColor(task.priority)} px-2 py-[2px] rounded-md text-xs font-semibold`}
@@ -158,26 +224,26 @@ function TaskRow({
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="border rounded-lg">
               <DropdownMenuItem
-                className="rounded-md cursor-pointer"
+                className="rounded-md"
                 onClick={() => setIsEditOpen(true)}
               >
                 <Pencil className="inline mr-2" /> Edit Task
               </DropdownMenuItem>
               <DropdownMenuItem
-                className="rounded-md cursor-pointer"
+                className="rounded-md"
                 onClick={() => setIsLogTimeOpen(true)}
               >
                 <Timer className="inline mr-2" /> Log Time
               </DropdownMenuItem>
               <DropdownMenuItem
-                className="rounded-md cursor-pointer"
+                className="rounded-md"
                 onClick={() => setIsViewTimeLogsOpen(true)}
               >
                 <History className="inline mr-2" /> View Time Logs
               </DropdownMenuItem>
               {task.sprintId ? (
                 <DropdownMenuItem
-                  className="rounded-md cursor-pointer"
+                  className="rounded-md"
                   onClick={() => updateTask({ id: task.id, sprintId: null })}
                 >
                   <Play className="inline mr-2" /> Move to Backlog
@@ -193,18 +259,17 @@ function TaskRow({
                 .map((status) => (
                   <DropdownMenuItem
                     key={status.value}
-                    className="cursor-pointer"
                     onClick={() => handleTaskStatus(status.value)}
                   >
                     {status.label}
                   </DropdownMenuItem>
                 ))}
-              <hr className="py-1 font-bold" />
+              <hr className="my-1 font-bold" />
               <DropdownMenuItem
-                className="cursor-pointer text-red-600"
+                className="flex items-center gap-2 rounded-md hover:bg-red-600/12! w-full px-3 py-2 text-red-500!"
                 onClick={() => deleteTask(task.id)}
               >
-                <Trash2 className="inline mr-2" /> Delete Task
+                <Trash2 className="inline mr-2 text-red-500" /> Delete Task
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -342,7 +407,7 @@ export default function Epic({
                 className="rounded-xl overflow-hidden group"
               >
                 {/* EPIC HEADER — unchanged */}
-                <AccordionTrigger className="hover:no-underline hover:bg-[#272b2f]/50 px-3 py-3 [&[data-state]>svg]:hidden">
+                <AccordionTrigger className="hover:no-underline hover:bg-muted px-3 py-3 [&[data-state]>svg]:hidden">
                   <div className="flex items-center justify-between w-full min-w-0 cursor-pointer">
                     <div className="flex items-center gap-3 min-w-0">
                       <ChevronRight className="h-4 w-4 transition-transform duration-200 group-data-[state=open]:rotate-90 shrink-0" />
@@ -412,7 +477,7 @@ export default function Epic({
                 <div className="h-px bg-border hidden group-data-[state=open]:block" />
 
                 {/* SPRINTS — now type="multiple" and controlled */}
-                <AccordionContent className="px-3 py-2 max-h-[300px] overflow-y-auto scrollbar-thin ">
+                <AccordionContent className="p-3 pl-8 max-h-[300px] overflow-y-auto scrollbar-thin ">
                   {epicSprints.length === 0 ? (
                     <p className="text-sm text-muted-foreground py-4 text-center">
                       No sprints in this epic
@@ -435,7 +500,7 @@ export default function Epic({
                               value={`sprint-${sprint.id}`}
                               className="border rounded-lg group/item"
                             >
-                              <AccordionTrigger className="hover:no-underline hover:bg-[#272b2f]/50 px-3 py-3 [&[data-state]>svg]:hidden">
+                              <AccordionTrigger className="hover:no-underline hover:bg-muted px-3 py-3 [&[data-state]>svg]:hidden">
                                 <div className="flex items-center justify-between w-full min-w-0 cursor-pointer">
                                   <div className="flex items-center gap-3 min-w-0 flex-wrap">
                                     <ChevronRight className="h-4 w-4 transition-transform duration-200 group-data-[state=open]/item:rotate-90 shrink-0" />
@@ -443,7 +508,8 @@ export default function Epic({
                                     <span className="font-medium truncate">
                                       {sprint.name}
                                     </span>
-                                    <span className="text-xs px-2 py-1 rounded-md border shrink-0">
+                                    <span className={`text-xs px-2 py-1 flex justify-center items-center gap-1 rounded-full border shrink-0 ${getSprintStatusStyle(sprint.status)}`}>
+                                      {getSprintStatusIcon(sprint.status)}
                                       {sprint.status}
                                     </span>
                                     <span className="text-sm truncate">
@@ -538,7 +604,7 @@ export default function Epic({
                               ).includes(`sprint-${sprint.id}`) && (
                                 <div className="h-px bg-border" />
                               )}
-                              <AccordionContent className="px-3 pb-0 max-h-[300px] overflow-y-auto scrollbar-thin">
+                              <AccordionContent className="p-2 pl-8 pb-0 max-h-[300px] overflow-y-auto scrollbar-thin">
                                 {sprintTasks.length === 0 ? (
                                   <p className="text-sm text-muted-foreground py-4 text-center">
                                     No tasks in this sprint

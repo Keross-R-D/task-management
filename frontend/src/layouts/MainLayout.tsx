@@ -18,7 +18,7 @@ export const MainLayout: React.FC = () => {
   }, [location.pathname]);
 
   return (
-    <div className="flex h-screen bg-background font-sans antialiased text-foreground">
+    <div className="flex h-screen overflow-auto bg-background font-sans antialiased text-foreground custom-scrollbar">
       {/* Syncs breadcrumbs into the library header — renders no DOM */}
       <AppBreadcrumbs />
 
@@ -27,7 +27,7 @@ export const MainLayout: React.FC = () => {
         <RenderSidebarNav
           items={navItems}
           sidebarHeader={
-            <h2 className="flex items-center gap-2 text-md mb-5 mt-2">
+            <h2 className="flex items-center gap-2 text-xl ml-2 mb-5 mt-2">
               <User size={18} />
               Task Management
             </h2>
@@ -35,7 +35,7 @@ export const MainLayout: React.FC = () => {
         />
 
         {/* Main Content Area */}
-        <div className="flex-1 overflow-auto">
+        <div className="flex-1">
           <main className="p-6">
             <Outlet />
           </main>
