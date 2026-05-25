@@ -24,6 +24,7 @@ dist-ssr
 *.sw?
 
 # Environment — local overrides and production secrets must NOT be committed
+.env
 .env.local
 .env.production
 .env.*.local
