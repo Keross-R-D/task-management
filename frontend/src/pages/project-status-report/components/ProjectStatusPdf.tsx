@@ -472,6 +472,7 @@ export default function ProjectStatusPdf({
                         </Text>
                     ) : (
                         <>
+                            {/* Table Header */}
                             <View wrap={false} minPresenceAhead={10}>
                                 <View style={styles.tableHeader}>
                                     <Text style={styles.cell}>Sprint Name</Text>
@@ -481,50 +482,130 @@ export default function ProjectStatusPdf({
                                     <Text style={styles.cell}>Status</Text>
                                 </View>
                             </View>
-                            {currentWeek.map((item, index) => (
+
+                            {/* Group Tasks by Sprint */}
+                            {Object.entries(
+                                currentWeek.reduce((acc, task) => {
+
+                                    if (!acc[task.sprintName]) {
+                                        acc[task.sprintName] = [];
+                                    }
+
+                                    acc[task.sprintName].push(task);
+
+                                    return acc;
+
+                                }, {} as Record<string, CurrentWeekTask[]>)
+                            ).map(([sprintName, tasks], sprintIndex) => (
+
                                 <View
-                                    key={index}
-                                    style={{
-                                        ...styles.tableRow,
-                                        borderBottom:
-                                            index === currentWeek.length - 1
-                                                ? "none"
-                                                : `1px solid ${colors.border}`,
-                                    }}
+                                    key={sprintName}
+                                    wrap={false}
                                 >
-                                    <Text style={styles.cell}>
-                                        {item.sprintName}
-                                    </Text>
 
-                                    <Text style={styles.cell}>
-                                        {item.taskName}
-                                    </Text>
-
-                                    <Text style={styles.cell}>
-                                        {item.plannedStartDate}
-                                    </Text>
-
-                                    <Text style={styles.cell}>
-                                        {item.plannedEndDate}
-                                    </Text>
-
+                                    {/* Sprint Header Row */}
                                     <View
                                         style={{
-                                            ...styles.cell,
-                                            justifyContent: "center",
-                                            alignItems: "flex-start",
+                                            ...styles.tableRow,
+                                            backgroundColor: "#f8fafc",
+                                            borderBottom: `1px solid ${colors.border}`,
                                         }}
                                     >
                                         <Text
                                             style={{
-                                                ...styles.badge,
-                                                ...getTaskStatusStyle(item.status),
+                                                ...styles.cell,
+                                                fontWeight: 700,
                                             }}
                                         >
-                                            {item.status.replace(/_/g, " ")}
+                                            {sprintName}
                                         </Text>
+
+                                        <Text style={styles.cell}></Text>
+
+                                        <Text style={styles.cell}>
+                                            {tasks[0]?.plannedStartDate}
+                                        </Text>
+
+                                        <Text style={styles.cell}>
+                                            {tasks[tasks.length - 1]?.plannedEndDate}
+                                        </Text>
+
+                                        <Text style={styles.cell}></Text>
                                     </View>
+
+                                    {/* Task Rows */}
+                                    {tasks.map((item, taskIndex) => (
+
+                                        <View
+                                            key={`${sprintName}-${taskIndex}`}
+                                            style={{
+                                                ...styles.tableRow,
+                                                borderBottom:
+                                                taskIndex === tasks.length - 1
+                                                    ? (
+                                                        sprintIndex ===
+                                                        Object.entries(
+                                                            currentWeek.reduce((acc, task) => {
+
+                                                                if (!acc[task.sprintName]) {
+                                                                    acc[task.sprintName] = [];
+                                                                }
+
+                                                                acc[task.sprintName].push(task);
+
+                                                                return acc;
+
+                                                            }, {} as Record<string, CurrentWeekTask[]>)
+                                                        ).length - 1
+                                                            ? "none"
+                                                            : `1px solid #71717a`
+                                                    )
+                                                    : `1px solid #d1d5db`,
+                                            }}
+                                        >
+
+                                            {/* Empty Sprint Cell */}
+                                            <Text style={styles.cell}></Text>
+
+                                            {/* Task Name */}
+                                            <Text style={styles.cell}>
+                                                {item.taskName}
+                                            </Text>
+
+                                            {/* Start */}
+                                            <Text style={styles.cell}>
+                                                {item.plannedStartDate}
+                                            </Text>
+
+                                            {/* End */}
+                                            <Text style={styles.cell}>
+                                                {item.plannedEndDate}
+                                            </Text>
+
+                                            {/* Status */}
+                                            <View
+                                                style={{
+                                                    ...styles.cell,
+                                                    justifyContent: "center",
+                                                    alignItems: "flex-start",
+                                                }}
+                                            >
+                                                <Text
+                                                    style={{
+                                                        ...styles.badge,
+                                                        ...getTaskStatusStyle(item.status),
+                                                    }}
+                                                >
+                                                    {item.status.replace(/_/g, " ")}
+                                                </Text>
+                                            </View>
+
+                                        </View>
+
+                                    ))}
+
                                 </View>
+
                             ))}
                         </>
                     )}
