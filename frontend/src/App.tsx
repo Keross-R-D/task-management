@@ -4,10 +4,13 @@ import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { mainRoutes } from '@/routes';
 import ProjectDetailsPage from '@/pages/projects/ProjectDetailsPage';
 import ProjectStatusDetailPage from './pages/project-status-report/components/ProjectStatusDetailPage';
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 
 function App() {
-  return (
-    <Routes>
+  return (<>
+   <Routes>
       <Route path="/" element={<Navigate to="/main/projects" replace />} />
 
       <Route element={<ProtectedRoute />}>
@@ -21,6 +24,9 @@ function App() {
         </Route>
       </Route>
     </Routes>
+     <ToastContainer />
+  </>
+   
   );
 }
 

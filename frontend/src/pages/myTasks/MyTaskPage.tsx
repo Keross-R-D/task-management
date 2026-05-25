@@ -1,12 +1,10 @@
 import {
   DataTableLayout,
   Button,
-  LoadingSpinner,
   Separator,
   Card,
   Skeleton,
 } from "ikon-react-components-lib";
-import { toast } from "sonner";
 import React, { useState, useEffect } from "react";
 import {
   useGetMyTasksQuery,
@@ -42,6 +40,7 @@ import {
 } from "lucide-react";
 import EditMyTaskModal from "./components/EditMyTaskModal";
 import ErrorState from "@/components/ErrorState";
+import { toast } from "sonner";
 
 // TYPES
 export type Task = {
@@ -161,27 +160,47 @@ const TasksPage: React.FC = () => {
   const handleCreate = async (data: CreateTaskPayload) => {
     try {
       await createTask(data).unwrap();
-      toast.success("Task created successfully!");
     } catch (err) {
       console.error(err);
     }
   };
 
-  const handleDelete = async (taskId: string) => {
-    //if (!window.confirm("Are you sure you want to delete this task?")) return;
-    try {
-      await deleteTask(taskId).unwrap();
-      toast.success("Task deleted successfully!");
-    } catch (err) {
-      console.error("Failed to delete task", err);
-    }
-    setOpenRowId(null);
-  };
+ 
+ const handleDelete = async (taskId: string) => {
+  toast.warning("Delete myTask ?", {
+    description: "This action will permanently delete this MyTask.",
+
+    action: {
+      label: "Delete",
+
+      onClick: async () => {
+        try {
+          await deleteTask(taskId).unwrap();
+        } catch (err) {
+          console.error("Failed to delete task", err);
+        }
+
+        setOpenRowId(null);
+      },
+    },
+
+    cancel: {
+      label: "Cancel",
+      onClick: () => {},
+    },
+
+    className: "border border-red-500/30",
+
+    actionButtonStyle: {
+      backgroundColor: "#dc2626",
+      color: "white",
+    },
+  });
+};
 
   const handleUpdate = async (id: string, formData: CreateTaskPayload) => {
     try {
       await updateTask({ id, data: formData }).unwrap();
-      toast.success("Task updated successfully!");
     } catch (err) {
       console.error(err);
     }
@@ -190,7 +209,6 @@ const TasksPage: React.FC = () => {
   const handleStatusChange = async (taskId: string, status: string) => {
     try {
       await updateTaskStatus({ id: taskId, status }).unwrap();
-      toast.success("Task status updated successfully!");
     } catch (err) {
       console.error("Failed to update status", err);
     }
@@ -385,29 +403,7 @@ const TasksPage: React.FC = () => {
                   onClick={(e) => {
                     e.stopPropagation();
 
-                    toast.error("Delete this task?", {
-                      description: "This action cannot be undone.",
-
-                      action: {
-                        label: "Delete",
-                        onClick: () => handleDelete(task.id),
-                      },
-
-                      cancel: {
-                        label: "Cancel",
-                        onClick: () => {}, // optional
-                      },
-
-                      className: "border border-red-500/30",
-                      actionButtonStyle: {
-                        backgroundColor: "#dc2626",
-                        color: "white",
-                      },
-                      cancelButtonStyle: {
-                        backgroundColor: "#374151",
-                        color: "white",
-                      },
-                    });
+                 handleDelete(task.id)
                     setOpenRowId(null);
                   }}
                   disabled={isDeleting}
@@ -555,29 +551,7 @@ const TasksPage: React.FC = () => {
                         onClick={(e) => {
                           e.stopPropagation();
 
-                          toast.error("Delete this task?", {
-                            description: "This action cannot be undone.",
-
-                            action: {
-                              label: "Delete",
-                              onClick: () => handleDelete(task.id),
-                            },
-
-                            cancel: {
-                              label: "Cancel",
-                              onClick: () => {},
-                            },
-
-                            className: "border border-red-500/30",
-                            actionButtonStyle: {
-                              backgroundColor: "#dc2626",
-                              color: "white",
-                            },
-                            cancelButtonStyle: {
-                              backgroundColor: "#374151",
-                              color: "white",
-                            },
-                          });
+                          handleDelete(task.id);
                           setOpenRowId(null);
                         }}
                         className="flex items-center gap-2 rounded-md hover:bg-red-600/12 w-full px-3 py-2 text-red-500"

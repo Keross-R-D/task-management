@@ -202,7 +202,36 @@ function TaskRow({
               <hr className="py-1 font-bold" />
               <DropdownMenuItem
                 className="cursor-pointer text-red-600"
-                onClick={() => deleteTask(task.id)}
+                onClick={() =>
+                  toast.warning("Delete task ?", {
+                    description:
+                      "This action will permanently delete this Task.",
+
+                    action: {
+                      label: "Delete",
+
+                      onClick: async () => {
+                        try {
+                          await deleteTask(task.id).unwrap();
+                        } catch (err) {
+                          console.error("Failed to delete task", err);
+                        }
+                      },
+                    },
+
+                    cancel: {
+                      label: "Cancel",
+                      onClick: () => {},
+                    },
+
+                    className: "border border-red-500/30",
+
+                    actionButtonStyle: {
+                      backgroundColor: "#dc2626",
+                      color: "white",
+                    },
+                  })
+                }
               >
                 <Trash2 className="inline mr-2" /> Delete Task
               </DropdownMenuItem>
@@ -242,6 +271,7 @@ import AddTaskModal from "./AddTaskModal";
 import AddEpicModal from "./AddEpicModal";
 import LogTimeModal from "./LogTimeModal";
 import ViewTimeLogsModal from "./ViewTimeLogsModal";
+import { toast } from "sonner";
 
 interface EpicComponentProps {
   epics: EpicType[];
@@ -399,7 +429,38 @@ export default function Epic({
                             className="text-red-600 cursor-pointer"
                             onClick={(e) => {
                               e.stopPropagation();
-                              deleteEpic(epic.id);
+
+                              toast.warning("Delete epic ?", {
+                                description:
+                                  "This action will permanently delete this Epic.",
+
+                                action: {
+                                  label: "Delete",
+
+                                  onClick: async () => {
+                                    try {
+                                      await deleteEpic(epic.id).unwrap();
+                                    } catch (err) {
+                                      console.error(
+                                        "Failed to delete epic",
+                                        err,
+                                      );
+                                    }
+                                  },
+                                },
+
+                                cancel: {
+                                  label: "Cancel",
+                                  onClick: () => {},
+                                },
+
+                                className: "border border-red-500/30",
+
+                                actionButtonStyle: {
+                                  backgroundColor: "#dc2626",
+                                  color: "white",
+                                },
+                              });
                             }}
                           >
                             <Trash2 className="inline mr-2" /> Delete Epic
@@ -521,7 +582,41 @@ export default function Epic({
                                           className="text-red-600 cursor-pointer"
                                           onClick={(e) => {
                                             e.stopPropagation();
-                                            deleteSprint(sprint.id);
+
+                                            toast.warning("Delete sprint ?", {
+                                              description:
+                                                "This action will permanently delete this Sprint.",
+
+                                              action: {
+                                                label: "Delete",
+
+                                                onClick: async () => {
+                                                  try {
+                                                    await deleteSprint(
+                                                      sprint.id,
+                                                    ).unwrap();
+                                                  } catch (err) {
+                                                    console.error(
+                                                      "Failed to delete sprint",
+                                                      err,
+                                                    );
+                                                  }
+                                                },
+                                              },
+
+                                              cancel: {
+                                                label: "Cancel",
+                                                onClick: () => {},
+                                              },
+
+                                              className:
+                                                "border border-red-500/30",
+
+                                              actionButtonStyle: {
+                                                backgroundColor: "#dc2626",
+                                                color: "white",
+                                              },
+                                            });
                                           }}
                                         >
                                           <Trash2 className="inline mr-2" />{" "}

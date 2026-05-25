@@ -348,7 +348,7 @@ const ResourceUtilisationPage: React.FC = () => {
 
   const userOptions = useMemo(() => {
     return [
-      { label: "All Users", value: "all" },
+      { label: "All Assignees", value: "all" },
       ...allUsers.map((u) => ({ label: u.name, value: u.id })),
     ];
   }, [allUsers]);
@@ -677,13 +677,13 @@ const timesheetData = useMemo(() => {
                 </div>
 
                 {/* RIGHT: Filters */}
-                <div className="flex flex-col gap-2 w-full md:flex-row md:w-auto md:items-center">
-                  <div className="w-full md:w-[180px]">
+                <div className="flex gap-4 flex-1 max-w-[300px] md:justify-end">
+                  <div className="w-full">
                     <ComboboxInput
-                      placeholder="All Users"
+                      placeholder="Select Assignee"
                       items={userComboboxItems}
                       defaultValue={
-                        userFilter === "all" ? "All Users" : getUserInfo(userFilter).name
+                        userFilter === "all" ? "" : getUserInfo(userFilter).name
                       }
                       onSelect={(value) => {
                         const selectedName = value as string;
@@ -691,16 +691,20 @@ const timesheetData = useMemo(() => {
                           setUserFilter("all");
                           return;
                         }
-                        const match = allUsers.find((u) => u.name === selectedName);
+                        const match = allUsers.find(
+                          (u) => u.name === selectedName,
+                        );
                         setUserFilter(match ? match.id : "all");
                       }}
                     />
                   </div>
-                  <div className="w-full md:w-[180px]">
+                  <div className="w-full">
                     <ComboboxInput
-                      placeholder="All Projects"
+                      placeholder="Select Projects"
                       items={projectOptions}
-                      defaultValue={projectFilter}
+                      defaultValue={
+                        projectFilter === "all" ? "" : projectFilter
+                      }
                       onSelect={(value) => setProjectFilter(value as string)}
                     />
                   </div>
@@ -710,11 +714,16 @@ const timesheetData = useMemo(() => {
               {/* Timesheet Table */}
               <div className="border rounded-lg overflow-hidden">
                 <Table>
-                  <TableHeader className="h-11 bg-muted font-extrabold">
+                  <TableHeader className="h-12 px-10 bg-muted font-extrabold">
                     <TableRow>
-                      <TableHead>Assignee</TableHead>
+                      <TableHead>
+                        {" "}
+                        <div className="pl-4">Assignee</div>
+                      </TableHead>
                       {weekDates.map((date) => (
-                        <TableHead key={date.toISOString()}>{formatDate(date)}</TableHead>
+                        <TableHead key={date.toISOString()}>
+                          {formatDate(date)}
+                        </TableHead>
                       ))}
                       <TableHead>Total</TableHead>
                     </TableRow>
@@ -722,13 +731,19 @@ const timesheetData = useMemo(() => {
                   <TableBody>
                     {isLoading ? (
                       <TableRow>
-                        <TableCell colSpan={weekDates.length + 2} className="text-center">
+                        <TableCell
+                          colSpan={weekDates.length + 2}
+                          className="text-center"
+                        >
                           Loading timesheet...
                         </TableCell>
                       </TableRow>
                     ) : timesheetData.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={weekDates.length + 2} className="text-center">
+                        <TableCell
+                          colSpan={weekDates.length + 2}
+                          className="text-center"
+                        >
                           No time logged
                         </TableCell>
                       </TableRow>
@@ -738,16 +753,25 @@ const timesheetData = useMemo(() => {
                           return sum + (row.entries[toKey(date)] || 0);
                         }, 0);
                         return (
-                          <TableRow key={row.userId}>
-                            <TableCell>{row.name}</TableCell>
+                          <TableRow key={row.userId} className="h-12">
+                            <TableCell>
+                              <div className="ps-4">{row.name}</div>
+                            </TableCell>
                             {weekDates.map((date) => {
                               const key = toKey(date);
                               const hrs = row.entries[key] || 0;
                               return (
-                                <TableCell key={key}>{hrs ? `${hrs}h` : "-"}</TableCell>
+                                <TableCell key={key}>
+                                  {hrs ? `${hrs}h` : "—"}
+                                </TableCell>
                               );
                             })}
-                            <TableCell className="font-semibold">{total}h</TableCell>
+                            <TableCell className="font-semibold">
+                              {" "}
+                              <div className="inline-flex min-w-[55px] items-center justify-center rounded-lg bg-green-500/10 px-3 py-1 font-bold text-green-500">
+                                {total}h
+                              </div>
+                            </TableCell>
                           </TableRow>
                         );
                       })

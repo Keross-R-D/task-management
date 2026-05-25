@@ -36,6 +36,7 @@ import {
 
 import AddTaskModal from "./AddTaskModal";
 import LogTimeModal from "./LogTimeModal";
+import { toast } from "sonner";
 
 
 /* ================= HELPERS ================= */
@@ -185,7 +186,35 @@ function DraggableItem({ item, column, sprints }: any) {
                     className="cursor-pointer text-red-600"
                     onPointerDown={(e) => {
                       e.stopPropagation();
-                      deleteTask(item.id);
+
+                      toast.warning("Delete Task ?", {
+                        description:
+                          "This action will permanently delete this Task.",
+
+                        action: {
+                          label: "Delete",
+
+                          onClick: async () => {
+                            try {
+                              await deleteTask(item.id).unwrap();
+                            } catch (err) {
+                              console.error("Failed to delete task", err);
+                            }
+                          },
+                        },
+
+                        cancel: {
+                          label: "Cancel",
+                          onClick: () => {},
+                        },
+
+                        className: "border border-red-500/30",
+
+                        actionButtonStyle: {
+                          backgroundColor: "#dc2626",
+                          color: "white",
+                        },
+                      });
                     }}
                   >
                     <Trash2 className="inline mr-2" /> Delete Task
