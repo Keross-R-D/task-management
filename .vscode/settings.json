@@ -1,0 +1,24 @@
+{
+  // ── YAML schema associations ─────────────────────────────────────────────────
+  // Prevents VS Code from applying the Kubernetes schema to Spring Boot config
+  // files, which would wrongly demand a "kind" field.
+  "yaml.schemas": {
+    // Spring Boot application configs → Spring Boot schema
+    // "https://json.schemastore.org/spring-boot-application.json": [
+    //   "**/src/main/resources/application.yml",
+    //   "**/src/main/resources/application-*.yml",
+    //   "**/src/main/resources/application.yaml",
+    //   "**/src/main/resources/application-*.yaml"
+    // ],
+    // Kubernetes manifests → Kubernetes schema (explicit, so it stays correct)
+    "kubernetes": [
+      "**/kube/*.yaml",
+      "**/kube/*.yml",
+      "**/k8s/*.yaml",
+      "**/k8s/*.yml"
+    ]
+  },
+  // Opt out of the YAML extension's automatic schema detection for Spring files
+  // so it doesn't override the explicit mapping above.
+  "yaml.schemaStore.enable": true
+}

@@ -110,8 +110,8 @@ export default function ViewMyTaskTimeLogsModal({
 
     return (
         <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
-            <DialogContent className="max-w-lg bg-[#0b0c10] text-gray-100 border-gray-800" onInteractOutside={(e) => e.preventDefault()}>
-                <DialogHeader className="my-2 border-b border-gray-800 pb-4">
+            <DialogContent className="max-w-lg onInteractOutside={(e) => e.preventDefault()">
+                <DialogHeader className="my-2 border-b pb-4">
                     <DialogTitle className="flex items-center gap-2">
                         <History className="h-5 w-5" /> Time Logs
                     </DialogTitle>
@@ -124,17 +124,17 @@ export default function ViewMyTaskTimeLogsModal({
 
                     {/* Stats */}
                     <div className="grid grid-cols-3 gap-4">
-                        <div className="p-4 border border-gray-800 rounded-xl text-center">
+                        <div className="p-4 border  rounded-xl text-center">
                             <span className="text-xs text-gray-400">Estimated</span>
                             <div className="text-xl font-bold">{estimated}h</div>
                         </div>
-                        <div className="p-4 border border-indigo-900 rounded-xl text-center">
-                            <span className="text-xs text-indigo-300">Logged</span>
-                            <div className="text-xl font-bold text-indigo-400">
+                        <div className="p-4 border rounded-xl text-center">
+                            <span className="text-xs text-indigo-400">Logged</span>
+                            <div className="text-xl font-bold text-indigo-500">
                                 {totalLogged.toFixed(2)}h
                             </div>
                         </div>
-                        <div className="p-4 border border-gray-800 rounded-xl text-center">
+                        <div className="p-4 border rounded-xl text-center">
                             <span className="text-xs text-gray-400">Remaining</span>
                             <div className="text-xl font-bold">
                                 {remaining.toFixed(2)}h
@@ -186,7 +186,7 @@ export default function ViewMyTaskTimeLogsModal({
                             return (
                                 <div
                                 key={`${log.worklogId}-${log.date}-${index}`}
-                                className="group relative p-4 rounded-xl border border-gray-800 bg-[#111218] hover:border-gray-700 transition-colors"
+                                className="group relative p-4 rounded-xl border hover:border-gray-700 transition-colors"
                                 >
                                 <div className="flex justify-between items-start">
                                     <div className="flex items-center gap-2">
@@ -227,13 +227,13 @@ export default function ViewMyTaskTimeLogsModal({
                     <div className="flex justify-end items-center gap-3 pt-4 border-t border-gray-800 mt-2">
                         <Button
                             variant="ghost"
-                            className="text-gray-400 hover:text-white"
+                            className="border"
                             onClick={onClose}
                         >
                             Close
                         </Button>
                         <Button
-                            className="bg-indigo-600 hover:bg-indigo-700 text-white"
+                            className="border"
                             onClick={() => {
                                 onClose();
                                 onLogMoreTime();

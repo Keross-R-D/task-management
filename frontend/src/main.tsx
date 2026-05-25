@@ -9,9 +9,9 @@ import { LoginPage } from './pages/auth/LoginPage.tsx';
 import './index.css';
 
 setIkonConfig({
-  IKON_BASE_API_URL: import.meta.env.VITE_IKON_API_URL || "http://localhost:8080",
-  IKON_PLATFORM_UI_URL: import.meta.env.VITE_IKON_PLATFORM_UI_URL || "http://localhost:3000",
-  LOGIN_PAGE_URL: "/login"
+  IKON_BASE_API_URL: import.meta.env.VITE_IKON_API_URL,
+  IKON_PLATFORM_UI_URL: import.meta.env.VITE_IKON_PLATFORM_UI_URL,
+  LOGIN_PAGE_URL: import.meta.env.VITE_LOGIN_PAGE_URL,
 });
 
 const isLoginPage = window.location.pathname === '/login';

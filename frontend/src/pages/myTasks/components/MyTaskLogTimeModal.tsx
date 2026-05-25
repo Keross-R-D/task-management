@@ -168,10 +168,10 @@ export default function MyTaskLogTimeModal({ open, task, onClose }: Props) {
 
     return (
         <Dialog open={open} onOpenChange={handleClose}>
-            <DialogContent className="max-w-md bg-[#0b0c10] text-gray-100 border-gray-800" onInteractOutside={(e) => e.preventDefault()}>
+            <DialogContent className="max-w-md onInteractOutside={(e) => e.preventDefault()">
                 <DialogHeader className="my-2 border-b border-gray-800 pb-4">
                     <DialogTitle>Log Time</DialogTitle>
-                    <span className="text-gray-400 text-sm">
+                    <span className="text-gray-500 text-sm">
                         Record actual time spent on "{task?.taskTitle}"
                     </span>
                 </DialogHeader>
@@ -185,14 +185,17 @@ export default function MyTaskLogTimeModal({ open, task, onClose }: Props) {
                             name="totalHours"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel className="text-gray-300">
+                                    <FormLabel className="text-gray-500">
                                         {isMultiDay ? "Total Hours" : "Hours Spent"} *
                                     </FormLabel>
                                     <FormControl>
                                         <Input
                                             type="number"
                                             step="0.25"
-                                            className="bg-transparent border-gray-700"
+                                            className="bg-transparent border 
+      [.blue-dark_&]:focus-visible:ring-1
+      [.blue-dark_&]:focus-visible:ring-indigo-500
+      [.blue-dark_&]:focus-visible:border-indigo-500"
                                             value={field.value ?? ""}
                                             onChange={(e) =>
                                                 field.onChange(
@@ -212,7 +215,7 @@ export default function MyTaskLogTimeModal({ open, task, onClose }: Props) {
                         <Button
                         type="button"
                         variant="outline"
-                        className={`w-fit py-1 h-8 text-sm flex items-center gap-2 border-gray-700 bg-transparent ${isMultiDay ? "text-indigo-400 border-indigo-500" : "text-gray-400"}`}
+                        className={`w-fit py-1 h-8 text-sm flex items-center gap-2 border bg-transparent ${isMultiDay ? "text-indigo-400 border-indigo-500" : "text-gray-500"}`}
                         onClick={() => setIsMultiDay(!isMultiDay)}
                         >
                         <Calendar size={14} />
@@ -226,13 +229,16 @@ export default function MyTaskLogTimeModal({ open, task, onClose }: Props) {
                             name="date"
                             render={({ field }) => (
                             <FormItem>
-                                <FormLabel className="text-gray-300">
+                                <FormLabel className="text-gray-500">
                                 Date <span className="text-red-500">*</span>
                                 </FormLabel>
                                 <FormControl>
                                 <Input
                                     type="date"
-                                    className="bg-transparent border-gray-700"
+                                    className="bg-transparent border 
+      [.blue-dark_&]:focus-visible:ring-1
+      [.blue-dark_&]:focus-visible:ring-indigo-500
+      [.blue-dark_&]:focus-visible:border-indigo-500"
                                     {...field}
                                     value={field.value || ""}
                                 />
@@ -242,20 +248,23 @@ export default function MyTaskLogTimeModal({ open, task, onClose }: Props) {
                             )}
                         />
                         ) : (
-                        <div className="space-y-4 border rounded-md border-gray-800 p-4 bg-[#111218]">
+                        <div className="space-y-4 border rounded-md border p-4">
                             <div className="grid grid-cols-2 gap-4">
                             <FormField
                                 control={form.control}
                                 name="startDate"
                                 render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel className="text-gray-300">
+                                    <FormLabel className="text-gray-500">
                                     Start Date <span className="text-red-500">*</span>
                                     </FormLabel>
                                     <FormControl>
                                     <Input
                                         type="date"
-                                        className="bg-transparent border-gray-700"
+                                        className="bg-transparent border 
+      [.blue-dark_&]:focus-visible:ring-1
+      [.blue-dark_&]:focus-visible:ring-indigo-500
+      [.blue-dark_&]:focus-visible:border-indigo-500"
                                         {...field}
                                         value={field.value || ""}
                                     />
@@ -269,13 +278,16 @@ export default function MyTaskLogTimeModal({ open, task, onClose }: Props) {
                                 name="endDate"
                                 render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel className="text-gray-300">
+                                    <FormLabel className="text-gray-500">
                                     End Date <span className="text-red-500">*</span>
                                     </FormLabel>
                                     <FormControl>
                                     <Input
                                         type="date"
-                                        className="bg-transparent border-gray-700"
+                                        className="bg-transparent border 
+      [.blue-dark_&]:focus-visible:ring-1
+      [.blue-dark_&]:focus-visible:ring-indigo-500
+      [.blue-dark_&]:focus-visible:border-indigo-500"
                                         {...field}
                                         value={field.value || ""}
                                     />
@@ -287,20 +299,20 @@ export default function MyTaskLogTimeModal({ open, task, onClose }: Props) {
                             </div>
 
                             <div className="flex items-center gap-3 mt-4">
-                            <span className="text-sm font-medium text-gray-300">
+                            <span className="text-sm font-medium text-gray-500">
                                 Distribution:
                             </span>
-                            <div className="flex bg-[#1a1c23] rounded-full p-1 border border-gray-800">
+                            <div className="flex rounded-full p-1 border border-gray-800">
                                 <button
                                 type="button"
-                                className={`px-3 py-1 text-xs rounded-full transition-colors ${distributionType === "EQUAL" ? "bg-indigo-500 text-white" : "text-gray-400 hover:text-white"}`}
+                                className={`px-3 py-1 text-xs rounded-full transition-colors ${distributionType === "EQUAL" ? "bg-indigo-500 text-white" : "text-gray-500"}`}
                                 onClick={() => setDistributionType("EQUAL")}
                                 >
                                 Split equally
                                 </button>
                                 <button
                                 type="button"
-                                className={`px-3 py-1 text-xs rounded-full transition-colors ${distributionType === "CUSTOM" ? "bg-indigo-500 text-white" : "text-gray-400 hover:text-white"}`}
+                                className={`px-3 py-1 text-xs rounded-full transition-colors ${distributionType === "CUSTOM" ? "bg-indigo-500 text-white" : "text-gray-500"}`}
                                 onClick={() => setDistributionType("CUSTOM")}
                                 >
                                 Custom per day
@@ -309,7 +321,7 @@ export default function MyTaskLogTimeModal({ open, task, onClose }: Props) {
                             </div>
 
                             {numberOfDays > 0 && (
-                            <div className="text-xs text-gray-400 mt-2">
+                            <div className="text-xs text-gray-500 mt-2">
                                 {numberOfDays} days selected —{" "}
                                 {distributionType === "EQUAL"
                                 ? `${hoursPerDayEqual}h per day`
@@ -333,7 +345,7 @@ export default function MyTaskLogTimeModal({ open, task, onClose }: Props) {
                                     key={date}
                                     className="flex justify-between items-center text-sm"
                                     >
-                                    <span className="text-gray-400 w-24">
+                                    <span className="text-gray-500 w-24">
                                         {dayName}, {monthDay}
                                     </span>
                                     <div className="flex items-center gap-2">
@@ -360,7 +372,7 @@ export default function MyTaskLogTimeModal({ open, task, onClose }: Props) {
                                     className={
                                     Math.abs(customTotal - totalHoursVal) > 0.01
                                         ? "text-amber-500"
-                                        : "text-gray-400"
+                                        : "text-gray-500"
                                     }
                                 >
                                     Custom total: {customTotal.toFixed(2)}h (total is{" "}
@@ -380,11 +392,14 @@ export default function MyTaskLogTimeModal({ open, task, onClose }: Props) {
                         name="description"
                         render={({ field }) => (
                             <FormItem>
-                            <FormLabel className="text-gray-300">Description</FormLabel>
+                            <FormLabel className="text-gray-500">Description</FormLabel>
                             <FormControl>
                                 <Textarea
                                 placeholder="What did you work on?"
-                                className="min-h-[80px] bg-transparent border-gray-700"
+                                className="min-h-[80px] bg-transparent border 
+      [.blue-dark_&]:focus-visible:ring-1
+      [.blue-dark_&]:focus-visible:ring-indigo-500
+      [.blue-dark_&]:focus-visible:border-indigo-500"
                                 {...field}
                                 value={field.value || ""}
                                 />
@@ -398,7 +413,7 @@ export default function MyTaskLogTimeModal({ open, task, onClose }: Props) {
                             <Button
                                 type="button"
                                 variant="ghost"
-                                className="text-gray-400 hover:text-white"
+                                className="border"
                                 onClick={handleClose}
                             >
                                 Cancel
@@ -406,7 +421,7 @@ export default function MyTaskLogTimeModal({ open, task, onClose }: Props) {
                             <Button
                                 type="submit"
                                 disabled={isLoading}
-                                className="bg-indigo-500 hover:bg-indigo-600 text-white"
+                                className="border"
                             >
                                 {isLoading
                                 ? "Saving..."

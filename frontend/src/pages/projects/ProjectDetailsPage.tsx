@@ -4,6 +4,7 @@ import {
   TabsTrigger,
   TabsContent,
   Button,
+  CardContent,
 } from "ikon-react-components-lib";
 import { Calendar } from "lucide-react";
 import TaskList from "./components/TaskList";
@@ -13,7 +14,6 @@ import SearchAndFilter, {
 } from "./components/SearchAndFilter";
 import TaskBoard from "./components/TaskBoard";
 import ResourceUtilization from "./components/ResouceUtilisation";
-import { SimpleWidget } from "ikon-react-components-lib";
 import { useState, useMemo, useEffect } from "react";
 import AddEpicModal from "./components/AddEpicModal";
 import { useDispatch } from "react-redux";
@@ -25,6 +25,7 @@ import {
   useGetTasksBacklogQuery,
 } from "@/features/tasks/tasksApiSlice";
 import { useGetProjectsQuery } from "@/features/projects/projectsApiSlice";
+import moment from "moment";
 import { useParams } from "react-router-dom";
 import { filterTasks } from "@/utils/taskFilters";
 
@@ -96,61 +97,77 @@ export default function ProjectDetailPage() {
   return (
     <div className="w-full">
       {/* ================= TOP PROJECT CARD ================= */}
-      <div className="border rounded-4xl">
+      <div className="rounded-2xl border dark:border-2 overflow-hidden">
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 md:px-6 md:py-2">
+        <div className="flex flex-col gap-4 p-4 md:flex-row md:items-center md:justify-between">
           <div>
             <div className="flex items-center gap-3">
-              <h2 className="text-lg md:text-xl font-semibold">
-                Project Details
+              <h2 className="text-2xl font-semibold tracking-tight">
+                {project?.projectName}
               </h2>
-              <span className="text-xs px-3 py-1 rounded-full border">
+
+              <span className="rounded-full px-4 py-1 text-xs font-medium border">
                 {isLoading ? "Loading..." : `${epics.length} Epics`}
               </span>
             </div>
-            <p className="text-gray-400 text-sm mt-1">
+
+            <p className="mt-2 text-sm">
               {metrics.totalTasks} tasks across {sprints.length} sprints
             </p>
           </div>
 
-          <div className="flex items-center gap-2 border px-4 py-2 rounded-xl text-sm w-fit">
-            <Calendar className="text-lg" />
-            <span>Project Timeline</span>
+          <div className="flex w-fit items-center gap-3 rounded-2xl px-5 py-3 text-sm font-medium  border">
+            <Calendar className="h-4 w-4" />
+
+            <span>
+              {project?.startDate
+                ? moment(project.startDate).format("MMM D, YYYY")
+                : "—"}{" "}
+              -{" "}
+              {project?.endDate
+                ? moment(project.endDate).format("MMM D, YYYY")
+                : "—"}
+            </span>
           </div>
         </div>
 
-        <div className="border-t"></div>
+        {/* Divider */}
+        <div className="border-t-1" />
 
-        {/* Stats — always unfiltered */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-sm">
-          <SimpleWidget
-            title="Completion"
-            primaryText={`${metrics.completion}%`}
-            secondaryText=""
-            iconName=""
-            mainClassName="p-0 border-none shadow-none bg-transparent"
-          />
-          <SimpleWidget
-            title="Tasks (Total / Done)"
-            primaryText={`${metrics.totalTasks} / ${metrics.doneTasks}`}
-            secondaryText=""
-            iconName=""
-            mainClassName="p-0 border-none shadow-none bg-transparent"
-          />
-          <SimpleWidget
-            title="Estimated Hours"
-            primaryText={`${metrics.estimatedHours}h`}
-            secondaryText=""
-            iconName=""
-            mainClassName="p-0 border-none shadow-none bg-transparent"
-          />
-          <SimpleWidget
-            title="Actual Hours"
-            primaryText={`${metrics.actualHours}h`}
-            secondaryText=""
-            iconName=""
-            mainClassName="p-0 border-none shadow-none bg-transparent"
-          />
+        {/* Stats */}
+        <div className="grid grid-cols-2 gap-8 px-6 py-4 md:grid-cols-4">
+          <CardContent className="flex flex-col gap-3 p-0">
+            <p className="text-sm">Completion</p>
+
+            <h2 className="text-2xl font-semibold leading-none text-green-500">
+              {metrics.completion}%
+            </h2>
+          </CardContent>
+
+          <CardContent className="flex flex-col gap-1 p-0">
+            <p className="text-sm">Tasks (Total / Done)</p>
+
+            <h2 className="text-2xl font-semibold leading-none ">
+              <span className="text-3xl">{metrics.totalTasks} </span>/{" "}
+              <span className="">{metrics.doneTasks}</span>
+            </h2>
+          </CardContent>
+
+          <CardContent className="flex flex-col gap-3 p-0">
+            <p className="text-sm">Estimated Hours</p>
+
+            <h2 className="text-2xl font-semibold leading-none ">
+              {metrics.estimatedHours}h
+            </h2>
+          </CardContent>
+
+          <CardContent className="flex flex-col gap-3 p-0">
+            <p className="text-sm ">Actual Hours</p>
+
+            <h2 className="text-2xl font-semibold leading-none text-indigo-500">
+              {metrics.actualHours}h
+            </h2>
+          </CardContent>
         </div>
       </div>
 

@@ -5,7 +5,7 @@ export const authApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     login: builder.mutation({
       query: (credentials) => ({
-        apiUrl: `${import.meta.env.VITE_IKON_API_URL || "https://ikoncloud-dev.keross.com/ikon-api"}/platform/auth/login`,
+        apiUrl: `${import.meta.env.VITE_IKON_API_URL}/platform/auth/login`,
         config: {
           method: "POST",
           data: credentials,

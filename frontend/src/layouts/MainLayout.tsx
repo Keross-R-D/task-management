@@ -19,6 +19,9 @@ export const MainLayout: React.FC = () => {
 
   return (
     <div className="flex h-screen bg-background font-sans antialiased text-foreground">
+      {/* Syncs breadcrumbs into the library header — renders no DOM */}
+      <AppBreadcrumbs />
+
       <div className="flex h-full w-full">
         {/* Sidebar */}
         <RenderSidebarNav
@@ -32,10 +35,8 @@ export const MainLayout: React.FC = () => {
         />
 
         {/* Main Content Area */}
-        {/* <div className="flex-1 overflow-auto bg-slate-50 dark:bg-zinc-900"> */}
         <div className="flex-1 overflow-auto">
           <main className="p-6">
-            <AppBreadcrumbs />
             <Outlet />
           </main>
         </div>

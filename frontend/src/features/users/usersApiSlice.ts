@@ -20,8 +20,7 @@ export const usersApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getUsers: builder.query<User[], void>({
       query: () => ({
-        // Absolute URL bypasses the default localhost baseUrl
-        apiUrl: "https://ikoncloud-dev.keross.com/ikon-api/platform/user/current",
+        apiUrl: import.meta.env.VITE_IKON_USER_API_URL,
       }),
       providesTags: ["User"] as any,
     }),
