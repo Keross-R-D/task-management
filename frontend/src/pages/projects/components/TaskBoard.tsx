@@ -10,7 +10,7 @@ import {
 } from "@dnd-kit/core";
 
 import type { DragEndEvent } from "@dnd-kit/core";
-import { Card, CardContent } from "ikon-react-components-lib";
+import { Card, CardContent, Separator } from "ikon-react-components-lib";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -22,9 +22,14 @@ import {
   Edit2,
   Timer,
   Trash2,
- 
   Clock,
   Zap,
+  SquareCheckBig,
+  BookOpen,
+  Bug,
+  ListTodo,
+  LoaderCircle,
+  Ban,
 } from "lucide-react";
 
 import { TaskEnum } from "@/enums/task.constants";
@@ -69,11 +74,28 @@ function priorityColor(priority: string) {
 }
 
 const COLUMN_CONFIG = [
-  { key: "todo", label: "To Do" },
+  { key: "to_do", label: "To Do" },
   { key: "in_progress", label: "In Progress" },
   { key: "done", label: "Done" },
   { key: "blocked", label: "Blocked" },
 ];
+
+const getTaskTypeIcon = (type: string) => {
+  switch (type?.toUpperCase()) {
+
+    case "TASK":
+      return <SquareCheckBig className="h-4 w-4 shrink-0 items-center text-indigo-500" />;
+
+    case "BUG":
+      return <Bug className="h-4 w-4 shrink-0 items-center text-red-500" />;
+
+    case "STORY":
+      return <BookOpen className="h-4 w-4 shrink-0 items-center text-green-500" />;
+
+    default:
+      return <Zap className="h-4 w-4 shrink-0 items-center text-yellow-500" />;
+  }
+};
 
 /* ================= COMPONENTS ================= */
 
@@ -105,24 +127,24 @@ function DraggableItem({ item, column, sprints }: any) {
   return (
     <>
       <div ref={setNodeRef} style={style} {...listeners} {...attributes}>
-        <Card className="mb-3 cursor-pointer border rounded-2xl shadow-sm hover:shadow-md transition py-2 m-4 bg-[#ffffff]/70  dark:bg-[#0a0a0a]/70 blue-dark:bg-[#0f172b]/70">
-          <CardContent className="space-y-3">
+        <Card className="mb-3 cursor-pointer border rounded-2xl shadow-sm hover:shadow-md transition py-3 m-3 bg-muted">
+          <CardContent className="px-4 space-y-3">
             {/* Top Row */}
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-2">
-                <Zap className="text-yellow-400 h-4 w-4 shrink-0" />
-                <h3 className="text-sm font-semibold">{item.title}</h3>
+                {getTaskTypeIcon(item.type)}
+                <h3 className="text-sm font-semibold items-center">{item.title}</h3>
               </div>
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button className="p-0 border-none outline-none focus:outline-none">
-                    <MoreHorizontal size={18} className="cursor-pointer" />
+                    <MoreHorizontal size={18}/>
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="border rounded-lg">
                   <DropdownMenuItem
-                    className="rounded-md cursor-pointer"
+                    className="flex items-center gap-2 rounded-md hover:bg-muted w-full px-3 py-2"
                     onPointerDown={(e) => {
                       e.stopPropagation();
                       setIsEditOpen(true);
@@ -131,7 +153,7 @@ function DraggableItem({ item, column, sprints }: any) {
                     <Edit2 className="inline mr-2" /> Edit Task
                   </DropdownMenuItem>
                   <DropdownMenuItem
-                    className="rounded-md cursor-pointer"
+                    className="flex items-center gap-2 rounded-md hover:bg-muted w-full px-3 py-2"
                     onPointerDown={(e) => {
                       e.stopPropagation();
                       setIsLogTimeOpen(true);
@@ -139,17 +161,18 @@ function DraggableItem({ item, column, sprints }: any) {
                   >
                     <Timer className="inline mr-2" /> Log Time
                   </DropdownMenuItem>
+                  <Separator className="m-1"/>
                   <DropdownMenuItem
-                    className="cursor-pointer"
+                    className="flex items-center gap-2 rounded-md hover:bg-muted w-full px-3 py-2"
                     onPointerDown={(e) => {
                       e.stopPropagation();
                       updateTaskStatus({ id: item.id, taskStatus: "TO_DO" });
                     }}
                   >
-                    Set To Do
+                    <ListTodo className="h-5 w-5" /> Set To Do
                   </DropdownMenuItem>
                   <DropdownMenuItem
-                    className="cursor-pointer"
+                    className="flex items-center gap-2 rounded-md hover:bg-muted w-full px-3 py-2"
                     onPointerDown={(e) => {
                       e.stopPropagation();
                       updateTaskStatus({
@@ -158,19 +181,19 @@ function DraggableItem({ item, column, sprints }: any) {
                       });
                     }}
                   >
-                    Set In Progress
+                    <LoaderCircle className="h-4 w-4" /> Set In Progress
                   </DropdownMenuItem>
                   <DropdownMenuItem
-                    className="cursor-pointer"
+                    className="flex items-center gap-2 rounded-md hover:bg-muted w-full px-3 py-2"
                     onPointerDown={(e) => {
                       e.stopPropagation();
                       updateTaskStatus({ id: item.id, taskStatus: "DONE" });
                     }}
                   >
-                    Set Done
+                    <SquareCheckBig className="h-4 w-4" /> Set Done
                   </DropdownMenuItem>
                   <DropdownMenuItem
-                    className="cursor-pointer"
+                    className="flex items-center gap-2 rounded-md hover:bg-muted w-full px-3 py-2"
                     onPointerDown={(e) => {
                       e.stopPropagation();
                       updateTaskStatus({
@@ -179,11 +202,11 @@ function DraggableItem({ item, column, sprints }: any) {
                       });
                     }}
                   >
-                    Set Blocked
+                    <Ban className="h-4 w-4" /> Set Blocked
                   </DropdownMenuItem>
-                  <hr className="py-1 font-bold" />
+                  <Separator className="m-1"/>
                   <DropdownMenuItem
-                    className="cursor-pointer text-red-600"
+                    className="flex items-center gap-2 rounded-md hover:bg-red-600/12! w-full px-3 py-2 text-red-500!"
                     onPointerDown={(e) => {
                       e.stopPropagation();
 
@@ -217,7 +240,7 @@ function DraggableItem({ item, column, sprints }: any) {
                       });
                     }}
                   >
-                    <Trash2 className="inline mr-2" /> Delete Task
+                    <Trash2 className="inline mr-2 text-red-500" /> Delete Task
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -236,7 +259,7 @@ function DraggableItem({ item, column, sprints }: any) {
               </div>
 
               {/* Bottom Row */}
-              <div className="flex items-center gap-2 text-xs">
+              <div className="flex items-center gap-2 pl-1 text-xs">
                 <Clock className="h-3 w-3" />
                 <span>
                   {item.actualHours || 0}/{item.estimatedHours || 0}h
@@ -276,25 +299,28 @@ function Column({ id, label, items, sprints }: any) {
   return (
     <div
       ref={setNodeRef}
-      className={`rounded-lg border border-t-1 ${columnBorderColor(
+      className={`rounded-lg border border-t ${columnBorderColor(
         id
-      )} w-full min-h-[400px] bg-[#fafafa]/90  dark:bg-[#171717]/90 blue-dark:bg-[#1b2336]/90`}
+      )} w-full min-h-[400px] bg-muted-foreground px-3 pb-3`}
     >
-      <div className="flex items-start px-4 pt-4 pb-2 justify-between">
+      <div className="flex items-start px-2 pt-4 pb-2 justify-between">
         <h3 className="font-semibold mb-3">{label}</h3>
-        <span className="text-sm p-1 px-2 rounded-4xl bg-[#f4f4f5] dark:bg-[#111111] blue-dark:bg-[#141c2b]">
+        <span className="text-sm p-1 px-2 rounded-4xl">
           {items.length}
         </span>
       </div>
       <hr className="mb-3" />
-      {items.map((item: Task) => (
-        <DraggableItem
-          key={item.id}
-          item={item}
-          column={id}
-          sprints={sprints}
-        />
-      ))}
+      <div className="max-h-95 overflow-y-auto custom-scrollbar">
+        {items.map((item: Task) => (
+          <DraggableItem
+            key={item.id}
+            item={item}
+            column={id}
+            sprints={sprints}
+          />
+        ))}
+      </div>
+      
     </div>
   );
 }
@@ -304,7 +330,7 @@ function Column({ id, label, items, sprints }: any) {
 export default function TaskBoard({ tasks, sprints = [] }: any) {
   const [updateTaskStatus] = useUpdateTaskStatusMutation();
 
-  const [activeTask, setActiveTask] = useState<Task | null>(null); // ✅ added
+  const [activeTask, setActiveTask] = useState<Task | null>(null);
 
   const groupedTasks = useMemo(() => {
     const groups: any = {};
@@ -387,7 +413,6 @@ export default function TaskBoard({ tasks, sprints = [] }: any) {
         ))}
       </div>
 
-     
       <DragOverlay>
         {activeTask ? (
           <DraggableItem

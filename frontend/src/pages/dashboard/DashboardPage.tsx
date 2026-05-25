@@ -583,7 +583,7 @@ const DashboardPage: React.FC = () => {
                     View All
                   </button>
                 </div>
-                <CardContent className="p-2 space-y-4 max-h-[420px] overflow-y-auto">
+                <CardContent className="p-2 space-y-4 max-h-[420px] overflow-y-auto custom-scrollbar">
                   {/* <style>{`div::-webkit-scrollbar { display: none; }`}</style> */}
                   {isProjectLoading ? (
                     <p className="text-sm text-muted-foreground">Loading...</p>

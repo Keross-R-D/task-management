@@ -99,19 +99,19 @@ export default function ProjectDetailPage() {
       {/* ================= TOP PROJECT CARD ================= */}
       <div className="rounded-2xl border dark:border-2 overflow-hidden">
         {/* Header */}
-        <div className="flex flex-col gap-4 px-6 py-5 md:flex-row md:items-center md:justify-between">
+        <div className="flex flex-col items-start gap-4 p-4 md:flex-row md:items-center md:justify-between">
           <div>
             <div className="flex items-center gap-3">
-              <h2 className="text-2xl font-semibold tracking-tight">
+              <h2 className="text-2xl font-bold tracking-tight">
                 {project?.projectName}
               </h2>
 
-              <span className="rounded-full px-4 py-1 text-xs font-medium border">
+              <span className="rounded-full px-2 py-0.5 text-xs bg-slate-500/20 border-slate-500/20 font-medium border">
                 {isLoading ? "Loading..." : `${epics.length} Epics`}
               </span>
             </div>
 
-            <p className="mt-2 text-sm">
+            <p className="mt-2 text-sm text-muted-foreground font-semibold">
               {metrics.totalTasks} tasks across {sprints.length} sprints
             </p>
           </div>
@@ -132,10 +132,10 @@ export default function ProjectDetailPage() {
         </div>
 
         {/* Divider */}
-        <div className="border-t-1" />
+        <div className="border-t" />
 
         {/* Stats */}
-        <div className="grid grid-cols-2 gap-8 px-6 py-4 md:grid-cols-4">
+        <div className="grid grid-cols-2 gap-8 p-4 md:grid-cols-4">
           <CardContent className="flex flex-col gap-3 p-0">
             <p className="text-sm">Completion</p>
 
@@ -148,8 +148,8 @@ export default function ProjectDetailPage() {
             <p className="text-sm">Tasks (Total / Done)</p>
 
             <h2 className="text-2xl font-semibold leading-none ">
-              <span className="text-3xl">{metrics.totalTasks} </span>/{" "}
-              <span className="">{metrics.doneTasks}</span>
+              <span className="text-3xl">{metrics.totalTasks} </span>
+              <span className="text-muted-foreground">/ {metrics.doneTasks}</span>
             </h2>
           </CardContent>
 

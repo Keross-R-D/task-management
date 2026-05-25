@@ -13,6 +13,7 @@ import {
   FolderOpen,
   CalendarDays,
   User,
+  Calendar,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -29,7 +30,7 @@ import { useUserMap } from "@/utils/userMap";
 const getProjectStatusStyles = (status: string) => {
   switch (status) {
     case "PLANNED":
-      return "bg-[rgba(59,130,246,0.2)] text-[#60a5fa] border border-[rgba(59,130,246,0.3)]";
+      return "bg-indigo-500/10 text-indigo-500 border border-indigo-500/20";
 
     case "IN_PROGRESS":
       return "bg-blue-500/10 text-blue-500 border border-blue-500/20";
@@ -42,6 +43,26 @@ const getProjectStatusStyles = (status: string) => {
 
     default:
       return "bg-muted text-muted-foreground border border-border";
+  }
+};
+
+//Apply border styles based on status
+const getBorderStyles = (status: string) => {
+  switch (status) {
+    case "PLANNED":
+      return "border-t-indigo-500";
+
+    case "IN_PROGRESS":
+      return "border-t-blue-500";
+
+    case "COMPLETED":
+      return "border-t-green-500";
+
+    case "ON_HOLD":
+      return "border-t-yellow-500";
+
+    default:
+      return "border-t-indigo-500";
   }
 };
 
@@ -68,7 +89,7 @@ export function ProjectsGrid({ data }: { data: any[] }) {
         <div
           key={project.id || idx}
           onClick={() => navigate(`/main/projects/${project.id}`)}
-          className="group relative bg-card border border-border rounded-xl overflow-hidden hover:border-primary/50 transition-all duration-300 shadow-sm hover:shadow-primary/5 cursor-pointer"
+          className={`group relative bg-card border ${getBorderStyles(project.projectStatus)} rounded-xl overflow-hidden hover:border-primary/50 transition-all duration-300 shadow-sm hover:shadow-primary/5 cursor-pointer`}
         >
           <div className="p-5">
             <div className="flex justify-between items-start mb-4">
@@ -96,22 +117,22 @@ export function ProjectsGrid({ data }: { data: any[] }) {
 
             <div className="space-y-2 mb-5">
               <div className="flex items-center text-sm text-muted-foreground">
-                <Users className="w-4 h-4 mr-2.5 text-muted-foreground/70" />
+                <Users className="w-4 h-4 mr-2.5" />
                 <span className="truncate">
-                  {project.clientName || "No client"}
+                  <span className="pr-0.5">Client:</span> <span className="text-muted-foreground/70 font-bold">{project.clientName || "No client"}</span>
                 </span>
               </div>
               <div className="flex items-center text-sm text-muted-foreground">
                 <User className="w-4 h-4 mr-2.5 text-muted-foreground/70" />
                 <span className="truncate">
-                  {getUserInfo(project.managerId).name || "Unassigned"}
+                  <span className="pr-0.5">Manager:</span> <span className="text-muted-foreground/70 font-bold">{getUserInfo(project.managerId).name || "Unassigned"}</span>
                 </span>
               </div>
               <div className="flex items-center text-sm text-muted-foreground">
                 <span className="w-4 h-4 mr-2.5 flex items-center justify-center font-bold text-[10px] text-muted-foreground/70">
-                  <CalendarDays />
+                  <Calendar />
                 </span>
-                <span>{formatDate(project.startDate)} - {formatDate(project.endDate)}</span>
+                <span className="font-semibold">{formatDate(project.startDate)} - {formatDate(project.endDate)}</span>
               </div>
             </div>
 

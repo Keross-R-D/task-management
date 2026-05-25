@@ -1,6 +1,30 @@
 @import "tailwindcss";
 
 @import "ikon-react-components-lib/dist/ikon-react-components-lib.css";
+
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #64748b transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #64748b;
+  border-radius: 9999px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: #475569;
+}
+
 /* App level styles */
 /* @theme {
   --color-border: hsl(var(--border));

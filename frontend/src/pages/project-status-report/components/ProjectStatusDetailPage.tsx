@@ -25,6 +25,7 @@ import {
     CircleCheck,
     CircleAlert,
     Download,
+    User,
 } from "lucide-react";
 import React, { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -297,15 +298,15 @@ const ProjectStatusDetailPage: React.FC = () => {
             cell: ({ row }: { row: { original: OverdueTask } }) => {
                 const value = row.original.progress;
 
-                return (
-                    <div className="flex items-center gap-2">
-                        <div className="w-24">
-                            <Progress value={value} />
-                        </div>
-                        <span className="text-sm">{value}%</span>
-                    </div>
-                );
-            },
+        return (
+            <div className="flex items-center gap-2">
+                <div className="w-24">
+                <Progress value={value} className="[&>div]:bg-green-500" />
+                </div>
+                <span className="text-sm">{value}%</span>
+            </div>
+            );
+        },
         },
     ];
 
@@ -354,21 +355,21 @@ const ProjectStatusDetailPage: React.FC = () => {
 const projectEndDate = project?.endDate;
 
 const normalizedMinDate = React.useMemo(() => {
-  if (!projectStartDate) return undefined;
+    if (!projectStartDate) return undefined;
 
-  const d = new Date(projectStartDate);
-  d.setHours(0, 0, 0, 0);
+    const d = new Date(projectStartDate);
+    d.setHours(0, 0, 0, 0);
 
-  return d;
+    return d;
 }, [projectStartDate]);
 
 const normalizedMaxDate = React.useMemo(() => {
-  if (!projectEndDate) return undefined;
+    if (!projectEndDate) return undefined;
 
-  const d = new Date(projectEndDate);
-  d.setHours(23, 59, 59, 999);
+    const d = new Date(projectEndDate);
+    d.setHours(23, 59, 59, 999);
 
-  return d;
+    return d;
 }, [projectEndDate]);
 
     // ── Task date helper ──────────────────────────────────────────────────────
@@ -439,15 +440,33 @@ const normalizedMaxDate = React.useMemo(() => {
             map.set(t.sprintId, entry);
         });
 
-        return Array.from(map.values()).map((e) => ({
-            name: e.sprintName,
-            progress: e.total === 0 ? 0 : Math.round((e.done / e.total) * 100),
-        }));
-    };
+    return Array.from(map.values()).map((e) => ({
+      sprintName: e.sprintName,
+      progress: e.total === 0 ? 0 : Math.round((e.done / e.total) * 100),
+    }));
+  };
 
     const currentWeekSprints = groupBySprint(currentTasks);
     const previousWeekSprints = groupBySprint(previousTasks);
     const upcomingWeekSprints = groupBySprint(upcomingTasks);
+
+    const currentWeekTaskRows = currentTasks
+    .filter((task) => task.sprintId)
+    .map((task) => {
+        const sprint = sprints.find(
+        (s) => s.id === task.sprintId
+        );
+
+        return {
+        sprintName: sprint?.name || "Unassigned",
+        taskName: task.title || "Untitled Task",
+        plannedStartDate: task.startDate || "-",
+        plannedEndDate: task.endDate || "-",
+        status: task.status,
+        };
+    });
+
+    const isReportReady = !isProjectLoading && !isTaskLoading && !isSprintLoading && !!project;
 
     // ── Render ────────────────────────────────────────────────────────────────
     return (
@@ -461,64 +480,58 @@ const normalizedMaxDate = React.useMemo(() => {
                     <div className="mt-0.5">Back to reports</div>
                 </button>
 
-                {/* <div className="flex justify-end">
-          <PDFDownloadLink
-            document={
-              <ProjectStatusPdf
-                project={{
-                  projectName: computedData.projectName,
-                  startDate: formatDate(computedData.startDate),
-                  endDate: formatDate(computedData.endDate),
-                  projectStatus: computedData.status,
-                  progress: computedData.progress,
-                  managerName: computedData.managerName,
-                  managerDelegateName: computedData.managerDelegateName,
-                  estimatedHours: computedData.estimatedHours,
-                  actualHours: computedData.actualHours,
-                  type: computedData.type,
-                  clientName: computedData.clientName,
-                  overallStatus: status === "on_time" ? "ON_TIME" : status === "slight_delay" ? "SLIGHT_DELAY" : "DELAY",
-                }}
+        <div className="flex justify-end">
+            <PDFDownloadLink
+                document={
+                <ProjectStatusPdf
+                    project={{
+                    projectName: computedData.projectName,
+                    startDate: formatDate(computedData.startDate),
+                    endDate: formatDate(computedData.endDate),
+                    projectStatus: computedData.status,
+                    progress: computedData.progress,
+                    managerName: computedData.managerName,
+                    managerDelegateName: computedData.managerDelegateName,
+                    estimatedHours: computedData.estimatedHours,
+                    actualHours: computedData.actualHours,
+                    type: computedData.type,
+                    clientName: computedData.clientName,
+                    overallStatus: status === "on_time" ? "ON_TIME" : status === "slight_delay" ? "SLIGHT_DELAY" : "DELAY",
+                    }}
 
-                executiveSummary={{
-                  runningOutOfTime: overdueTasks.length,
-                  risks: 0,
-                  completedTasks: computedData.tasksDone,
-                  remainingTasks: computedData.remainingTasks,
-                  totalTasks: computedData.tasksTotal,
-                }}
+                    executiveSummary={{
+                    runningOutOfTime: overdueTasks.length,
+                    risks: 0,
+                    completedTasks: computedData.tasksDone,
+                    remainingTasks: computedData.remainingTasks,
+                    totalTasks: computedData.tasksTotal,
+                    }}
 
-                currentWeekStart={formatDate(currentWeekStart)}
+                    currentWeekStart={formatDate(currentWeekStart)}
 
-                currentWeekEnd={formatDate(currentWeekEnd)}
+                    currentWeekEnd={formatDate(currentWeekEnd)}
 
-                overdueTasks={overdueTasks}
+                    overdueTasks={overdueTasks}
 
-                currentWeek={currentWeekData}
+                    currentWeek={currentWeekTaskRows}
 
-                previousWeek={previousWeekSprints.map((s) => ({
-                  sprintName: s.name,
-                  progress: getProgress(s.id),
-                  plannedStartDate: s.startDate,
-                  plannedEndDate: s.endDate,
-                  status: s.status
-                }))}
+                    previousWeek={previousWeekSprints}
 
-                upcomingWeek={upcomingWeekData}
-              />
-            }
-            fileName={`PSR of ${computedData.projectName} - ${formatDate(today)}.pdf`}
-          >
-            <Button
-              disabled={!isReportReady}
-              className="px-4 py-2 rounded-lg text-sm"
+                    upcomingWeek={upcomingWeekSprints}
+                />
+                }
+                fileName={`PSR of ${computedData.projectName} - ${formatDate(today)}.pdf`}
             >
-              <Download />
-              {!isReportReady ? "Generating Report..." : "Download Report"}
-            </Button>
-          </PDFDownloadLink>
-        </div> */}
-      </div>
+                <Button
+                disabled={!isReportReady}
+                className="px-4 py-2 rounded-lg text-sm"
+                >
+                <Download />
+                {!isReportReady ? "Generating Report..." : "Download Report"}
+                </Button>
+            </PDFDownloadLink>
+            </div>
+        </div>
 
             <div>
                 <div className="grid grid-cols-1 lg:grid-cols-2! gap-6">
@@ -539,50 +552,56 @@ const normalizedMaxDate = React.useMemo(() => {
 
                         <CardContent className="space-y-3 text-sm">
                             <p className="flex items-center gap-2">
-                                <span className="flex items-center gap-1 font-bold">
-                                    <FolderKanban className="h-4" /> Project:
-                                </span>{" "}
-                                {computedData.projectName}
+                                <span className="flex items-center gap-1 font-semibold text-muted-foreground">
+                                <FolderKanban className="h-4 font-semibold text-muted-foreground" /> Project:
+                                </span>
+                                <span className="font-semibold">{computedData.projectName}</span>
                             </p>
 
                             <p className="flex items-center gap-2">
-                                <span className="flex items-center gap-1 font-bold">
-                                    <Calendar className="h-4" /> Start Date:
-                                </span>{" "}
-                                {formatDate(new Date(computedData.startDate))}
+                                <span className="flex items-center gap-1 font-semibold text-muted-foreground">
+                                <Calendar className="h-4 font-semibold text-muted-foreground" /> Start Date:
+                                </span>
+                                <span className="font-semibold">{formatDate(new Date(computedData.startDate))}</span>
                             </p>
 
                             <p className="flex items-center gap-2">
-                                <span className="flex items-center gap-1 font-bold">
-                                    <Calendar className="h-4" /> End Date:
-                                </span>{" "}
-                                {formatDate(new Date(computedData.endDate))}
+                                <span className="flex items-center gap-1 font-semibold text-muted-foreground">
+                                <Calendar className="h-4 font-semibold text-muted-foreground" /> End Date:
+                                </span>
+                                <span className="font-semibold">{formatDate(new Date(computedData.endDate))}</span>
                             </p>
 
                             <p className="flex items-center gap-2">
-                                <ChartColumn className="h-4" />
-                                <span className="flex items-center gap-1 font-bold">
-                                    Status:
-                                </span>{" "}
-                                <span className="text-sm">
-                                    {computedData.status.replace("_", " ")}
+                                <span className="flex items-center gap-1 font-semibold text-muted-foreground">
+                                <User className="h-4 font-semibold text-muted-foreground" />Manager:
+                                </span>
+                                <span className="font-semibold">
+                                {computedData.managerName || "Unassigned"}
                                 </span>
                             </p>
 
                             <p className="flex items-center gap-2">
-                                <Target className="h-4" />
-                                <span className="flex items-center gap-1 font-bold">
-                                    Progress:
-                                </span>{" "}
-                                <span>{computedData.progress}%</span>
+                                <span className="flex items-center gap-1 font-semibold text-muted-foreground">
+                                <ChartColumn className="h-4 font-semibold text-muted-foreground" />Status:
+                                </span>
+                                <span className="text-sm font-semibold bg-muted w-fit px-2 py-0.5 rounded-2xl text-muted">
+                                {computedData.status.replace("_", " ")}
+                                </span>
+                            </p>
+
+                            <p className="flex items-center gap-2">
+                                <span className="flex items-center gap-1 font-semibold text-muted-foreground">
+                                <Target className="h-4 font-semibold text-muted-foreground" />Progress:
+                                </span>
+                                <span className="font-semibold text-green-500">{computedData.progress}%</span>
                             </p>
 
                             <div className="flex items-center gap-2">
-                                <Clock className="h-4" />
-                                <span className="flex items-center gap-1 font-bold">
-                                    Hours:
-                                </span>{" "}
-                                {computedData.actualHours}h / {computedData.estimatedHours}h
+                                <span className="flex items-center gap-1 font-semibold text-muted-foreground">
+                                <Clock className="h-4 font-semibold text-muted-foreground" />Hours:
+                                </span>
+                                <span className="font-semibold">{computedData.actualHours}h / {computedData.estimatedHours}h</span>
                             </div>
 
                             <div className="pt-2">
@@ -678,25 +697,25 @@ const normalizedMaxDate = React.useMemo(() => {
                     </Card>
                 </div>
 
-                {/* Overdue Tasks Table */}
-                {/* <div className="mt-4 mb-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="font-medium">Overdue Tasks</CardTitle>
-            </CardHeader>
-            <CardContent className="text-center text-gray-400">
-              <DataTableLayout
-                columns={overdueTasksColumns}
-                data={overdueTasks}
-                extraTools={{
-                  totalPages: 1,
-                  isLoading: isLoading,
-                  fileName: "Overdue Tasks Report",
-                }}
-              />
-            </CardContent>
-          </Card>
-        </div> */}
+        {/* Overdue Tasks Table */}
+        <div className="mt-4 mb-4">
+            <Card>
+                <CardHeader>
+                <CardTitle className="font-medium">Overdue Tasks</CardTitle>
+                </CardHeader>
+                <CardContent className="text-center">
+                <DataTableLayout
+                    columns={overdueTasksColumns}
+                    data={overdueTasks}
+                    extraTools={{
+                    totalPages: 1,
+                    isLoading: isSprintLoading,
+                    fileName: "Overdue Tasks Report",
+                    }}
+                />
+                </CardContent>
+            </Card>
+        </div>
 
                 {/* Week Sprint Tables */}
                 <div className="grid grid-cols-1 xl:grid-cols-3! gap-6">
