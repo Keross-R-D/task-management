@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.4.5</version>
+        <relativePath />
+    </parent>
+    <groupId>com.ikon</groupId> <!-- lookup parent from repository -->
+    <artifactId>task-management</artifactId><!-- lookup parent from repository -->
+    <version>1.0.0</version>
+    <packaging>pom</packaging>
+    <name>task-management</name><!-- lookup parent from repository -->
+    <url />
+
+    <properties>
+        <java.version>21</java.version>
+        <spring-cloud.version>2024.0.0</spring-cloud.version>
+        <graalvm.version>24.1.1</graalvm.version>
+        <avro.version>1.12.0</avro.version>
+        <avro-serializer.version>7.8.0</avro-serializer.version>
+        <ikon.sdk.version>1.0.0</ikon.sdk.version>
+        <task-management.version>1.0.0</task-management.version>
+    </properties>
+
+    <repositories>
+        <repository>
+            <id>maven-central</id>
+            <name>Maven Central Repository</name>
+            <url>https://ikon-vpm.keross.com/nexus/repository/maven-central</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>ikon-repository</id>
+            <name>Ikon Repository</name>
+            <url>https://ikon-vpm.keross.com/nexus/repository/maven-releases</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <!-- When required other apps package -->
+        <!-- <repository>
+            <id>ikon-apps-lib-dist</id>
+            <name>Ikon Application Library Distribution</name>
+            <url>https://ikon-vpm.keross.com/nexus/repository/ikon-apps-lib-dist</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository> -->
+    </repositories>
+
+    <distributionManagement>
+        <repository>
+            <id>ikon-nexus</id>
+            <name>Ikon Apps Library Distribution</name>
+            <url>https://ikon-vpm.keross.com/nexus/repository/ikon-apps-lib-dist/</url>
+        </repository>
+    </distributionManagement>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+    <modules>
+        <module>task-management-client</module>
+        <module>task-management-server</module>
+    </modules>
+</project>

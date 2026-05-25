@@ -1,0 +1,40 @@
+# Default values for your helm chart
+replicaCount: 1
+
+image:
+  repository: task-management-frontend
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+# Leave empty if container runtime is already authenticated with Harbor
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+podAnnotations: {}
+
+service:
+  type: ClusterIP
+  port: 3000
+
+resources:
+  limits:
+    cpu: 100m
+    memory: 128Mi
+  requests:
+    cpu: 50m
+    memory: 64Mi
+
+livenessProbe:
+  initialDelaySeconds: 40
+  periodSeconds: 20
+  prefix: ""
+
+readinessProbe:
+  initialDelaySeconds: 60
+  periodSeconds: 10
+  prefix: ""
+
+env: []
+  # - name: ENV_VAR_NAME
+  #   value: "value"

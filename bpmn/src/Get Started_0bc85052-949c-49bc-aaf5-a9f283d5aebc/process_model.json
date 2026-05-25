@@ -1,0 +1,112 @@
+{
+  "nodes": [
+    {
+      "data": {
+        "nodeAdditionalInfo": {},
+        "nodeId": "44dde623-e9ac-4850-b6da-b1a25adf150d",
+        "nodeName": "New Node",
+        "nodeType": "Start"
+      },
+      "dragging": false,
+      "id": "Start_44dde623-e9ac-4850-b6da-b1a25adf150d",
+      "measured": {
+        "height": 62,
+        "width": 256
+      },
+      "position": {
+        "x": 12,
+        "y": 22
+      },
+      "selected": false,
+      "type": "Start"
+    },
+    {
+      "data": {
+        "nodeAdditionalInfo": {},
+        "nodeId": "522762b7-eb96-4a72-8432-2d277ac335d9",
+        "nodeName": "Task 1",
+        "nodeType": "Task"
+      },
+      "dragging": false,
+      "id": "Task_522762b7-eb96-4a72-8432-2d277ac335d9",
+      "measured": {
+        "height": 114,
+        "width": 384
+      },
+      "position": {
+        "x": 568,
+        "y": 22
+      },
+      "selected": false,
+      "type": "Task"
+    }
+  ],
+  "edges": [
+    {
+      "animated": true,
+      "data": {
+        "edgeAdditionalInfo": {
+          "actionDefinition": {
+            "actionValidationScriptId": "",
+            "messageBinding": "Init",
+            "transitionActionScriptId": ""
+          },
+          "isJobActive": false,
+          "linkId": "abe7d65d-da6c-4c6b-a461-d0b089371972",
+          "linkName": "Init",
+          "processJob": {},
+          "sourceNodeId": "44dde623-e9ac-4850-b6da-b1a25adf150d",
+          "targetNodeId": "522762b7-eb96-4a72-8432-2d277ac335d9"
+        },
+        "edgeColor": "40",
+        "edgeTransitionCategory": 2,
+        "height": 185
+      },
+      "deleteAble": true,
+      "id": "abe7d65d-da6c-4c6b-a461-d0b089371972",
+      "label": "Init",
+      "markerEnd": {
+        "type": "arrowclosed"
+      },
+      "selected": false,
+      "source": "Start_44dde623-e9ac-4850-b6da-b1a25adf150d",
+      "sourceHandle": null,
+      "target": "Task_522762b7-eb96-4a72-8432-2d277ac335d9",
+      "targetHandle": null,
+      "type": "selfConnecting"
+    },
+    {
+      "animated": true,
+      "data": {
+        "edgeAdditionalInfo": {
+          "actionDefinition": {
+            "actionValidationScriptId": "",
+            "messageBinding": "Updated ${S1}",
+            "transitionActionScriptId": "55d0d46d-dd62-4b89-ae82-83d91ce8dd92"
+          },
+          "isJobActive": false,
+          "linkId": "9abe1291-e692-4e9d-be2b-aeec2008bea2",
+          "linkName": "Update",
+          "processJob": {},
+          "sourceNodeId": "522762b7-eb96-4a72-8432-2d277ac335d9",
+          "targetNodeId": "522762b7-eb96-4a72-8432-2d277ac335d9"
+        },
+        "edgeColor": "205",
+        "edgeTransitionCategory": 2,
+        "height": 185
+      },
+      "deleteAble": true,
+      "id": "9abe1291-e692-4e9d-be2b-aeec2008bea2",
+      "label": "Update",
+      "markerEnd": {
+        "type": "arrowclosed"
+      },
+      "selected": true,
+      "source": "Task_522762b7-eb96-4a72-8432-2d277ac335d9",
+      "sourceHandle": null,
+      "target": "Task_522762b7-eb96-4a72-8432-2d277ac335d9",
+      "targetHandle": null,
+      "type": "selfConnecting"
+    }
+  ]
+}

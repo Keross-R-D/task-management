@@ -1,0 +1,31 @@
+# Default values for your helm chart
+replicaCount: 1
+
+image:
+  repository: ""
+  tag: ""
+  pullPolicy: IfNotPresent
+
+podAnnotations: {}
+
+service:
+  type: ClusterIP
+  port: 8070
+
+resources:
+  limits:
+    cpu: 200m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 256Mi
+
+livenessProbe:
+  initialDelaySeconds: 180
+  periodSeconds: 20
+
+readinessProbe:
+  initialDelaySeconds: 180
+  periodSeconds: 10
+
+env: []

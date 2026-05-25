@@ -1,0 +1,15 @@
+{
+  "isDeployed": false,
+  "isInstanceLockNeeded": false,
+  "isLockRequired": true,
+  "isSharedProcess": false,
+  "parentProcess": {
+    "parent": "src",
+    "path": "\\Get Started_0bc85052-949c-49bc-aaf5-a9f283d5aebc"
+  },
+  "processId": "0bc85052-949c-49bc-aaf5-a9f283d5aebc",
+  "processName": "Get Started",
+  "processVariableFields": [],
+  "processVersion": 1,
+  "scripts": []
+}

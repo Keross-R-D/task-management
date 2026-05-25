@@ -1,0 +1,20 @@
+[
+  {
+    "scriptId": "6d072328-0013-4e29-90ae-f70bd2782ac9",
+    "scriptName": "S1",
+    "scriptType": "Message Variable",
+    "scriptLanguage": "JavaScript"
+  },
+  {
+    "scriptId": "55d0d46d-dd62-4b89-ae82-83d91ce8dd92",
+    "scriptName": "S2",
+    "scriptType": "Transition Action - Before Transaction",
+    "scriptLanguage": "JavaScript"
+  },
+  {
+    "scriptId": "670fa1c6-26ab-4623-bbea-0ea91ce1541e",
+    "scriptName": "S3",
+    "scriptType": "Form Data Post Processing",
+    "scriptLanguage": "JavaScript"
+  }
+]

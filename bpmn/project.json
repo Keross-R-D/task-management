@@ -1,0 +1,22 @@
+{
+  "projectName": "task-management",
+  "groups": [
+    {
+      "id": "08d401c6-f65e-42e7-b453-3f0f56eb49ef",
+      "name": "Basic Access Group",
+      "description": "Basic Access Group",
+      "active": true
+    }
+  ],
+  "roles": [
+    {
+      "id": "c5ddc3c5-7a53-40a2-a852-fefe0ec656b7",
+      "name": "Basic Access",
+      "active": true,
+      "description": "Basic Access",
+      "groups": [
+        "08d401c6-f65e-42e7-b453-3f0f56eb49ef"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,81 @@
+/* General Styling */
+.body-style {
+    background: linear-gradient(104.96deg, #131a29 0%, #1d2634 56.6%, #2f2e78 100.68%);
+    color: #fff;
+    font-family: 'Poppins', sans-serif;
+}
+
+/* Left Section */
+.left-section {
+    /* background: #0b1120; */
+    color: #fff;
+    text-align: left;
+}
+
+.left-ikon-logo {
+    width: 15%;
+    left: 0;
+    position: absolute;
+    top: 0;
+}
+
+.quote {
+    font-size: 2rem;
+    font-style: italic;
+}
+
+/* Right Section */
+.right-section {
+    /* background: #1a1c3d; */
+    text-align: center;
+    color: #ccc;
+}
+
+.right-ikon-logo {
+    width: 30%;
+}
+
+.subtitle {
+    font-size: 1rem;
+    /* margin-bottom: 20px; */
+}
+
+.form-control {
+    background: #252a48;
+    color: white;
+    border: none;
+}
+
+.form-control:focus {
+    box-shadow: none;
+    border: 1px solid #8a86ff;
+}
+
+.forgot-password, .sign-up {
+    color: #8a86ff;
+    text-decoration: none;
+}
+
+.btn-primary {
+    background: #635bff;
+    border: none;
+}
+
+.btn-primary:hover {
+    background: #5249db;
+}
+
+.support-text {
+    font-size: 0.9rem;
+    color: #888;
+}
+.terminal-video {
+    mix-blend-mode: lighten;
+    max-width: 100%;
+    height: auto;
+}
+footer a {
+    color: #888;
+    text-decoration: none;
+    font-size: 0.9rem;
+}

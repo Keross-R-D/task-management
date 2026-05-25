@@ -1,0 +1,58 @@
+# Maven build output
+
+\*_/target/
+_.jar
+_.war
+_.ear
+
+# IDE files
+
+.idea/
+.vscode/
+.settings/
+.classpath
+.project
+_.iml
+_.ipr
+\*.iws
+
+# Version control
+
+.git/
+.gitignore
+.gitattributes
+
+# Documentation
+
+README.md
+\*.md
+
+# Test reports
+
+**/surefire-reports/
+**/failsafe-reports/
+
+# Logs
+
+\*.log
+\*\*/logs/
+
+# OS files
+
+.DS_Store
+Thumbs.db
+
+# Temporary files
+
+_.tmp
+_.bak
+_.swp
+_~
+
+# Maven wrapper (optional, uncomment if you want to use system Maven)
+
+# .mvn/
+
+# mvnw
+
+# mvnw.cmd

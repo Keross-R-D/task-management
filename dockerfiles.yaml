@@ -1,0 +1,9 @@
+images:
+  - name: task-management-frontend
+    path: ./frontend/Dockerfile
+    chart: frontend
+
+  - name: task-management-backend
+    path: ./backend/Dockerfile
+    chart: backend
+    context: .

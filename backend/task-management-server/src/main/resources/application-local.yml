@@ -1,0 +1,149 @@
+spring:
+  application:
+    name: task-management
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/taskmanagement?createDatabaseIfNotExist=true
+    username: root
+    password: admin
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      connectionTimeout: 20000
+      maximumPoolSize: 20
+  jpa:
+    database-platform: org.hibernate.dialect.MySQL8Dialect
+    hibernate:
+      ddl-auto: update # Options: none, validate, update, create, create-drop
+    show-sql: true
+    defer-datasource-initialization: false
+    properties:
+      hibernate:
+        format_sql: true
+
+  # If you are using process, uncomment below
+  # sql:
+  #   init:
+  #     schema-locations:
+  #       - classpath:activiti.engine.schema.sql
+  #     mode: always
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://ikoncloud-dev.keross.com/ikon-api/platform
+
+  # If you use any one of the below data sources, uncomment data and the respective section.
+  # data:
+
+  # If you are using redis, uncomment below
+  # redis:
+  #   host: localhost
+  #   port: 6379
+  #   password: 7410
+  #   database: 0
+  #   lettuce:
+  #     pool:
+  #       max-active: 10       # Maximum number of connections
+  #       max-idle: 8          # Maximum idle connections
+  #       min-idle: 2          # Minimum idle connections
+  #       max-wait: 5s         # Max wait time for a connection
+
+  # If you are using mongodb, uncomment below
+  # mongodb:
+  #   host: localhost
+  #   port: 27017
+  #   username: system
+  #   password: admin
+  #   authentication-database: admin
+  # mongodb:
+  #   client:
+  #     settings:
+  #       connection-pool:
+  #         max-size: 500           # Maximum connections in the pool
+  #         min-size: 10           # Minimum idle connections
+  #         max-connection-idle-time: 10s     # Time a connection can be idle before being closed
+  #         max-wait-time: 5s
+
+  # If you are using kafka, uncomment below
+  # kafka:
+  #   bootstrap-servers: localhost:9092
+  #   properties:
+  #     schema:
+  #       registry:
+  #         url: http://localhost:8081
+  #     specific:
+  #       avro:
+  #         reader: true
+  #   producer:
+  #     key-serializer: org.apache.kafka.common.serialization.StringSerializer
+  #     value-serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
+  #   consumer:
+  #     key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+  #     value-deserializer: io.confluent.kafka.serializers.KafkaAvroDeserializer
+  #     group-id: ${spring.application.name}-consumer-group
+  #     auto-offset-reset: earliest
+
+ikon:
+  user:
+    agent: "IKON App Server"
+  time-zone: "Asia/Kolkata"
+  platform:
+    rest:
+      url: https://ikoncloud-dev.keross.com/ikon-api/platform
+  logger:
+    enabled: false # set true when deployed in dev/uat/prod otherwise set to false if running in local/devtools environment.
+  app:
+    softwareId: "5e6113d9-7837-4e7c-9cb1-98cf0300e097"
+    softwareVersion: 1
+    softwareName: "Task Management"
+    softwareRepositoryName: "task-management"
+  accessmanagement:
+    init:
+      file: ../../bpmn/project.json
+
+# If you are using process, uncomment below
+# processengine:
+#   databaseSchemaUpdate: false # possible values: "true", "false", "create-drop"
+#   bpmn:
+#     enabled: true
+#     path: "../../bpmn"
+# job:
+#   max-pool-size: 100
+
+logging:
+  level:
+    com.ikon: DEBUG
+  file:
+    name: "../logs/${spring.application.name}-app.log"
+
+server:
+  address: 0.0.0.0
+  port: 8070
+
+eureka:
+  instance:
+    ip-address: ${server.address}
+    preferIpAddress: true
+    instance-id: ${spring.cloud.client.ip-address}:${spring.application.name}:${server.port}
+  client:
+    register-with-eureka: false
+    fetch-registry: false
+    service-url:
+      default-zone: http://localhost:8761/eureka
+
+management:
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: always
+  endpoints:
+    web:
+      exposure:
+        include: health
+  health:
+    livenessState:
+      enabled: true
+    readinessState:
+      enabled: true
