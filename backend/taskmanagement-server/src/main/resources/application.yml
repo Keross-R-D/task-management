@@ -1,4 +1,6 @@
 spring:
+  config:
+    import: optional:file:.env[.properties]
   main:
     allow-bean-definition-overriding: true
   application:
@@ -12,10 +14,9 @@ spring:
   # PostgreSQL Database Config
   # =============================
   datasource:
-    url: jdbc:postgresql://192.168.3.144:5432/taskmanagement
-    # url: jdbc:postgresql://localhost:5432/task_management
-    username: postgres
-    password: postgres
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
     # ... keep hikari settings
     hikari:
@@ -69,9 +70,9 @@ spring:
   # =============================
   data:
     redis:
-      host: 192.168.3.144
-      port: 6379
-      password: redispassword123
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+      password: ${REDIS_PASSWORD}
       database: 0
       lettuce:
         pool:
@@ -84,11 +85,11 @@ spring:
     # MongoDB Configuration
     # =============================
     mongodb:
-      host: 192.168.3.144
-      port: 27017
-      username: root
-      password: mongopassword123
-      authentication-database: admin
+      host: ${MONGO_HOST}
+      port: ${MONGO_PORT}
+      username: ${MONGO_USERNAME}
+      password: ${MONGO_PASSWORD}
+      authentication-database: ${MONGO_AUTH_DB}
 
   mongodb:
     client:
@@ -103,11 +104,11 @@ spring:
   # Kafka Configuration
   # =============================
   kafka:
-    bootstrap-servers: 192.168.3.144:9092
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
     properties:
       schema:
         registry:
-          url: http://192.168.3.144:8081
+          url: ${KAFKA_SCHEMA_REGISTRY_URL}
       specific:
         avro:
           reader: true
@@ -127,7 +128,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: https://ikoncloud-dev.keross.com/ikon-api/platform
+          issuer-uri: ${IKON_JWT_ISSUER_URI}
 
 # =============================
 # IKON Platform Configurations
@@ -136,19 +137,19 @@ ikon:
   user:
     agent: "IKON App Server"
   platform:
-    rest: https://ikoncloud-dev.keross.com/ikon-api
+    rest: ${IKON_PLATFORM_URL}
   logger:
     enabled: false
   accessmanagement:
     init:
-      file: ../../bpmn/project.json
+      file: ${BPMN_PROJECT_JSON}
   processengine:
     databaseSchemaUpdate: false
     bpmn:
       enabled: true
-      path: ../../bpmn
+      path: ${BPMN_PATH}
   app:
-    softwareId: "bfbb1d15-7e43-46ea-9b4c-109c8574aff8"
+    softwareId: ${IKON_SOFTWARE_ID}
     softwareVerion: 1
     softwareName: ${spring.application.name}
     softwareRepositoryName: taskmanagement
@@ -168,8 +169,8 @@ logging:
 # Server Configuration
 # =============================
 server:
-  address: 0.0.0.0
-  port: 8071
+  address: ${SERVER_ADDRESS}
+  port: ${SERVER_PORT}
 
 # =============================
 # Eureka (Optional)
@@ -180,7 +181,7 @@ eureka:
     preferIpAddress: true
     instance-id: ${spring.cloud.client.ip-address}:${spring.application.name}:${server.port}
   client:
-    register-with-eureka: false
-    fetch-registry: false
+    register-with-eureka: ${EUREKA_REGISTER}
+    fetch-registry: ${EUREKA_FETCH}
     service-url:
-      default-zone: http://localhost:8761/eureka
+      default-zone: ${EUREKA_DEFAULT_ZONE}

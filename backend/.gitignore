@@ -36,5 +36,9 @@ build/
 ../logs/
 logs/
 
-
-
+### Environment — real secrets must NOT be committed ###
+# Commit .env.example instead
+.env
+.env.local
+.env.production
+.env.*.local
