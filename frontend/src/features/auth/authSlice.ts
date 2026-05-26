@@ -21,13 +21,51 @@ export interface AuthState {
   isAuthenticated: boolean;
 }
 
-const token = localStorage.getItem("token")
-  ? JSON.parse(localStorage.getItem("token") as string)
-  : null;
+// Cookie helpers
+const setCookie = (name: string, value: string, expiresInSeconds: number) => {
+  const date = new Date();
+  date.setTime(date.getTime() + expiresInSeconds * 1000);
+
+  document.cookie = `${name}=${encodeURIComponent(
+    value,
+  )}; expires=${date.toUTCString()}; path=/`;
+};
+
+const getCookie = (name: string) => {
+  const cookies = document.cookie.split("; ");
+
+  for (const cookie of cookies) {
+    const [key, value] = cookie.split("=");
+
+    if (key === name) {
+      return decodeURIComponent(value);
+    }
+  }
+
+  return null;
+};
+
+const deleteCookie = (name: string) => {
+  document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+};
+
+// Load token from cookie
+const accessToken = getCookie("ikoncloud_next_accessToken");
+const refreshToken = getCookie("ikoncloud_next_refreshToken");
+
+const token: TokenResponse | null =
+  accessToken && refreshToken
+    ? {
+        accessToken,
+        refreshToken,
+        expiresIn: 0,
+        refreshExpiresIn: 0,
+      }
+    : null;
 
 const initialState: AuthState = {
   user: null,
-  token: token,
+  token,
   isAuthenticated: !!token,
 };
 
@@ -37,25 +75,41 @@ const authSlice = createSlice({
   reducers: {
     setToken: (state, action: PayloadAction<TokenResponse | null>) => {
       state.token = action.payload;
+
       if (action.payload) {
-        localStorage.setItem("token", JSON.stringify(action.payload));
+        setCookie(
+          "ikoncloud_next_accessToken",
+          action.payload.accessToken,
+          action.payload.expiresIn,
+        );
+
+        setCookie(
+          "ikoncloud_next_refreshToken",
+          action.payload.refreshToken,
+          action.payload.refreshExpiresIn,
+        );
       } else {
-        localStorage.removeItem("token");
+        deleteCookie("ikoncloud_next_accessToken");
+        deleteCookie("ikoncloud_next_refreshToken");
       }
+
       state.isAuthenticated = !!action.payload;
     },
+
     setUser: (state, action: PayloadAction<User | null>) => {
       state.user = action.payload;
     },
+
     logout: (state) => {
       state.user = null;
       state.token = null;
-      localStorage.removeItem("token");
+
+      deleteCookie("ikoncloud_next_accessToken");
+      deleteCookie("ikoncloud_next_refreshToken");
+
       state.isAuthenticated = false;
-      // Maintain cookie cleanup for ikon library
-      document.cookie = "ikoncloud_next_accessToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-      document.cookie = "ikoncloud_next_refreshToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-      window.location.href = '/login';
+
+      window.location.href = "/login";
     },
   },
 });

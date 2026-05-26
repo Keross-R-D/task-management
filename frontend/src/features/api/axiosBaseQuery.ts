@@ -15,16 +15,20 @@ export interface AxiosBaseQueryError {
   data: unknown | string;
 }
 
-export function axiosBaseQuery({ baseUrl }: { baseUrl: string } = { baseUrl: "" }): BaseQueryFn<AxiosBaseQueryArgs, unknown, AxiosBaseQueryError> {
+export function axiosBaseQuery(
+  { baseUrl }: { baseUrl: string } = { baseUrl: "" },
+): BaseQueryFn<AxiosBaseQueryArgs, unknown, AxiosBaseQueryError> {
   return async ({ apiUrl, config }: AxiosBaseQueryArgs) => {
     try {
       let fullUrl = apiUrl;
       if (baseUrl && !apiUrl.startsWith("http")) {
-         fullUrl = `${baseUrl}${apiUrl}`;
+        fullUrl = `${baseUrl}${apiUrl}`;
       }
-      
+
       const incomingHeaders = config?.headers ? { ...config.headers } : {};
-      const hasContentType = Object.keys(incomingHeaders).some((k) => k.toLowerCase() === "content-type");
+      const hasContentType = Object.keys(incomingHeaders).some(
+        (k) => k.toLowerCase() === "content-type",
+      );
       const headers = { ...incomingHeaders };
       if (!hasContentType) {
         headers["Content-Type"] = "application/json";
@@ -47,7 +51,9 @@ export function axiosBaseQuery({ baseUrl }: { baseUrl: string } = { baseUrl: "" 
 
 let refreshTokenPromise: Promise<string | null> | null = null;
 
-export function axiosBaseQueryWithReauth({ baseUrl }: { baseUrl: string } = { baseUrl: "" }): BaseQueryFn<AxiosBaseQueryArgs, unknown, AxiosBaseQueryError> {
+export function axiosBaseQueryWithReauth(
+  { baseUrl }: { baseUrl: string } = { baseUrl: "" },
+): BaseQueryFn<AxiosBaseQueryArgs, unknown, AxiosBaseQueryError> {
   return async (args, api, extraOptions) => {
     const axiosBaseQueryFn = axiosBaseQuery({ baseUrl });
     const state = api.getState() as { auth: AuthState };
@@ -79,14 +85,17 @@ export function axiosBaseQueryWithReauth({ baseUrl }: { baseUrl: string } = { ba
 
       refreshTokenPromise ??= (async () => {
         try {
-          const response = await fetch(`${import.meta.env.VITE_IKON_API_URL || "https://ikoncloud-dev.keross.com/ikon-api"}/platform/auth/refresh-token`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ refreshToken })
-          });
-          
+          const response = await fetch(
+            `${import.meta.env.VITE_IKON_API_URL}/platform/auth/refresh-token`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ refreshToken }),
+            },
+          );
+
           if (!response.ok) throw new Error("Refresh failed");
-          
+
           const refreshResult = await response.json();
           const newAccessToken = refreshResult?.accessToken;
 
@@ -95,7 +104,7 @@ export function axiosBaseQueryWithReauth({ baseUrl }: { baseUrl: string } = { ba
             return null;
           }
 
-          api.dispatch({ type: 'auth/setToken', payload: refreshResult });
+          api.dispatch({ type: "auth/setToken", payload: refreshResult });
           return newAccessToken;
         } catch (error) {
           console.error("Token refresh failed:", error);
