@@ -8,7 +8,7 @@ data:
   application.yml: |
     spring:
       application:
-        name: taskmanagement
+        name: task-management
       profiles:
         active: local
 
@@ -126,9 +126,8 @@ data:
         softwareId: "5e6113d9-7837-4e7c-9cb1-98cf0300e097"
         softwareVerion: 1
         softwareName: "Task Management"
-        softwareRepositoryName: taskmanagement
-      job:
-        max-pool-size: 100
+        softwareRepositoryName: task-management
+    
 
 
     # =============================
@@ -155,7 +154,7 @@ data:
     eureka:
       instance:
         hostname: ${HOSTNAME}
-        ipAddress: ${TASKMANAGEMENT_BACKEND_SERVICE_SERVICE_HOST}
+        ipAddress: ${TASK_MANAGEMENT_BACKEND_SERVICE_SERVICE_HOST}
         preferIpAddress: true
         instance-id: ${spring.cloud.client.ip-address}:${spring.application.name}:${server.port}
       client:
