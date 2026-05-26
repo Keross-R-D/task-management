@@ -310,7 +310,7 @@ function Column({ id, label, items, sprints }: any) {
         </span>
       </div>
       <hr className="mb-3" />
-      <div className="max-h-95 overflow-y-auto custom-scrollbar">
+      <div className="max-h-88 overflow-y-auto custom-scrollbar">
         {items.map((item: Task) => (
           <DraggableItem
             key={item.id}
