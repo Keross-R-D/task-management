@@ -1,0 +1,82 @@
+# Default values for Task Management Application
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# Global values shared across all subcharts
+global:
+  # Global image pull secret configuration for private Harbor registry
+  imagePullSecret:
+    enabled: true # Set to true to enable image pull secret for all charts
+    registry: "registry.e2enetworks.net"
+    username: "" # Harbor username
+    password: "" # Harbor password or robot token
+
+  # Alternative: Reference existing secrets
+  # imagePullSecrets: []
+  # - name: harbor-registry
+
+# Frontend subchart configuration
+frontend:
+  enabled: true
+  replicaCount: 1
+
+  image:
+    repository: registry.e2enetworks.net/ikon-applications/taskmanagement-frontend
+    tag: dev-1
+    pullPolicy: Always
+
+  service:
+    type: ClusterIP
+    port: 80
+
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+  livenessProbe:
+    initialDelaySeconds: 10
+    periodSeconds: 10
+
+  readinessProbe:
+    initialDelaySeconds: 10
+    periodSeconds: 5
+
+  # Vite bakes VITE_* env vars at build time, so runtime env is not needed.
+  # Rebuild the Docker image per environment instead.
+  env: []
+
+# Backend subchart configuration
+backend:
+  enabled: true
+  replicaCount: 1
+
+  image:
+    repository: registry.e2enetworks.net/ikon-applications/taskmanagement-backend
+    tag: dev-1
+    pullPolicy: IfNotPresent
+
+  service:
+    type: ClusterIP
+    port: 8071
+
+  resources:
+    limits:
+      cpu: 500m
+      memory: 2Gi
+    requests:
+      cpu: 450m
+      memory: 1Gi
+
+  livenessProbe:
+    initialDelaySeconds: 290
+    periodSeconds: 10
+
+  readinessProbe:
+    initialDelaySeconds: 290
+    periodSeconds: 5
+
+  env: []

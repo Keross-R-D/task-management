@@ -1,0 +1,15 @@
+node_modules
+dist
+dist-ssr
+.git
+.gitignore
+.env
+.env.*
+*.md
+*.log
+.vscode
+.idea
+tsc-error.txt
+tsc-errors.txt
+kube
+app

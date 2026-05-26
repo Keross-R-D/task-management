@@ -1,0 +1,182 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "chart.fullname" . }}-configmap
+  labels:
+    name: {{ include "chart.fullname" . }}-configmap
+data:
+  application.yml: |
+    spring:
+      application:
+        name: taskmanagement
+      profiles:
+        active: local
+
+      service:
+        token:
+          enabled: true
+
+      # =============================
+      # PostgreSQL Database Config
+      # =============================
+      datasource:
+        url: jdbc:postgresql://postgres.postgres.svc.cluster.local:5432/taskmanagement
+        username: postgres
+        password: 4aILKPEdvm
+        driver-class-name: org.postgresql.Driver
+        # ... keep hikari settings
+        hikari:
+          connectionTimeout: 20000
+          maximumPoolSize: 20
+     
+
+      jpa:
+        database-platform: org.hibernate.dialect.PostgreSQLDialect
+        hibernate:
+          ddl-auto: update
+        show-sql: true
+        defer-datasource-initialization: false
+        properties:
+          hibernate:
+            format_sql: true
+          jdbc:
+            time_zone: Asia/Kolkata
+      
+      
+
+      # =============================
+      # Redis Configuration
+      # =============================
+      data:
+        redis:
+          host: redis.redis.svc.cluster.local
+          port: 6379
+          password: ducs8WZf7lJnsHm6
+          database: 0
+          lettuce:
+            pool:
+              max-active: 10
+              max-idle: 8
+              min-idle: 2
+              max-wait: 5s
+
+      # =============================
+      # MongoDB Configuration
+      # =============================
+        mongodb:
+          host: mongo.database.svc.cluster.local
+          port: 27017
+          user: system
+          password: admin
+          authentication-database: admin
+
+      mongodb:
+        client:
+          settings:
+            connection-pool:
+              max-size: 500
+              min-size: 10
+              max-connection-idle-time: 10s
+              max-wait-time: 5s
+
+      # =============================
+      # Kafka Configuration
+      # =============================
+      kafka:
+        bootstrap-servers: kafka.kafka.svc.cluster.local:9092
+        properties:
+          schema:
+            registry:
+              url: http://schemaregistry.kafka.svc.cluster.local:8081
+          specific:
+            avro:
+              reader: true
+        producer:
+          key-serializer: org.apache.kafka.common.serialization.StringSerializer
+          value-serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
+        consumer:
+          key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+          value-deserializer: io.confluent.kafka.serializers.KafkaAvroDeserializer
+          group-id: ${spring.application.name}-consumer-group
+          auto-offset-reset: earliest
+
+      # =============================
+      # Security Configuration
+      # =============================
+      security:
+        oauth2:
+          resourceserver:
+            jwt:
+              issuer-uri: https://holocron.keross.com/api/platform
+
+
+    # =============================
+    # IKON Platform Configurations
+    # =============================
+    ikon:
+      user:
+        agent: "IKON App Server"
+      time-zone: "Asia/Kolkata"
+      platform:
+        rest:  https://holocron.keross.com/api
+      logger:
+        enabled: true 
+      
+      app:
+        softwareId: "5e6113d9-7837-4e7c-9cb1-98cf0300e097"
+        softwareVerion: 1
+        softwareName: "Task Management"
+        softwareRepositoryName: taskmanagement
+      job:
+        max-pool-size: 100
+
+
+    # =============================
+    # Logging Configuration
+    # =============================
+    logging:
+      level:
+        com.ikon: DEBUG
+      file:
+        name: "../logs/${spring.application.name}-app.log"
+
+
+    # =============================
+    # Server Configuration
+    # =============================
+    server:
+      address: 0.0.0.0
+      port: 8071
+
+
+    # =============================
+    # Eureka (Optional)
+    # =============================
+    eureka:
+      instance:
+        hostname: ${HOSTNAME}
+        ipAddress: ${TASKMANAGEMENT_BACKEND_SERVICE_SERVICE_HOST}
+        preferIpAddress: true
+        instance-id: ${spring.cloud.client.ip-address}:${spring.application.name}:${server.port}
+      client:
+        registerWithEureka: true
+        fetchRegistry: true
+        serviceUrl:
+          defaultZone: http://ikon-discovery-service.ikon-platform.svc.cluster.local:8761/eureka
+
+
+    management:
+      endpoint:
+        health:
+          probes:
+            enabled: true
+          show-details: always
+      endpoints:
+        web:
+          exposure:
+            include: health
+      health:
+        livenessState:
+          enabled: true
+        readinessState:
+          enabled: true
