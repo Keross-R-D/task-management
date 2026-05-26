@@ -1,63 +1,114 @@
 spring:
+  config:
+    import: optional:file:.env[.properties]
+  main:
+    allow-bean-definition-overriding: true
   application:
     name: taskmanagement
 
+  service:
+    token:
+      enabled: true
+
+  # =============================
+  # PostgreSQL Database Config
+  # =============================
   datasource:
-    url: jdbc:mysql://localhost:3306/taskmanagement?createDatabaseIfNotExist=true
-    username: root
-    password: rootpassword123
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+    # ... keep hikari settings
     hikari:
       connectionTimeout: 20000
-      maximumPoolSize: 20
+      maximumPoolSize: 5
+  minimumIdle: 2
+  idleTimeout: 600000
+
   jpa:
-    database-platform: org.hibernate.dialect.MySQL8Dialect
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
-      ddl-auto: update # Options: none, validate, update, create, create-drop
+      ddl-auto: update
     show-sql: true
     defer-datasource-initialization: false
     properties:
       hibernate:
         format_sql: true
-  sql:
-    init:
-      schema-locations:
-        - classpath:activiti.engine.schema.sql
-      mode: always
+      jdbc:
+        time_zone: Asia/Kolkata
 
+  # sql:
+  #   init:
+  #     schema-locations:
+  #       - classpath:activiti.engine.schema.sql
+  #     mode: always
+
+  # =============================
+  # MySQL Database Configuration
+  # =============================
+  # datasource:
+  #   url: jdbc:mysql://192.168.3.144:3306/taskmanagement?createDatabaseIfNotExist=true
+  #   username: app_user
+  #   password: userpassword123
+  #   driver-class-name: com.mysql.cj.jdbc.Driver
+  #   hikari:
+  #     connectionTimeout: 20000
+  #     maximumPoolSize: 20
+
+  # jpa:
+  #   database-platform: org.hibernate.dialect.MySQL8Dialect
+  #   hibernate:
+  #     ddl-auto: update
+  #   show-sql: true
+  #   defer-datasource-initialization: false
+  #   properties:
+  #     hibernate:
+  #       format_sql: true
+
+  # =============================
+  # Redis Configuration
+  # =============================
   data:
     redis:
-      host: localhost
-      port: 6379
-      password: redispassword123
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+      password: ${REDIS_PASSWORD}
       database: 0
       lettuce:
         pool:
-          max-active: 10 # Maximum number of connections
-          max-idle: 8 # Maximum idle connections
-          min-idle: 2 # Minimum idle connections
-          max-wait: 5s # Max wait time for a connection
+          max-active: 10
+          max-idle: 8
+          min-idle: 2
+          max-wait: 5s
+
+    # =============================
+    # MongoDB Configuration
+    # =============================
     mongodb:
-      host: localhost
-      port: 27017
-      username: root
-      password: mongopassword123
-      authentication-database: admin
+      host: ${MONGO_HOST}
+      port: ${MONGO_PORT}
+      username: ${MONGO_USERNAME}
+      password: ${MONGO_PASSWORD}
+      authentication-database: ${MONGO_AUTH_DB}
+
   mongodb:
     client:
       settings:
         connection-pool:
-          max-size: 500 # Maximum connections in the pool
-          min-size: 10 # Minimum idle connections
-          max-connection-idle-time: 10s # Time a connection can be idle before being closed
+          max-size: 500
+          min-size: 10
+          max-connection-idle-time: 10s
           max-wait-time: 5s
 
+  # =============================
+  # Kafka Configuration
+  # =============================
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
     properties:
       schema:
         registry:
-          url: http://localhost:9093
+          url: ${KAFKA_SCHEMA_REGISTRY_URL}
       specific:
         avro:
           reader: true
@@ -70,55 +121,67 @@ spring:
       group-id: ${spring.application.name}-consumer-group
       auto-offset-reset: earliest
 
+  # =============================
+  # Security Configuration
+  # =============================
   security:
     oauth2:
       resourceserver:
         jwt:
-          #          issuer-uri: http://localhost:8081/api/platform
-          issuer-uri: https://ikoncloud-dev.keross.com/ikon-api/platform
+          issuer-uri: ${IKON_JWT_ISSUER_URI}
 
+# =============================
+# IKON Platform Configurations
+# =============================
 ikon:
   user:
     agent: "IKON App Server"
-  time-zone: "Asia/Kolkata"
   platform:
-    rest:
-      url: https://ikoncloud-dev.keross.com/ikon-api
+    rest: ${IKON_PLATFORM_URL}
   logger:
-    enabled: false # set true when deployed in dev/uat/prod otherwise set to false if running in local/devtools environment.
+    enabled: false
+  accessmanagement:
+    init:
+      file: ${BPMN_PROJECT_JSON}
+  processengine:
+    databaseSchemaUpdate: false
+    bpmn:
+      enabled: true
+      path: ${BPMN_PATH}
   app:
-    softwareId: "fe6e3390-c5e1-4797-9d59-7393d2fab5c1"
+    softwareId: ${IKON_SOFTWARE_ID}
     softwareVerion: 1
     softwareName: ${spring.application.name}
     softwareRepositoryName: taskmanagement
-  accessmanagement:
-    init:
-      file: C:\Sales_CRM_New\taskmanagement\taskmanagement\bpmn\project.json
-  processengine:
-    databaseSchemaUpdate: false # possible values: "true", "false", "create-drop"
-    bpmn:
-      enabled: true
-      path: C:\Sales_CRM_New\taskmanagement\taskmanagement\bpmn
   job:
     max-pool-size: 100
 
+# =============================
+# Logging Configuration
+# =============================
 logging:
   level:
     com.ikon: DEBUG
   file:
     name: "../logs/${spring.application.name}-app.log"
 
+# =============================
+# Server Configuration
+# =============================
 server:
-  address: 0.0.0.0
-  port: 8070
+  address: ${SERVER_ADDRESS}
+  port: ${SERVER_PORT}
 
+# =============================
+# Eureka (Optional)
+# =============================
 eureka:
   instance:
     ip-address: ${server.address}
     preferIpAddress: true
     instance-id: ${spring.cloud.client.ip-address}:${spring.application.name}:${server.port}
   client:
-    register-with-eureka: false
-    fetch-registry: false
+    register-with-eureka: ${EUREKA_REGISTER}
+    fetch-registry: ${EUREKA_FETCH}
     service-url:
-      default-zone: http://localhost:8761/eureka
+      default-zone: ${EUREKA_DEFAULT_ZONE}
