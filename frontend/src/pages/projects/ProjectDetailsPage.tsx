@@ -99,7 +99,7 @@ export default function ProjectDetailPage() {
       {/* ================= TOP PROJECT CARD ================= */}
       <div className="rounded-2xl border dark:border-2 overflow-hidden">
         {/* Header */}
-        <div className="flex flex-col items-start gap-4 p-4 md:flex-row md:items-center md:justify-between">
+        <div className="flex flex-col items-start gap-4 px-4 py-2 md:flex-row md:items-center md:justify-between">
           <div>
             <div className="flex items-center gap-3">
               <h2 className="text-2xl font-bold tracking-tight">
@@ -135,7 +135,7 @@ export default function ProjectDetailPage() {
         <div className="border-t" />
 
         {/* Stats */}
-        <div className="grid grid-cols-2 gap-8 p-4 md:grid-cols-4">
+        <div className="grid grid-cols-2 gap-8 p-4 pb-3 md:grid-cols-4">
           <CardContent className="flex flex-col gap-3 p-0">
             <p className="text-sm">Completion</p>
 
