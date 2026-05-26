@@ -21,7 +21,7 @@ frontend:
   replicaCount: 1
 
   image:
-    repository: registry.e2enetworks.net/ikon-applications/taskmanagement-frontend
+    repository: registry.e2enetworks.net/ikon-applications/task-management-frontend
     tag: dev-1
     pullPolicy: Always
 
@@ -55,7 +55,7 @@ backend:
   replicaCount: 1
 
   image:
-    repository: registry.e2enetworks.net/ikon-applications/taskmanagement-backend
+    repository: registry.e2enetworks.net/ikon-applications/task-management-backend
     tag: dev-1
     pullPolicy: IfNotPresent
 
