@@ -19,7 +19,7 @@ setIkonConfig({
 });
 
 const isLoginPage = window.location.pathname === "/login";
-//ADDED to resolve pr issue
+//ADDED to resolve pr  again
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
