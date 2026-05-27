@@ -11,9 +11,9 @@ export const MainLayout: React.FC = () => {
   const navItems = useMemo(() => {
     return mainRoutes.map((route) => ({
       title: route.title,
-      url: `/main/${route.path}`,
+      url: `/${route.path}`,
       icon: route.icon,
-      isActive: location.pathname.startsWith(`/main/${route.path}`),
+      isActive: location.pathname.startsWith(`/${route.path}`),
     }));
   }, [location.pathname]);
 

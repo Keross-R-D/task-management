@@ -60,7 +60,7 @@ export const LoginPage: React.FC = () => {
       // as two separate React trees based on pathname. A soft navigate() won't
       // switch trees — we need a full page reload to enter the ProviderWrapper branch.
       setTimeout(() => {
-        window.location.href = "/main/dashboard";
+        window.location.href = "/dashboard";
       }, 1000);
     } catch (err: any) {
       handleAlert(err?.data?.error || "Login failed.");

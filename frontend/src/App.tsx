@@ -8,10 +8,9 @@ import ProjectStatusDetailPage from './pages/project-status-report/components/Pr
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/main/projects" replace />} />
-
       <Route element={<ProtectedRoute />}>
-        <Route path="/main" element={<MainLayout />}>
+        <Route path="/" element={<MainLayout />}>
+          <Route index element={<Navigate to="/dashboard" replace />} />
           {mainRoutes.map((route) => (
             <Route key={route.path} path={route.path} element={route.element} />
           ))}

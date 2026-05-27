@@ -17,7 +17,7 @@ import { mainRoutes } from "@/routes";
 import { useBreadcrumb } from "ikon-react-components-lib";
 
 // Static label map built from the routes config
-const routeNameMap: Record<string, string> = { main: "Home" };
+const routeNameMap: Record<string, string> = {};
 mainRoutes.forEach((route) => {
   routeNameMap[route.path] = route.title;
 });
@@ -32,7 +32,7 @@ export const AppBreadcrumbs: React.FC = () => {
   const breadcrumbItems = useMemo(() => {
     const pathnames = location.pathname.split("/").filter(Boolean);
 
-    // Don't show breadcrumbs at the root level
+    // Don't show breadcrumbs if we're at a top-level page (e.g. /dashboard)
     if (pathnames.length <= 1) return [];
 
     return pathnames.map((segment, index) => {

@@ -89,7 +89,7 @@ const ProjectStatusReportPage: React.FC = () => {
         <div
           className="font-medium cursor-pointer"
           onClick={() =>
-            navigate(`/main/project-status-report/${row.original.id}`)
+            navigate(`/project-status-report/${row.original.id}`)
           }
         >
           {row.original.projectName}

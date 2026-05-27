@@ -88,7 +88,7 @@ export function ProjectsGrid({ data }: { data: any[] }) {
       {data.map((project, idx) => (
         <div
           key={project.id || idx}
-          onClick={() => navigate(`/main/projects/${project.id}`)}
+          onClick={() => navigate(`/projects/${project.id}`)}
           className={`group relative bg-card border ${getBorderStyles(project.projectStatus)} rounded-xl overflow-hidden hover:border-primary/50 transition-all duration-300 shadow-sm hover:shadow-primary/5 cursor-pointer`}
         >
           <div className="p-5">
@@ -161,7 +161,7 @@ const ProjectsPage: React.FC = () => {
         cell: ({ row }: any) => (
           <span
             className="font-medium cursor-pointer hover:underline"
-            onClick={() => navigate(`/main/projects/${row.original.id}`)}
+            onClick={() => navigate(`/projects/${row.original.id}`)}
           >
             {row.original.projectName}
           </span>
@@ -333,7 +333,7 @@ const ProjectsPage: React.FC = () => {
                 isLoading: isLoading,
                 onReload: refetch,
                 toggleViewMode: true,
-                // onRowClick: (row: any) => navigate(`/main/projects/${row.id}`),
+                // onRowClick: (row: any) => navigate(`/projects/${row.id}`),
                 gridComponent: (data: any[]) => <ProjectsGrid data={data} />,
               }}
             />
