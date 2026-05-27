@@ -4,13 +4,16 @@ import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { mainRoutes } from '@/routes';
 import ProjectDetailsPage from '@/pages/projects/ProjectDetailsPage';
 import ProjectStatusDetailPage from './pages/project-status-report/components/ProjectStatusDetailPage';
+import { basePath, appPath } from '@/utils/basePath';
 
 function App() {
   return (
     <Routes>
+      {/* Redirect root to dashboard */}
+      <Route path={basePath || "/"} element={<Navigate to={appPath("/dashboard")} replace />} />
+
       <Route element={<ProtectedRoute />}>
-        <Route path="/" element={<MainLayout />}>
-          <Route index element={<Navigate to="/dashboard" replace />} />
+        <Route path={`${basePath}/`} element={<MainLayout />}>
           {mainRoutes.map((route) => (
             <Route key={route.path} path={route.path} element={route.element} />
           ))}

@@ -4,6 +4,7 @@ import { CalendarClock, ChartPie, FolderKanban, LayoutList, ListTodo, LoaderCirc
 import { Card, CardContent, CardTitle, EChart, Progress, Separator, Skeleton } from "ikon-react-components-lib";
 import ProjectCard from "./components/ProjectCard";
 import { useNavigate } from "react-router-dom";
+import { appPath } from "@/utils/basePath";
 import { useGetMyTasksQuery } from "@/features/myTasks/mytasksApiSlice";
 import { useGetProjectsQuery } from "@/features/projects/projectsApiSlice";
 import type { Task as ProjectTask } from "@/features/tasks/tasksApiSlice";
@@ -553,7 +554,7 @@ const DashboardPage: React.FC = () => {
                   Recent Tasks
                 </CardTitle>
                 <button
-                  onClick={() => navigate("/tasks")}
+                  onClick={() => navigate(appPath("/tasks"))}
                   className="flex items-center gap-2 cursor-pointer text-indigo-500 hover:text-indigo-600"
                 >
                   View All
@@ -577,7 +578,7 @@ const DashboardPage: React.FC = () => {
                     Projects
                   </CardTitle>
                   <button
-                    onClick={() => navigate("/projects")}
+                    onClick={() => navigate(appPath("/projects"))}
                     className="flex items-center gap-2 cursor-pointer text-indigo-500 hover:text-indigo-600"
                   >
                     View All
@@ -610,7 +611,7 @@ const DashboardPage: React.FC = () => {
                     Team Workload
                   </CardTitle>
                   <button
-                    onClick={() => navigate("/resource-utilisation")}
+                    onClick={() => navigate(appPath("/resource-utilisation"))}
                     className="flex items-center gap-2 cursor-pointer text-indigo-500 hover:text-indigo-600"
                   >
                     Details

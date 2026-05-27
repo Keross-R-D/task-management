@@ -10,6 +10,7 @@ import {
 } from "ikon-react-components-lib";
 import App from "./App.tsx";
 import { LoginPage } from "./pages/auth/LoginPage.tsx";
+import { basePath } from "@/utils/basePath";
 import "./index.css";
 
 setIkonConfig({
@@ -18,13 +19,15 @@ setIkonConfig({
   LOGIN_PAGE_URL: import.meta.env.VITE_LOGIN_PAGE_URL,
 });
 
+
+
 const isLoginPage = window.location.pathname.endsWith("/login");
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <Provider store={store}>
       {isLoginPage ? (
-        <BrowserRouter basename={import.meta.env.BASE_URL}>
+        <BrowserRouter basename={basePath}>
           <LoginPage />
         </BrowserRouter>
       ) : (

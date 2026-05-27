@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useLoginMutation } from "@/features/auth/authApiSlice";
+import { appPath } from "@/utils/basePath";
 
 const LoginSchema = z.object({
   userlogin: z.string().min(2, "Username is required"),
@@ -60,7 +61,7 @@ export const LoginPage: React.FC = () => {
       // as two separate React trees based on pathname. A soft navigate() won't
       // switch trees — we need a full page reload to enter the ProviderWrapper branch.
       setTimeout(() => {
-        window.location.href = "/dashboard";
+        window.location.href = appPath("/dashboard");
       }, 1000);
     } catch (err: any) {
       handleAlert(err?.data?.error || "Login failed.");
@@ -80,7 +81,7 @@ export const LoginPage: React.FC = () => {
           {/* Left Section */}
           <div className="flex flex-col h-full justify-center md:w-1/3 p-10 w-full relative">
             <img
-              src="/assets/images/dark/keross-logo.png"
+              src={`${import.meta.env.BASE_URL}assets/images/dark/keross-logo.png`}
               alt="Keross Logo"
               className="absolute top-10 left-10 w-[15%]"
             />
@@ -102,7 +103,7 @@ export const LoginPage: React.FC = () => {
               muted
               loop
             >
-              <source src="/assets/terminal.mp4" type="video/mp4" />
+              <source src={`${import.meta.env.BASE_URL}assets/terminal.mp4`} type="video/mp4" />
               Your browser does not support the video tag.
             </video>
           </div>
@@ -111,7 +112,7 @@ export const LoginPage: React.FC = () => {
           <div className="flex flex-col items-center justify-center text-center md:w-1/3 p-10 w-full text-gray-300">
             <div className="flex w-full justify-center mb-4">
               <img
-                src="/assets/images/dark/ikon-logo.png"
+                src={`${import.meta.env.BASE_URL}assets/images/dark/ikon-logo.png`}
                 alt="IKON Logo"
                 className="w-[30%]"
               />

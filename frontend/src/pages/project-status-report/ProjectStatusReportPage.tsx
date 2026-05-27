@@ -10,6 +10,7 @@ import {
 
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { appPath } from "@/utils/basePath";
 
 type ProjectSummary = {
   id: string;
@@ -89,7 +90,7 @@ const ProjectStatusReportPage: React.FC = () => {
         <div
           className="font-medium cursor-pointer"
           onClick={() =>
-            navigate(`/project-status-report/${row.original.id}`)
+            navigate(appPath(`/project-status-report/${row.original.id}`))
           }
         >
           {row.original.projectName}
