@@ -18,14 +18,13 @@ setIkonConfig({
   LOGIN_PAGE_URL: import.meta.env.VITE_LOGIN_PAGE_URL,
 });
 
-const isLoginPage = window.location.pathname === "/login";
-//ADDED to resolve pr  again
+const isLoginPage = window.location.pathname.endsWith("/login");
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <Provider store={store}>
       {isLoginPage ? (
-        <BrowserRouter>
+        <BrowserRouter basename={import.meta.env.BASE_URL}>
           <LoginPage />
         </BrowserRouter>
       ) : (

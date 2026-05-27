@@ -553,7 +553,7 @@ const DashboardPage: React.FC = () => {
                   Recent Tasks
                 </CardTitle>
                 <button
-                  onClick={() => navigate("/main/tasks")}
+                  onClick={() => navigate("/tasks")}
                   className="flex items-center gap-2 cursor-pointer text-indigo-500 hover:text-indigo-600"
                 >
                   View All
@@ -577,7 +577,7 @@ const DashboardPage: React.FC = () => {
                     Projects
                   </CardTitle>
                   <button
-                    onClick={() => navigate("/main/projects")}
+                    onClick={() => navigate("/projects")}
                     className="flex items-center gap-2 cursor-pointer text-indigo-500 hover:text-indigo-600"
                   >
                     View All
@@ -610,7 +610,7 @@ const DashboardPage: React.FC = () => {
                     Team Workload
                   </CardTitle>
                   <button
-                    onClick={() => navigate("/main/resource-utilisation")}
+                    onClick={() => navigate("/resource-utilisation")}
                     className="flex items-center gap-2 cursor-pointer text-indigo-500 hover:text-indigo-600"
                   >
                     Details
