@@ -218,6 +218,8 @@ export default function ProjectDetailPage() {
               </div>
             ) : (
               <TaskList
+                projectStartDate={project?.startDate}
+                projectEndDate={project?.endDate}
                 epics={epics}
                 sprints={sprints}
                 tasks={allTasks}
