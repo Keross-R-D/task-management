@@ -16,6 +16,7 @@ import {
   Calendar,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { appPath } from "@/utils/basePath";
 import {
   useGetProjectsQuery,
   useCreateProjectMutation,
@@ -88,7 +89,7 @@ export function ProjectsGrid({ data }: { data: any[] }) {
       {data.map((project, idx) => (
         <div
           key={project.id || idx}
-          onClick={() => navigate(`/projects/${project.id}`)}
+          onClick={() => navigate(appPath(`/projects/${project.id}`))}
           className={`group relative bg-card border ${getBorderStyles(project.projectStatus)} rounded-xl overflow-hidden hover:border-primary/50 transition-all duration-300 shadow-sm hover:shadow-primary/5 cursor-pointer`}
         >
           <div className="p-5">
@@ -161,7 +162,7 @@ const ProjectsPage: React.FC = () => {
         cell: ({ row }: any) => (
           <span
             className="font-medium cursor-pointer hover:underline"
-            onClick={() => navigate(`/projects/${row.original.id}`)}
+            onClick={() => navigate(appPath(`/projects/${row.original.id}`))}
           >
             {row.original.projectName}
           </span>

@@ -4,6 +4,7 @@ import { RenderSidebarNav } from "ikon-react-components-lib";
 import { User } from "lucide-react";
 import { mainRoutes } from "@/routes";
 import { AppBreadcrumbs } from "@/components/AppBreadcrumbs";
+import { appPath } from "@/utils/basePath";
 
 export const MainLayout: React.FC = () => {
   const location = useLocation();
@@ -11,9 +12,9 @@ export const MainLayout: React.FC = () => {
   const navItems = useMemo(() => {
     return mainRoutes.map((route) => ({
       title: route.title,
-      url: `/${route.path}`,
+      url: appPath(`/${route.path}`),
       icon: route.icon,
-      isActive: location.pathname.startsWith(`/${route.path}`),
+      isActive: location.pathname.includes(`/${route.path}`),
     }));
   }, [location.pathname]);
 

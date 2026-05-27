@@ -15,6 +15,7 @@ import { useSelector } from "react-redux";
 import type { RootState } from "@/app/store";
 import { mainRoutes } from "@/routes";
 import { useBreadcrumb } from "ikon-react-components-lib";
+import { basePath, appPath } from "@/utils/basePath";
 
 // Static label map built from the routes config
 const routeNameMap: Record<string, string> = {};
@@ -30,13 +31,18 @@ export const AppBreadcrumbs: React.FC = () => {
   );
 
   const breadcrumbItems = useMemo(() => {
-    const pathnames = location.pathname.split("/").filter(Boolean);
+    // Strip the base path prefix (e.g. /apps/task-management/v1) from pathname
+    let pathname = location.pathname;
+    if (basePath && pathname.startsWith(basePath)) {
+      pathname = pathname.slice(basePath.length) || "/";
+    }
+    const pathnames = pathname.split("/").filter(Boolean);
 
     // Don't show breadcrumbs if we're at a top-level page (e.g. /dashboard)
     if (pathnames.length <= 1) return [];
 
     return pathnames.map((segment, index) => {
-      const href = `/${pathnames.slice(0, index + 1).join("/")}`;
+      const href = appPath(`/${pathnames.slice(0, index + 1).join("/")}`);
 
       // Priority: dynamic label (UUID etc.) → static route map → capitalize
       let title = dynamicBreadcrumbs[segment];
