@@ -257,7 +257,6 @@ const ProjectsPage: React.FC = () => {
   const headerActions = (
     <Button
       onClick={() => setIsModalOpen(true)}
-      className="bg-white text-black hover:bg-gray-200"
     >
       <Plus className="h-4 w-4 mr-2" /> Add Project
     </Button>

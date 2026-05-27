@@ -178,7 +178,7 @@ function TaskRow({
 
   return (
     <>
-      <div className="w-full border hover:bg-muted px-4 my-2 py-2 flex items-center justify-between rounded-lg">
+      <div className="w-full border hover:bg-muted px-4 my-2 py-2 flex items-center justify-between rounded-lg bg-muted/30">
         {/* LEFT SIDE */}
         <div className="flex items-center gap-3">
           {getTaskTypeIcon(task.type)}
@@ -429,7 +429,7 @@ export default function Epic({
         type="multiple"
         value={isFiltering ? derivedOpenEpics : openEpics}
         onValueChange={setOpenEpics} // ← user can still manually toggle
-        className="w-full space-y-3 max-h-[400px] overflow-y-auto scrollbar-thin"
+        className="w-full space-y-3 max-h-[400px] overflow-y-auto custom-scrollbar"
       >
         {epics.map((epic) => {
           const epicSprints = sprints.filter((s) => s.epicId === epic.id);
@@ -542,7 +542,7 @@ export default function Epic({
                 <div className="h-px bg-border hidden group-data-[state=open]:block" />
 
                 {/* SPRINTS — now type="multiple" and controlled */}
-                <AccordionContent className="p-3 pl-8 max-h-[300px] overflow-y-auto scrollbar-thin ">
+                <AccordionContent className="p-3 pl-8 max-h-[300px] bg-muted/30 overflow-y-auto custom-scrollbar">
                   {epicSprints.length === 0 ? (
                     <p className="text-sm text-muted-foreground py-4 text-center">
                       No sprints in this epic
@@ -560,12 +560,12 @@ export default function Epic({
                         );
 
                         return (
-                          <div key={sprint.id} className="border rounded-xl">
+                          <div key={sprint.id} className="border-b rounded-lg">
                             <AccordionItem
                               value={`sprint-${sprint.id}`}
-                              className="border rounded-lg group/item"
+                              className="border rounded-lg group/item bg-background"
                             >
-                              <AccordionTrigger className="hover:no-underline hover:bg-muted px-3 py-3 [&[data-state]>svg]:hidden">
+                              <AccordionTrigger className="hover:no-underline hover:bg-muted rounded-b-lg px-3 py-3 [&[data-state]>svg]:hidden">
                                 <div className="flex items-center justify-between w-full min-w-0 cursor-pointer">
                                   <div className="flex items-center gap-3 min-w-0 flex-wrap">
                                     <ChevronRight className="h-4 w-4 transition-transform duration-200 group-data-[state=open]/item:rotate-90 shrink-0" />
@@ -703,7 +703,7 @@ export default function Epic({
                               ).includes(`sprint-${sprint.id}`) && (
                                 <div className="h-px bg-border" />
                               )}
-                              <AccordionContent className="p-2 pl-8 pb-0 max-h-[300px] overflow-y-auto scrollbar-thin">
+                              <AccordionContent className="p-2 pl-8 pb-0 rounded-b-lg max-h-[300px] bg-background overflow-y-auto custom-scrollbar">
                                 {sprintTasks.length === 0 ? (
                                   <p className="text-sm text-muted-foreground py-4 text-center">
                                     No tasks in this sprint

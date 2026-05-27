@@ -131,7 +131,7 @@ function DraggableItem({ item, column, sprints }: any) {
           <CardContent className="px-4 space-y-3">
             {/* Top Row */}
             <div className="flex items-start justify-between">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center pl-0.5 gap-2">
                 {getTaskTypeIcon(item.type)}
                 <h3 className="text-sm font-semibold items-center">{item.title}</h3>
               </div>
@@ -305,12 +305,12 @@ function Column({ id, label, items, sprints }: any) {
     >
       <div className="flex items-start px-2 pt-4 pb-2 justify-between">
         <h3 className="font-semibold mb-3">{label}</h3>
-        <span className="text-sm p-1 px-2 rounded-4xl">
+        <span className="text-sm p-1 px-2 rounded-4xl bg-muted font-semibold">
           {items.length}
         </span>
       </div>
       <hr className="mb-3" />
-      <div className="max-h-95 overflow-y-auto custom-scrollbar">
+      <div className="max-h-88 overflow-y-auto custom-scrollbar">
         {items.map((item: Task) => (
           <DraggableItem
             key={item.id}
