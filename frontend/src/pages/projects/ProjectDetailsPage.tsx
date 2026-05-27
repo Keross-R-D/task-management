@@ -64,7 +64,9 @@ export default function ProjectDetailPage() {
   const dispatch = useDispatch();
   useEffect(() => {
     if (project?.projectName) {
-      dispatch(setBreadcrumbLabel({ id: projectId, label: project.projectName }));
+      dispatch(
+        setBreadcrumbLabel({ id: projectId, label: project.projectName }),
+      );
     }
   }, [project, projectId, dispatch]);
 
@@ -95,7 +97,7 @@ export default function ProjectDetailPage() {
   }, [allTasks, boardFilters, sprints]);
 
   return (
-    <div className="w-full">
+    <div className="w-full py-4">
       {/* ================= TOP PROJECT CARD ================= */}
       <div className="rounded-2xl border dark:border-2 overflow-hidden">
         {/* Header */}
