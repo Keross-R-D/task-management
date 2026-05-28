@@ -491,12 +491,13 @@ const timesheetData = useMemo(() => {
       id: "utilisation",
       header: () => <div className="font-semibold">Utilisation %</div>,
       cell: ({ row }: { row: { original: ResourceMember } }) => {
-        const { capacity, actual } = row.original;
-        const utilisation = capacity > 0 ? Math.round((actual / capacity) * 100) : 0;
+        const { planned, actual } = row.original;
+        const utilisation = planned > 0 ? Math.round((actual / planned) * 100) : 0;
 
         let color = "text-green-500";
         if (utilisation > 100) color = "text-red-500";
         else if (utilisation > 80) color = "text-yellow-500";
+        else if (utilisation >= 0) color = "text-green-500";
 
         return <span className={color}>{utilisation}%</span>;
       },

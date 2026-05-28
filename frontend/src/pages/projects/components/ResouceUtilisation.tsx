@@ -518,11 +518,11 @@ export default function ResourceUtilization({ tasks, epics }: Props) {
 
               {filteredData.map((res) => {
                 let colorClass = "bg-green-500";
-                if (res.utilizationPercentage > 110) colorClass = "bg-red-500";
-                else if (res.utilizationPercentage > 90)
+                if (res.utilizationPercentage > 100) colorClass = "bg-red-500";
+                else if (res.utilizationPercentage > 80)
                   colorClass = "bg-yellow-500";
-                else if (res.utilizationPercentage < 50)
-                  colorClass = "bg-slate-400";
+                else if (res.utilizationPercentage > 0)
+                  colorClass = "bg-green-500";
 
                 return (
                   <tbody key={res.userId} className="group">
@@ -594,48 +594,46 @@ export default function ResourceUtilization({ tasks, epics }: Props) {
 
                     {/* Epic breakdown row — shown on hover */}
                     {res.epicBreakdown.length > 0 && (
-                      <tr className="border-b border-border/30 hidden group-hover:table-row bg-secondary/10">
-                        <td colSpan={6} className="px-6 pb-4 pt-2">
-                          <div className="pl-14 pr-4 pt-3">
-                            <p className="text-sm font-bold text-muted mb-3 flex items-center tracking-wider">
-                              <TrendingUp className="h-4 w-4 ml-3 mr-1.5" /> Epic
-                              Breakdown
-                            </p>
-                            <div className="grid grid-cols-2 gap-3 mx-2">
-                              {res.epicBreakdown.map((ep) => (
-                                <div
-                                  key={ep.epicId}
-                                  className="text-sm border border-border p-3 rounded-lg"
-                                >
-                                  <div className="flex justify-between items-center mb-2">
-                                    <span className="truncate pr-2 font-semibold text-muted-foreground">
-                                      {ep.epicName}
-                                    </span>
-                                  </div>
-                                  <div className="flex items-center gap-2">
-                                    <div className="flex-1 h-1.5 bg-secondary blue-dark:bg-[#313b4f] rounded-full overflow-hidden">
-                                      <div
-                                        className="h-full bg-primary transition-all"
-                                        style={{
-                                          width: `${
-                                            ep.totalTasks > 0
-                                              ? Math.round(
-                                                  (ep.doneTasks /
-                                                    ep.totalTasks) *
-                                                    100,
-                                                )
-                                              : 0
-                                          }%`,
-                                        }}
-                                      />
+                      <tr className="border-b border-border/30 bg-secondary/10">
+                        <td colSpan={6} className="p-0 border-0">
+                          <div className="overflow-hidden max-h-0 opacity-0 group-hover:max-h-125 group-hover:opacity-100 transition-all duration-300 delay-150">
+                            <div className="px-6 pb-4 pt-2">
+                              <div className="pl-14 pr-4 pt-3">
+                                <p className="text-sm font-bold text-muted mb-3 flex items-center tracking-wider">
+                                  <TrendingUp className="h-4 w-4 ml-3 mr-1.5" />
+                                  Epic Breakdown
+                                </p>
+                                <div className="grid grid-cols-2 gap-3 mx-2">
+                                  {res.epicBreakdown.map((ep) => (
+                                    <div key={ep.epicId} className="text-sm border border-border p-3 rounded-lg bg-background/70backdrop-blur-sm">
+                                      <div className="flex justify-between items-center mb-2">
+                                        <span className="truncate pr-2 font-semibold text-muted">
+                                          {ep.epicName}
+                                        </span>
+                                      </div>
+                                      <div className="flex items-center gap-2">
+                                        <div className="flex-1 h-1.5 bg-secondary blue-dark:bg-[#313b4f] rounded-full overflow-hidden">
+                                          <div
+                                            className="h-full transition-all duration-700 bg-green-500"
+                                            style={{
+                                              width: `${
+                                                ep.totalTasks > 0
+                                                  ? Math.round(
+                                                      (ep.doneTasks / ep.totalTasks) * 100
+                                                    )
+                                                  : 0
+                                              }%`,
+                                            }}
+                                          />
+                                        </div>
+                                        <span className="text-muted font-medium">
+                                          {ep.doneTasks}/{ep.totalTasks}
+                                        </span>
+                                      </div>
                                     </div>
-                                    <span className="text-muted-foreground font-medium">
-                                      {ep.doneTasks}/{ep.totalTasks}
-                                    </span>
-                                  </div>
+                                  ))}
                                 </div>
-                              ))}
-                              
+                              </div>
                             </div>
                           </div>
                         </td>
