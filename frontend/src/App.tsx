@@ -5,7 +5,6 @@ import { mainRoutes } from '@/routes';
 import ProjectDetailsPage from '@/pages/projects/ProjectDetailsPage';
 import ProjectStatusDetailPage from './pages/project-status-report/components/ProjectStatusDetailPage';
 
-
 function App() {
   return (
     <>

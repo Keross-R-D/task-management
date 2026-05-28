@@ -755,8 +755,13 @@ const timesheetData = useMemo(() => {
                         return (
                           <TableRow key={row.userId} className="h-12">
                             <TableCell>
-                              <div className="ps-4">{row.name}</div>
-                            </TableCell>
+                              <div className="flex items-center gap-2 ps-2">
+                                  <div className="h-6 w-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-[11px] font-bold shrink-0">
+                                      {row?.name?.charAt(0).toUpperCase()}
+                                  </div>
+                                  <span className="font-semibold">{row.name}</span>
+                              </div>
+                          </TableCell>
                             {weekDates.map((date) => {
                               const key = toKey(date);
                               const hrs = row.entries[key] || 0;

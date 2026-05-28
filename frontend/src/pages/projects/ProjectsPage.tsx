@@ -11,7 +11,6 @@ import {
   ClipboardCheck,
   ArrowUpRight,
   FolderOpen,
-  CalendarDays,
   User,
   Calendar,
 } from "lucide-react";

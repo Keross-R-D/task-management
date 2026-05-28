@@ -220,7 +220,7 @@ function AssigneeDropdown({
                       </p>
                     </div>
                     {isSelected && (
-                      <div className="h-4 w-4 rounded-full bg-primary flex items-center justify-center shrink-0">
+                      <div className="h-4 w-4 rounded-full bg-emerald-500 flex items-center justify-center shrink-0">
                         <svg width="8" height="6" viewBox="0 0 8 6" fill="none">
                           <path
                             d="M1 3L3 5L7 1"
@@ -490,27 +490,27 @@ export default function ResourceUtilization({ tasks, epics }: Props) {
           </CardContent>
         </Card>
       ) : (
-       <Card className="border-border overflow-hidden rounded-2xl">
+        <Card className="border-border overflow-hidden rounded-2xl">
           <div className="overflow-auto max-h-[480px]">
             <table className="w-full text-left border-collapse border-spacing-y-2">
               <thead className="sticky top-0 z-10 bg-card rounded-2xl">
                 <tr className="border-b border-border">
-                  <th className="px-6 py-4 font-semibold text-xs uppercase text-muted-foreground">
+                  <th className="px-6 py-4 font-semibold text-sm text-muted">
                     Team Member
                   </th>
-                  <th className="px-4 py-4 text-center font-semibold text-xs uppercase text-muted-foreground">
+                  <th className="px-4 py-4 text-center font-semibold text-sm text-muted">
                     Tasks
                   </th>
-                  <th className="px-4 py-4 text-center font-semibold text-xs uppercase text-muted-foreground">
+                  <th className="px-4 py-4 text-center font-semibold text-sm text-muted">
                     Status Breakdown
                   </th>
-                  <th className="px-4 py-4 text-center font-semibold text-xs uppercase text-muted-foreground">
+                  <th className="px-4 py-4 text-center font-semibold text-sm text-muted">
                     Assigned (h)
                   </th>
-                  <th className="px-4 py-4 text-center font-semibold text-xs uppercase text-muted-foreground">
+                  <th className="px-4 py-4 text-center font-semibold text-sm text-muted">
                     Actual (h)
                   </th>
-                  <th className="px-6 py-4 font-semibold text-xs uppercase text-muted-foreground w-[220px]">
+                  <th className="px-6 py-4 font-semibold text-sm text-muted w-[220px]">
                     Utilization
                   </th>
                 </tr>
@@ -527,7 +527,7 @@ export default function ResourceUtilization({ tasks, epics }: Props) {
                 return (
                   <tbody key={res.userId} className="group">
                     {/* Main row */}
-                    <tr className="border-b border-border/50 hover:bg-secondary/20 transition-colors">
+                    <tr className="border-b border-border bg-background hover:bg-secondary/20 transition-colors">
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
                           <div className="h-10 w-10 rounded-full bg-secondary text-foreground flex items-center justify-center font-bold shrink-0">
@@ -548,23 +548,23 @@ export default function ResourceUtilization({ tasks, epics }: Props) {
                       <td className="px-4 py-4">
                         <div className="flex flex-wrap items-center justify-center gap-1.5">
                           {res.doneTasks > 0 && (
-                            <span className="inline-flex items-center gap-1 text-[12px] px-1.5 py-0.5 rounded bg-green-500/40 text-green-400 font-medium">
-                              {res.doneTasks} done
+                            <span className="inline-flex items-center gap-1 text-[12px] px-1.5 py-0.5 rounded bg-green-500/10 text-green-500 font-medium">
+                              {res.doneTasks} Done
                             </span>
                           )}
                           {res.inProgressTasks > 0 && (
-                            <span className="inline-flex items-center gap-1 text-[12px] px-1.5 py-0.5 rounded bg-blue-500/40 text-blue-400 font-medium">
-                              {res.inProgressTasks} active
+                            <span className="inline-flex items-center gap-1 text-[12px] px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-500 font-medium">
+                              {res.inProgressTasks} Active
                             </span>
                           )}
                           {res.todoTasks > 0 && (
-                            <span className="inline-flex items-center gap-1 text-[12px] px-1.5 py-0.5 rounded bg-slate-500/30 text-slate-300 font-medium">
-                              {res.todoTasks} todo
+                            <span className="inline-flex items-center gap-1 text-[12px] px-1.5 py-0.5 rounded bg-slate-500/10 text-slate-500 font-medium">
+                              {res.todoTasks} Todo
                             </span>
                           )}
                           {res.blockedTasks > 0 && (
-                            <span className="inline-flex items-center gap-1 text-[12px] px-1.5 py-0.5 rounded bg-red-500/40 text-red-400 font-medium">
-                              {res.blockedTasks} blocked
+                            <span className="inline-flex items-center gap-1 text-[12px] px-1.5 py-0.5 rounded bg-red-500/10 text-red-500 font-medium">
+                              {res.blockedTasks} Blocked
                             </span>
                           )}
                         </div>
@@ -585,7 +585,7 @@ export default function ResourceUtilization({ tasks, epics }: Props) {
                               }}
                             />
                           </div>
-                          <span className="font-bold w-12 text-right text-foreground">
+                          <span className="font-bold w-12 text-left text-foreground">
                             {res.utilizationPercentage}%
                           </span>
                         </div>
@@ -597,23 +597,23 @@ export default function ResourceUtilization({ tasks, epics }: Props) {
                       <tr className="border-b border-border/30 hidden group-hover:table-row bg-secondary/10">
                         <td colSpan={6} className="px-6 pb-4 pt-2">
                           <div className="pl-14 pr-4 pt-3">
-                            <p className="text-[11px] uppercase font-bold text-muted-foreground mb-3 flex items-center tracking-wider">
-                              <TrendingUp className="h-3.5 w-3.5 mr-1.5" /> Epic
+                            <p className="text-sm font-bold text-muted mb-3 flex items-center tracking-wider">
+                              <TrendingUp className="h-4 w-4 ml-3 mr-1.5" /> Epic
                               Breakdown
                             </p>
                             <div className="grid grid-cols-2 gap-3 mx-2">
                               {res.epicBreakdown.map((ep) => (
                                 <div
                                   key={ep.epicId}
-                                  className="text-xs border border-border p-3 rounded-lg"
+                                  className="text-sm border border-border p-3 rounded-lg"
                                 >
                                   <div className="flex justify-between items-center mb-2">
-                                    <span className="truncate pr-2 font-semibold text-foreground">
+                                    <span className="truncate pr-2 font-semibold text-muted-foreground">
                                       {ep.epicName}
                                     </span>
                                   </div>
                                   <div className="flex items-center gap-2">
-                                    <div className="flex-1 h-1.5 bg-secondary blue-dark:bg-[#313b4f]  rounded-full overflow-hidden">
+                                    <div className="flex-1 h-1.5 bg-secondary blue-dark:bg-[#313b4f] rounded-full overflow-hidden">
                                       <div
                                         className="h-full bg-primary transition-all"
                                         style={{
