@@ -339,6 +339,8 @@ import ViewTimeLogsModal from "./ViewTimeLogsModal";
 import { toast } from "sonner";
 
 interface EpicComponentProps {
+  projectStartDate?:string;
+  projectEndDate?:string
   epics: EpicType[];
   sprints: Sprint[];
   tasks: Task[];
@@ -370,6 +372,8 @@ const sprintActions: Record<
   CANCELLED: [{ label: "Start Sprint", status: "ACTIVE", icon: Play }],
 };
 export default function Epic({
+  projectStartDate,
+  projectEndDate,
   epics,
   sprints,
   tasks,
@@ -760,6 +764,8 @@ export default function Epic({
         open={!!editEpic}
         epic={editEpic}
         projectId={editEpic?.projectId || ""}
+        projectStartDate={projectStartDate}
+        projectEndDate={projectEndDate}
         onClose={() => setEditEpic(null)}
       />
       <AddSprintModal
