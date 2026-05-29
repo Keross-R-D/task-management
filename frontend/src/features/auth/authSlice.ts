@@ -1,6 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import type { RootState } from "@/app/store";
+import { appPath } from "@/utils/basePath";
 
 export interface TokenResponse {
   accessToken: string;
@@ -109,7 +110,7 @@ const authSlice = createSlice({
 
       state.isAuthenticated = false;
 
-      window.location.href = "/login";
+      window.location.href = appPath("/login");
     },
   },
 });

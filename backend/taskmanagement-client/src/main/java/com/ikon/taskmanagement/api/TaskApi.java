@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestHeader;
 
 import java.util.List;
 import java.util.UUID;
@@ -17,37 +18,37 @@ public interface TaskApi {
 
     @Operation(summary = "Create a new task")
     @PostMapping
-    ResponseEntity<TaskResponseDto> createTask(@RequestBody TaskRequestDto dto);
+    ResponseEntity<TaskResponseDto> createTask(@RequestHeader("Authorization") String accessToken, @RequestBody TaskRequestDto dto);
 
     @Operation(summary = "Fetch tasks by Project ID")
     @GetMapping("/project/{projectId}")
-    ResponseEntity<List<TaskResponseDto>> getTasksByProjectId(@PathVariable("projectId") UUID projectId);
+    ResponseEntity<List<TaskResponseDto>> getTasksByProjectId(@RequestHeader("Authorization") String accessToken, @PathVariable("projectId") UUID projectId);
 
     @Operation(summary = "Fetch tasks by Epic ID")
     @GetMapping("/epic/{epicId}")
-    ResponseEntity<List<TaskResponseDto>> getTasksByEpicId(@PathVariable("epicId") UUID epicId);
+    ResponseEntity<List<TaskResponseDto>> getTasksByEpicId(@RequestHeader("Authorization") String accessToken, @PathVariable("epicId") UUID epicId);
 
     @Operation(summary = "Fetch tasks by Sprint ID")
     @GetMapping("/sprint/{sprintId}")
-    ResponseEntity<List<TaskResponseDto>> getTasksBySprintId(@PathVariable("sprintId") UUID sprintId);
+    ResponseEntity<List<TaskResponseDto>> getTasksBySprintId(@RequestHeader("Authorization") String accessToken, @PathVariable("sprintId") UUID sprintId);
 
     @Operation(summary = "Fetch project backlog (tasks unassigned to sprint)")
     @GetMapping("/project/{projectId}/backlog")
-    ResponseEntity<List<TaskResponseDto>> getProjectBacklog(@PathVariable("projectId") UUID projectId);
+    ResponseEntity<List<TaskResponseDto>> getProjectBacklog(@RequestHeader("Authorization") String accessToken, @PathVariable("projectId") UUID projectId);
 
     @Operation(summary = "Fetch task by ID")
     @GetMapping("/{id}")
-    ResponseEntity<TaskResponseDto> getTaskById(@PathVariable("id") UUID id);
+    ResponseEntity<TaskResponseDto> getTaskById(@RequestHeader("Authorization") String accessToken, @PathVariable("id") UUID id);
 
     @Operation(summary = "Update an existing task")
     @PutMapping("/{id}")
-    ResponseEntity<TaskResponseDto> updateTask(@PathVariable("id") UUID id, @RequestBody TaskRequestDto dto);
+    ResponseEntity<TaskResponseDto> updateTask(@RequestHeader("Authorization") String accessToken, @PathVariable("id") UUID id, @RequestBody TaskRequestDto dto);
 
     @Operation(summary = "Delete task by ID")
     @DeleteMapping("/{id}")
-    ResponseEntity<Void> deleteTask(@PathVariable("id") UUID id);
+    ResponseEntity<Void> deleteTask(@RequestHeader("Authorization") String accessToken, @PathVariable("id") UUID id);
 
     @Operation(summary = "Update task status")
     @PatchMapping("/{id}/status")
-    ResponseEntity<TaskResponseDto> patchTaskStatus(@PathVariable("id") UUID id, @RequestBody UpdateTaskStatusDto dto);
+    ResponseEntity<TaskResponseDto> patchTaskStatus(@RequestHeader("Authorization") String accessToken, @PathVariable("id") UUID id, @RequestBody UpdateTaskStatusDto dto);
 }
