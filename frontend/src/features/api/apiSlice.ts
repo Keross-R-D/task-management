@@ -1,13 +1,21 @@
-import { createApi } from '@reduxjs/toolkit/query/react';
-import { axiosBaseQueryWithReauth } from './axiosBaseQuery';
+import { createApi } from "@reduxjs/toolkit/query/react";
+import { axiosBaseQuery } from "./axiosBaseQuery";
 
-// Configure base query and inject endpoints later to avoid circular dependencies
+// The library's axiosInstance handles token attach/refresh/logout,
+// so we use the simple axiosBaseQuery (no reauth wrapper needed).
 export const apiSlice = createApi({
-  reducerPath: 'api',
-  baseQuery: axiosBaseQueryWithReauth({
+  reducerPath: "api",
+  baseQuery: axiosBaseQuery({
     baseUrl: import.meta.env.VITE_API_BASE_URL,
   }),
-  tagTypes: ['Project', 'Task', 'Epic', 'Sprint', 'Worklog', 'MyTask', 'MyTaskWorklog'],
+  tagTypes: [
+    "Project",
+    "Task",
+    "Epic",
+    "Sprint",
+    "Worklog",
+    "MyTask",
+    "MyTaskWorklog",
+  ],
   endpoints: () => ({}),
 });
-

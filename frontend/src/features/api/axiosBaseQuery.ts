@@ -2,8 +2,6 @@ import type { BaseQueryFn } from "@reduxjs/toolkit/query";
 import { AxiosError } from "axios";
 import type { AxiosRequestConfig } from "axios";
 import { axiosInstance } from "./axiosInstance";
-import { logout } from "../auth/authSlice";
-import type { AuthState } from "../auth/authSlice";
 
 export interface AxiosBaseQueryArgs {
   apiUrl: string;
@@ -15,6 +13,12 @@ export interface AxiosBaseQueryError {
   data: unknown | string;
 }
 
+/**
+ * RTK Query base query adapter for the shared axiosInstance.
+ *
+ * Token management (attach, refresh, logout) is fully handled by the
+ * library's interceptors — no reauth wrapper needed here.
+ */
 export function axiosBaseQuery(
   { baseUrl }: { baseUrl: string } = { baseUrl: "" },
 ): BaseQueryFn<AxiosBaseQueryArgs, unknown, AxiosBaseQueryError> {
@@ -46,96 +50,5 @@ export function axiosBaseQuery(
         },
       };
     }
-  };
-}
-
-let refreshTokenPromise: Promise<string | null> | null = null;
-
-export function axiosBaseQueryWithReauth(
-  { baseUrl }: { baseUrl: string } = { baseUrl: "" },
-): BaseQueryFn<AxiosBaseQueryArgs, unknown, AxiosBaseQueryError> {
-  return async (args, api, extraOptions) => {
-    const axiosBaseQueryFn = axiosBaseQuery({ baseUrl });
-    const state = api.getState() as { auth: AuthState };
-    const token = state?.auth?.token?.accessToken;
-
-    const configWithAuth = {
-      ...args.config,
-      headers: {
-        ...args.config?.headers,
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      },
-    };
-    const argsWithAuth = { ...args, config: configWithAuth };
-
-    let result = await axiosBaseQueryFn(argsWithAuth, api, extraOptions);
-
-    if (result.error?.status === 401) {
-      if (args.apiUrl.includes("refresh-token")) {
-        api.dispatch(logout());
-        return result;
-      }
-
-      const refreshToken = state?.auth?.token?.refreshToken;
-
-      if (!refreshToken) {
-        api.dispatch(logout());
-        return result;
-      }
-
-      refreshTokenPromise ??= (async () => {
-        try {
-          const response = await fetch(
-            `${import.meta.env.VITE_IKON_API_URL}/platform/auth/refresh-token`,
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ refreshToken }),
-            },
-          );
-
-          if (!response.ok) throw new Error("Refresh failed");
-
-          const refreshResult = await response.json();
-          const newAccessToken = refreshResult?.accessToken;
-
-          if (!newAccessToken) {
-            console.warn("No access token in refresh response:", refreshResult);
-            return null;
-          }
-
-          api.dispatch({ type: "auth/setToken", payload: refreshResult });
-          return newAccessToken;
-        } catch (error) {
-          console.error("Token refresh failed:", error);
-          api.dispatch(logout());
-          return null;
-        } finally {
-          refreshTokenPromise = null;
-        }
-      })();
-
-      const newAccessToken = await refreshTokenPromise;
-
-      if (!newAccessToken) {
-        return result;
-      }
-
-      const retryConfig = {
-        ...args.config,
-        headers: {
-          ...args.config?.headers,
-          Authorization: `Bearer ${newAccessToken}`,
-        },
-      };
-
-      result = await axiosBaseQueryFn(
-        { ...args, config: retryConfig },
-        api,
-        extraOptions,
-      );
-    }
-
-    return result;
   };
 }

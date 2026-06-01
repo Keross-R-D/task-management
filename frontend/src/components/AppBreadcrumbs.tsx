@@ -38,8 +38,8 @@ export const AppBreadcrumbs: React.FC = () => {
     }
     const pathnames = pathname.split("/").filter(Boolean);
 
-    // Don't show breadcrumbs if we're at a top-level page (e.g. /dashboard)
-    if (pathnames.length <= 1) return [];
+    // Don't show breadcrumbs if we're at the root (no segments)
+    if (pathnames.length < 1) return [];
 
     return pathnames.map((segment, index) => {
       const href = appPath(`/${pathnames.slice(0, index + 1).join("/")}`);
