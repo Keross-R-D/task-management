@@ -355,21 +355,21 @@ const ProjectStatusDetailPage: React.FC = () => {
 const projectEndDate = project?.endDate;
 
 const normalizedMinDate = React.useMemo(() => {
-  if (!projectStartDate) return undefined;
+    if (!projectStartDate) return undefined;
 
-  const d = new Date(projectStartDate);
-  d.setHours(0, 0, 0, 0);
+    const d = new Date(projectStartDate);
+    d.setHours(0, 0, 0, 0);
 
-  return d;
+    return d;
 }, [projectStartDate]);
 
 const normalizedMaxDate = React.useMemo(() => {
-  if (!projectEndDate) return undefined;
+    if (!projectEndDate) return undefined;
 
-  const d = new Date(projectEndDate);
-  d.setHours(23, 59, 59, 999);
+    const d = new Date(projectEndDate);
+    d.setHours(23, 59, 59, 999);
 
-  return d;
+    return d;
 }, [projectEndDate]);
 
     // ── Task date helper ──────────────────────────────────────────────────────
@@ -550,59 +550,59 @@ const normalizedMaxDate = React.useMemo(() => {
                             </span>
                         </CardHeader>
 
-            <CardContent className="space-y-3 text-sm">
-              <p className="flex items-center gap-2">
-                <span className="flex items-center gap-1 font-semibold text-muted-foreground">
-                  <FolderKanban className="h-4 font-semibold text-muted-foreground" /> Project:
-                </span>
-                <span className="font-semibold">{computedData.projectName}</span>
-              </p>
+                        <CardContent className="space-y-3 text-sm">
+                            <p className="flex items-center gap-2">
+                                <span className="flex items-center gap-1 font-semibold text-muted-foreground">
+                                <FolderKanban className="h-4 font-semibold text-muted-foreground" /> Project:
+                                </span>
+                                <span className="font-semibold">{computedData.projectName}</span>
+                            </p>
 
-              <p className="flex items-center gap-2">
-                <span className="flex items-center gap-1 font-semibold text-muted-foreground">
-                  <Calendar className="h-4 font-semibold text-muted-foreground" /> Start Date:
-                </span>
-                <span className="font-semibold">{formatDate(new Date(computedData.startDate))}</span>
-              </p>
+                            <p className="flex items-center gap-2">
+                                <span className="flex items-center gap-1 font-semibold text-muted-foreground">
+                                <Calendar className="h-4 font-semibold text-muted-foreground" /> Start Date:
+                                </span>
+                                <span className="font-semibold">{formatDate(new Date(computedData.startDate))}</span>
+                            </p>
 
-              <p className="flex items-center gap-2">
-                <span className="flex items-center gap-1 font-semibold text-muted-foreground">
-                  <Calendar className="h-4 font-semibold text-muted-foreground" /> End Date:
-                </span>
-                <span className="font-semibold">{formatDate(new Date(computedData.endDate))}</span>
-              </p>
+                            <p className="flex items-center gap-2">
+                                <span className="flex items-center gap-1 font-semibold text-muted-foreground">
+                                <Calendar className="h-4 font-semibold text-muted-foreground" /> End Date:
+                                </span>
+                                <span className="font-semibold">{formatDate(new Date(computedData.endDate))}</span>
+                            </p>
 
-              <p className="flex items-center gap-2">
-                <span className="flex items-center gap-1 font-semibold text-muted-foreground">
-                  <User className="h-4 font-semibold text-muted-foreground" />Manager:
-                </span>
-                <span className="font-semibold">
-                  {computedData.managerName || "Unassigned"}
-                </span>
-              </p>
+                            <p className="flex items-center gap-2">
+                                <span className="flex items-center gap-1 font-semibold text-muted-foreground">
+                                <User className="h-4 font-semibold text-muted-foreground" />Manager:
+                                </span>
+                                <span className="font-semibold">
+                                {computedData.managerName || "Unassigned"}
+                                </span>
+                            </p>
 
-              <p className="flex items-center gap-2">
-                <span className="flex items-center gap-1 font-semibold text-muted-foreground">
-                  <ChartColumn className="h-4 font-semibold text-muted-foreground" />Status:
-                </span>
-                <span className="text-sm font-semibold bg-muted w-fit px-2 py-0.5 rounded-2xl text-muted">
-                  {computedData.status.replace("_", " ")}
-                </span>
-              </p>
+                            <p className="flex items-center gap-2">
+                                <span className="flex items-center gap-1 font-semibold text-muted-foreground">
+                                <ChartColumn className="h-4 font-semibold text-muted-foreground" />Status:
+                                </span>
+                                <span className="text-sm font-semibold bg-muted w-fit px-2 py-0.5 rounded-2xl text-muted">
+                                {computedData.status.replace("_", " ")}
+                                </span>
+                            </p>
 
-              <p className="flex items-center gap-2">
-                <span className="flex items-center gap-1 font-semibold text-muted-foreground">
-                  <Target className="h-4 font-semibold text-muted-foreground" />Progress:
-                </span>
-                <span className="font-semibold text-green-500">{computedData.progress}%</span>
-              </p>
+                            <p className="flex items-center gap-2">
+                                <span className="flex items-center gap-1 font-semibold text-muted-foreground">
+                                <Target className="h-4 font-semibold text-muted-foreground" />Progress:
+                                </span>
+                                <span className="font-semibold text-green-500">{computedData.progress}%</span>
+                            </p>
 
-              <div className="flex items-center gap-2">
-                <span className="flex items-center gap-1 font-semibold text-muted-foreground">
-                  <Clock className="h-4 font-semibold text-muted-foreground" />Hours:
-                </span>
-                <span className="font-semibold">{computedData.actualHours}h / {computedData.estimatedHours}h</span>
-              </div>
+                            <div className="flex items-center gap-2">
+                                <span className="flex items-center gap-1 font-semibold text-muted-foreground">
+                                <Clock className="h-4 font-semibold text-muted-foreground" />Hours:
+                                </span>
+                                <span className="font-semibold">{computedData.actualHours}h / {computedData.estimatedHours}h</span>
+                            </div>
 
                             <div className="pt-2">
                                 <hr />

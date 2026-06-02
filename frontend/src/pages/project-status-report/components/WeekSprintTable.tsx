@@ -67,10 +67,7 @@ const WeekSprintTable: React.FC<Props> = ({ title, data }) => {
         </Table>
 
         {/* Scrollable body */}
-        <div
-          className="max-h-[260px] overflow-y-auto"
-          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-        >
+        <div className="max-h-[260px] overflow-y-auto custom-scrollbar">
           <style>{`div::-webkit-scrollbar { display: none; }`}</style>
           <Table className="w-full">
             <TableBody>

@@ -69,9 +69,9 @@ export default function SearchAndFilter({
       </div>
 
       {/* STATUS */}
-      <div className="flex items-center w-40 gap-2 ps-2 border rounded-lg">
-        <Filter className="text-lg font-bold" />
-        <div className="flex-1">
+      <div className="relative">
+        <Filter className="absolute left-3 top-2.5 h-4 w-4" />
+        <div className="[&>button]:pl-10!">
           <ComboboxInput
             placeholder="All Status"
             items={statusItems}

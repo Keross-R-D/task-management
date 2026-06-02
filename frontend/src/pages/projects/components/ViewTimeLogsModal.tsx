@@ -81,8 +81,36 @@ export default function ViewTimeLogsModal({
 
       // If there are no more dates remaining in this worklog, delete the entire worklog
       if (Object.keys(updatedDist).length === 0) {
-        await deleteWorklog({ id: log.worklogId, taskId: task!.id }).unwrap();
-        toast.success("Time log removed.");
+        toast.warning("Delete Task workLog?", {
+          description: "This action will permanently delete this Task WorkLog.",
+
+          action: {
+            label: "Delete",
+
+            onClick: async () => {
+              try {
+                await deleteWorklog({
+                  id: log.worklogId,
+                  taskId: task!.id,
+                }).unwrap();
+              } catch (err) {
+                console.error("Failed to delete worklog", err);
+              }
+            },
+          },
+
+          cancel: {
+            label: "Cancel",
+            onClick: () => {},
+          },
+
+          className: "border border-red-500/30",
+
+          actionButtonStyle: {
+            backgroundColor: "#dc2626",
+            color: "white",
+          },
+        });
       } else {
         // Otherwise update the worklog with the date removed
         await updateWorklog({
@@ -90,11 +118,9 @@ export default function ViewTimeLogsModal({
           taskId: task!.id,
           hoursDistribution: updatedDist,
         }).unwrap();
-        toast.success("Time log updated.");
       }
     } catch (err) {
       console.error("Failed to delete time log: ", err);
-      toast.error("Failed to remove time log.");
     }
   };
 
@@ -117,9 +143,7 @@ export default function ViewTimeLogsModal({
               <span className="text-xs text-gray-400 font-medium tracking-wide">
                 Estimated
               </span>
-              <span className="text-xl font-bold mt-1">
-                {estimated}h
-              </span>
+              <span className="text-xl font-bold mt-1">{estimated}h</span>
             </div>
             <div className="flex flex-col items-center justify-center p-4 rounded-xl border">
               <span className="text-xs text-indigo-400 font-medium tracking-wide">
@@ -156,7 +180,8 @@ export default function ViewTimeLogsModal({
           {/* Entries List */}
           <div className="space-y-3 mt-4">
             <div className="text-sm text-gray-400 font-medium">
-              {flattenedLogs.length} {flattenedLogs.length === 1 ? "entry" : "entries"}
+              {flattenedLogs.length}{" "}
+              {flattenedLogs.length === 1 ? "entry" : "entries"}
             </div>
 
             {isLoading ? (
@@ -187,9 +212,7 @@ export default function ViewTimeLogsModal({
                     >
                       <div className="flex justify-between items-start">
                         <div className="flex items-center gap-2">
-                          <span className="font-bold">
-                            {log.hours}h
-                          </span>
+                          <span className="font-bold">{log.hours}h</span>
                           <span className="text-sm text-gray-500">
                             on {displayDate}
                           </span>
@@ -222,11 +245,7 @@ export default function ViewTimeLogsModal({
 
           {/* Action Footer */}
           <div className="flex justify-end items-center gap-3 pt-4 border-t border-gray-800 mt-2">
-            <Button
-              variant="ghost"
-              className= "border"
-              onClick={onClose}
-            >
+            <Button variant="ghost" className="border" onClick={onClose}>
               Close
             </Button>
             <Button
