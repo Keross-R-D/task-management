@@ -166,7 +166,7 @@ export default function Backlog({ tasks }: BacklogProps) {
             className="rounded-xl overflow-hidden group"
           >
             {/* BACKLOG HEADER */}
-            <AccordionTrigger className=" hover:no-underline hover:bg-[#272b2f]/50 px-3 py-3 [&[data-state]>svg]:hidden">
+            <AccordionTrigger className=" hover:no-underline hover:bg-muted px-3 py-3 [&[data-state]>svg]:hidden">
               <div className="flex items-center justify-between w-full min-w-0 cursor-pointer">
                 {/* LEFT */}
                 <div className="flex items-center gap-3 min-w-0">

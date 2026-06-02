@@ -33,7 +33,7 @@ createRoot(document.getElementById("root")!).render(
       ) : (
         <ProviderWrapper>
           <App />
-          <Toaster richColors={true} position="top-center" />
+          <Toaster richColors={true} position="bottom-right" />
         </ProviderWrapper>
       )}
     </Provider>

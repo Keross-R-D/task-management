@@ -82,30 +82,52 @@ export default function ViewMyTaskTimeLogsModal({
             : 0;
 
     const handleDeleteLog = async (log: FlattenedLog) => {
-        try {
-            const updatedDist = { ...log.originalWorklog.hoursDistribution };
-            delete updatedDist[log.date];
+      try {
+        const updatedDist = { ...log.originalWorklog.hoursDistribution };
+        delete updatedDist[log.date];
 
-            if (Object.keys(updatedDist).length === 0) {
-                await deleteWorklog({
+        if (Object.keys(updatedDist).length === 0) {
+          toast.warning("Delete MyTask workLog ?", {
+            description:
+              "This action will permanently delete this myTask WorkLog.",
+
+            action: {
+              label: "Delete",
+
+              onClick: async () => {
+                try {
+                  await deleteWorklog({
                     id: log.worklogId,
                     myTaskId: task!.id,
-                }).unwrap();
+                  }).unwrap();
+                } catch (err) {
+                  console.error("Failed to delete worklog", err);
+                }
+              },
+            },
 
-                toast.success("Time log removed.");
-            } else {
-                await updateWorklog({
-                    id: log.worklogId,
-                    myTaskId: task!.id,
-                    hoursDistribution: updatedDist,
-                }).unwrap();
+            cancel: {
+              label: "Cancel",
+              onClick: () => {},
+            },
 
-                toast.success("Time log updated.");
-            }
-        } catch (err) {
-            console.error("Failed to delete time log: ", err);
-            toast.error("Failed to remove time log.");
+            className: "border border-red-500/30",
+
+            actionButtonStyle: {
+              backgroundColor: "#dc2626",
+              color: "white",
+            },
+          });
+        } else {
+          await updateWorklog({
+            id: log.worklogId,
+            myTaskId: task!.id,
+            hoursDistribution: updatedDist,
+          }).unwrap();
         }
+      } catch (err) {
+        console.error("Failed to delete time log: ", err);
+      }
     };
 
     return (

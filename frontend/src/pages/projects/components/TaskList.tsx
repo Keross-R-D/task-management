@@ -13,6 +13,8 @@ interface TaskListProps {
   epics: EpicType[];
   sprints: Sprint[];
   tasks: Task[];
+  projectStartDate?: string;
+  projectEndDate?: string;
   backlogTasks: Task[];
 }
 
@@ -26,7 +28,7 @@ const DEFAULT_FILTERS: FilterState = {
 
 
 
-const TaskList = ({ epics, sprints, tasks, backlogTasks }: TaskListProps) => {
+const TaskList = ({ epics, sprints, tasks, backlogTasks,projectEndDate,projectStartDate }: TaskListProps) => {
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
 
   const isFiltering =
@@ -84,6 +86,8 @@ const filteredBacklog = useMemo(
       <SearchAndFilter filters={filters} onChange={setFilters} />
 
       <Epic
+        projectStartDate={projectStartDate}
+        projectEndDate={projectEndDate}
         epics={filteredEpics}
         sprints={filteredSprints}
         tasks={filteredTasks}
