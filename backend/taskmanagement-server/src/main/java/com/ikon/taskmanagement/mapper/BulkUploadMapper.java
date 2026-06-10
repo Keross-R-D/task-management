@@ -1,15 +1,12 @@
 package com.ikon.taskmanagement.mapper;
 
 import com.ikon.taskmanagement.dto.request.BulkTaskUploadRequestDto;
-import com.ikon.taskmanagement.dto.request.EpicRequestDto;
 import com.ikon.taskmanagement.dto.request.SprintRequestDto;
 import com.ikon.taskmanagement.dto.request.TaskRequestDto;
-import com.ikon.taskmanagement.entity.Epic;
 import com.ikon.taskmanagement.entity.Sprint;
 import com.ikon.taskmanagement.entity.Task;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import com.ikon.taskmanagement.enums.EpicStatus;
 import com.ikon.taskmanagement.enums.SprintStatus;
 import com.ikon.taskmanagement.enums.TaskStatus;
 
@@ -19,28 +16,8 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class BulkUploadMapper {
 
-    // Reuse existing mappers — no duplicate logic
-    private final EpicMapper epicMapper;
     private final SprintMapper sprintMapper;
     private final TaskMapper taskMapper;
-
-    public EpicRequestDto toEpicRequestDto(BulkTaskUploadRequestDto row) {
-        EpicRequestDto dto = new EpicRequestDto();
-        dto.setProjectId(row.getProjectId());
-        dto.setName(row.getEpicName().trim());
-        dto.setDescription(row.getEpicDescription());
-        dto.setStatus(
-                row.getEpicStatus() != null
-                        ? EpicStatus.valueOf(row.getEpicStatus().toUpperCase())
-                        : EpicStatus.ACTIVE);
-        dto.setStartDate(row.getEpicStartDate()); // epicStartDate → Epic.startDate
-        dto.setEndDate(row.getEpicEndDate()); // epicEndDate → Epic.endDate
-        return dto;
-    }
-
-    public Epic toEpicEntity(BulkTaskUploadRequestDto row) {
-        return epicMapper.mapToEntity(toEpicRequestDto(row));
-    }
 
     public SprintRequestDto toSprintRequestDto(BulkTaskUploadRequestDto row, UUID epicId) {
         SprintRequestDto dto = new SprintRequestDto();
