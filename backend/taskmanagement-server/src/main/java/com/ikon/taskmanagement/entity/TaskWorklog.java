@@ -10,6 +10,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -24,12 +25,25 @@ public class TaskWorklog {
     @Column(nullable = false)
     private UUID taskId;
 
+    @Column
+    private UUID assigneeId;
+
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb", nullable = false)
     private Map<String, Double> hoursDistribution;
 
     @Column(columnDefinition = "TEXT")
     private String description;
+
+    @ElementCollection
+    @CollectionTable(name = "taskworklog_read_groups", joinColumns = @JoinColumn(name = "taskworklog_id"))
+    @Column(name = "group_name")
+    private Set<String> readGroups;
+
+    @ElementCollection
+    @CollectionTable(name = "taskworklog_write_groups", joinColumns = @JoinColumn(name = "taskworklog_id"))
+    @Column(name = "group_name")
+    private Set<String> writeGroups;
 
     @CreatedDate
     @Column(updatable = false)

@@ -14,6 +14,7 @@ import com.ikon.taskmanagement.enums.ProjectStatus;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -32,6 +33,10 @@ public class Project {
 
     @Column
     private String clientName;
+
+    @Column
+    @JdbcTypeCode(SqlTypes.UUID)
+    private UUID accountId;
 
     @Column
     @JdbcTypeCode(SqlTypes.UUID)
@@ -59,6 +64,16 @@ public class Project {
     @Column(name = "team_member_id")
     @JdbcTypeCode(SqlTypes.UUID)
     private List<UUID> teamMemberIds;
+
+    @ElementCollection
+    @CollectionTable(name = "project_dynamic_groups", joinColumns = @JoinColumn(name = "project_id"))
+    @Column(name = "group_name")
+    private Set<String> dynamicGroups;
+
+    @ElementCollection
+    @CollectionTable(name = "project_write_groups", joinColumns = @JoinColumn(name = "project_id"))
+    @Column(name = "group_name")
+    private Set<String> writeGroups;
 
     @CreatedDate
     @Column(updatable = false)

@@ -134,6 +134,9 @@ spring:
 # IKON Platform Configurations
 # =============================
 ikon:
+  dac:
+    enabled: true
+    bypass-roles: [PLATFORM_ADMIN, SUPER_ADMIN]
   user:
     agent: "IKON App Server"
   platform:

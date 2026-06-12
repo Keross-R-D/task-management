@@ -10,6 +10,7 @@ import com.ikon.taskmanagement.enums.EpicStatus;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -39,6 +40,16 @@ public class Epic {
 
     @Column
     private LocalDate endDate;
+
+    @ElementCollection
+    @CollectionTable(name = "epic_read_groups", joinColumns = @JoinColumn(name = "epic_id"))
+    @Column(name = "group_name")
+    private Set<String> readGroups;
+
+    @ElementCollection
+    @CollectionTable(name = "epic_write_groups", joinColumns = @JoinColumn(name = "epic_id"))
+    @Column(name = "group_name")
+    private Set<String> writeGroups;
 
     @CreatedDate
     @Column(updatable = false)

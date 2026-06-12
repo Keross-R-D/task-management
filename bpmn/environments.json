@@ -2,7 +2,7 @@
   {
     "envName": "local",
     "applicationUrl": "http://localhost:8071",
-    "authUrl": "https://holocron.keross.com/api/platform",
+    "authUrl": "https://holocron.keross.com/api",
     "jobUrl": "http://localhost:8083"
   }
 ]

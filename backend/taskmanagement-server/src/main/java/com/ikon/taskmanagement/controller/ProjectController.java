@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import java.util.List;
 import java.util.UUID;
 
+import com.ikon.dac.annotation.RequireRole;
+
 @RestController
 public class ProjectController implements ProjectApi {
 
@@ -22,7 +24,9 @@ public class ProjectController implements ProjectApi {
     }
 
     @Override
-    public ResponseEntity<ProjectResponseDto> createProject(@RequestHeader("Authorization") String accessToken, ProjectRequestDto projectDto) {
+    @RequireRole("Task Manager")
+    public ResponseEntity<ProjectResponseDto> createProject(@RequestHeader("Authorization") String accessToken,
+            ProjectRequestDto projectDto) {
         return new ResponseEntity<>(projectService.createProject(projectDto), HttpStatus.CREATED);
     }
 
@@ -32,16 +36,20 @@ public class ProjectController implements ProjectApi {
     }
 
     @Override
-    public ResponseEntity<ProjectResponseDto> getProjectById(@RequestHeader("Authorization") String accessToken, UUID id) {
+    public ResponseEntity<ProjectResponseDto> getProjectById(@RequestHeader("Authorization") String accessToken,
+            UUID id) {
         return ResponseEntity.ok(projectService.getProjectById(id));
     }
 
     @Override
-    public ResponseEntity<ProjectResponseDto> updateProject(@RequestHeader("Authorization") String accessToken, UUID id, ProjectRequestDto projectDto) {
+    @RequireRole("Task Manager")
+    public ResponseEntity<ProjectResponseDto> updateProject(@RequestHeader("Authorization") String accessToken, UUID id,
+            ProjectRequestDto projectDto) {
         return ResponseEntity.ok(projectService.updateProject(id, projectDto));
     }
 
     @Override
+    @RequireRole("Task Manager")
     public ResponseEntity<Void> deleteProject(@RequestHeader("Authorization") String accessToken, UUID id) {
         projectService.deleteProject(id);
         return ResponseEntity.noContent().build();

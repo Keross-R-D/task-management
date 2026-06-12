@@ -1,0 +1,729 @@
+
+IKON Dynamic Access Control Library
+ Overview
+ikon-dac is a comprehensive Dynamic Access Control library for Spring Boot applications. It provides data-level security filtering across multiple database technologies including JPA (MySQL, PostgreSQL, Oracle, SQL Server, H2), MongoDB, Elasticsearch, and Cassandra.
+Key Features
+Role-based Access Control (RBAC) - Control method access based on user roles
+Group-based Access Control - Restrict access based on group membership
+Data-level Filtering - Automatic query filtering based on user context
+Multi-tenancy Support - Built-in tenant isolation with account-based filtering
+Multiple Database Support - JPA, MongoDB, Elasticsearch, Cassandra
+AOP-based Annotations - Declarative access control with @RequireRole and @RequireGroup
+Bypass Mechanism - Configurable bypass roles for admin users
+Auto-configuration - Zero-config integration with Spring Boot
+Performance Optimizations - Auto-batching, caching, optimized queries
+Comprehensive Logging - Apache Commons Logging for security auditing
+ Installation
+Maven Dependency
+&lt;dependency&gt;
+    &lt;groupId&gt;com.ikon&lt;/groupId&gt;
+    &lt;artifactId&gt;ikon-dac&lt;/artifactId&gt;
+    &lt;version&gt;${ikon.sdk.version}&lt;/version&gt;
+&lt;/dependency&gt;
+Required Dependencies
+The library requires the following dependencies based on your database:
+Database
+Required Dependency
+JPA (SQL)
+spring-boot-starter-data-jpa
+MongoDB
+spring-boot-starter-data-mongodb
+Elasticsearch
+spring-boot-starter-data-elasticsearch
+Cassandra
+spring-boot-starter-data-cassandra
+Integration Dependencies
+For automatic integration with IKON platform:
+&lt;dependency&gt;
+    &lt;groupId&gt;com.ikon&lt;/groupId&gt;
+    &lt;artifactId&gt;ikon-sdk&lt;/artifactId&gt;
+    &lt;version&gt;${ikon.sdk.version}&lt;/version&gt;
+&lt;/dependency&gt;
+
+OR
+&lt;dependency&gt;
+    &lt;groupId&gt;com.ikon&lt;/groupId&gt;
+    &lt;artifactId&gt;ikon-app-access-management&lt;/artifactId&gt;
+    &lt;version&gt;${ikon.sdk.version}&lt;/version&gt;
+&lt;/dependency&gt;
+
+&lt;dependency&gt;
+    &lt;groupId&gt;com.ikon&lt;/groupId&gt;
+    &lt;artifactId&gt;ikon-webservice&lt;/artifactId&gt;
+    &lt;version&gt;${ikon.sdk.version}&lt;/version&gt;
+&lt;/dependency&gt;
+
+ Configuration
+Application Properties
+ikon:
+  dac:
+    # Enable/disable DAC (default: true)
+    enabled: true
+    
+    # Roles that bypass all access checks (e.g., super admin)
+    bypass-roles:
+      - SUPER_ADMIN
+      - PLATFORM_ADMIN
+    
+    # Default batch size for IN clause operations (default: 500)
+    default-batch-size: 500
+Configuration Properties
+@ConfigurationProperties(prefix = &quot;ikon.dac&quot;)
+public class DacProperties {
+    
+    // Enable or disable access control (default: true)
+    private boolean enabled = true;
+
+    // Roles that bypass access checks (platform roles from JWT/token)
+    private String[] bypassRoles = new String[0];
+
+    // Default batch size for IN clause operations (default: 500)
+    private int defaultBatchSize = 500;
+}
+ Usage Examples
+Quick examples to get started with ikon-dac in a Spring Boot service.
+By default, the system uses IkonAccessContextProvider when running on IKON, so no additional implementation is required.
+If you do not want to use IkonAccessContextProvider, then you need to provide your own implementation of AccessContextProvider:
+@Component
+public class MyAccessContextProvider implements AccessContextProvider {
+    @Override
+    public UUID getCurrentUserId() { /* extract from security context / token */ }
+    @Override
+    public UUID getCurrentAccountId() { /* extract tenant id */ }
+    @Override
+    public Set&lt;String&gt; getCurrentUserGroups() { /* group names */ }
+    @Override
+    public Set&lt;String&gt; getCurrentUserRoles() { /* app roles */ }
+    @Override
+    public Set&lt;String&gt; getCurrentUserPlatformRoles() { /* platform roles */ }
+}
+Autowire and use DataAccessFilter in your services:
+@Service
+public class ProductService {
+    private final DataAccessFilter filter;
+
+    public ProductService(DataAccessFilter filter) {
+        this.filter = filter;
+    }
+
+    public List&lt;Product&gt; findForCustomer(UUID customerId) {
+        AccessCriteria criteria = AccessCriteria.defaults();
+        return filter.findByField(Product.class, &quot;customerId&quot;, customerId, criteria);
+    }
+
+    public boolean canAccessProduct(UUID productId) {
+        return filter.isAccessible(Product.class, productId, AccessCriteria.defaults());
+    }
+}
+Use findByFieldIn for large collections (auto-batching reduces DB limits):
+List&lt;Product&gt; products = filter.findByFieldIn(Product.class, &quot;id&quot;, hugeIdList, AccessCriteria.defaults());
+Method-level checks and programmatic checks with AccessChecker:
+@Autowired AccessChecker accessChecker;
+if (accessChecker.hasRole(&quot;ADMIN&quot;) || accessChecker.isOwner(entityOwnerId)) {
+    // permitted
+}
+Example application.yml settings:
+ikon:
+  dac:
+    enabled: true
+    bypass-roles: [PLATFORM_ADMIN, SUPER_ADMIN]
+    default-batch-size: 500
+
+Quick start summary:
+Add the ikon-dac dependency
+Provide an AccessContextProvider (or use IKON integration)
+Autowire DataAccessFilter / AccessChecker and call the filtering methods
+
+ Architecture
+Package Structure
+com.ikon.dac
++-- annotation/          # AOP annotations for method-level access control
+¦   +-- AccessControlAspect.java
+¦   +-- RequireRole.java
+¦   +-- RequireGroup.java
++-- config/              # Auto-configuration and properties
+¦   +-- DacAutoConfiguration.java
+¦   +-- DacProperties.java
+¦   +-- DacRequestFilter.java
++-- core/                # Core access control interfaces and classes
+¦   +-- AbstractDataAccessFilter.java
+¦   +-- AccessChecker.java
+¦   +-- AccessContext.java
+¦   +-- AccessContextHolder.java
+¦   +-- AccessContextProvider.java
+¦   +-- AccessCriteria.java
+¦   +-- AccessDeniedException.java
+¦   +-- DataAccessFilter.java
++-- filter/              # Database-specific filter implementations
+¦   +-- cassandra/CassandraAccessFilter.java
+¦   +-- elasticsearch/ElasticAccessFilter.java
+¦   +-- jpa/JpaAccessFilter.java
+¦   +-- mongo/MongoAccessFilter.java
++-- integration/         # IKON platform integration
+    +-- IkonAccessContextProvider.java
+    +-- IkonAccessContextProviderAutoConfiguration.java
+
+
+
+
+
+Component Diagram
++-------------------------------------------------------------------------+
+¦                        IKON DAC Library                                 ¦
++-------------------------------------------------------------------------¦
+¦                                                                         ¦
+¦  +-----------------+    +-----------------+    +---------------------+  ¦
+¦  ¦  Annotations    ¦    ¦  Access Checker ¦    ¦  Access Context     ¦  ¦
+¦  ¦  @RequireRole   ¦---?¦   canBypass()  ¦?---¦    Provider         ¦  ¦
+¦  ¦  @RequireGroup  ¦    ¦   hasRole()     ¦    ¦  getCurrentUserId() ¦  ¦
+¦  +-----------------+    ¦   hasGroup()    ¦    ¦  getCurrentRoles()  ¦  ¦
+¦         ¦               +-----------------+    +---------------------+  ¦
+¦         ¦                       ¦                                       ¦
+¦         ?                       ?                                       ¦
+¦  +-----------------+    +---------------------------------------------+ ¦
+¦  ¦ AccessControl   ¦    ¦            Data Access Filters              ¦ ¦
+¦  ¦    Aspect       ¦    +---------------------------------------------¦ ¦
+¦  ¦  (AOP Advice)   ¦    ¦ +-----------+ +-----------+ +------------+  ¦ |
+¦  +-----------------+    ¦ ¦    JPA    ¦ ¦  MongoDB  ¦ ¦Elasticsearch¦ ¦ ¦
+¦                         ¦ ¦  Filter   ¦ ¦   Filter  ¦ ¦   Filter    ¦ ¦ |
+¦                         ¦ +-----------+ +-----------+ +------------+  ¦ |
+¦                         ¦               +------------+                ¦ ¦
+¦                         ¦               ¦ Cassandra  ¦                ¦ ¦
+¦                         ¦               ¦   Filter   ¦                ¦ ¦
+¦                         ¦               +------------+                ¦ ¦
+¦                         +---------------------------------------------+ ¦
+¦                                                                         ¦
++-------------------------------------------------------------------------+
+
+ Core Components
+1. AccessContext
+Immutable context containing the current user's access information. Built fresh on each request.
+@Getter
+@Builder
+public class AccessContext {
+    private final UUID userId;              // Owner-based access checks
+    private final UUID accountId;           // Tenant isolation
+    private final Set&lt;String&gt; groups;       // User's group names
+    private final Set&lt;String&gt; roles;        // Application roles
+    private final Set&lt;String&gt; platformRoles; // Platform-level roles for bypass
+    
+    // Role/Group check methods
+    boolean hasRole(String role);
+    boolean hasAnyRole(Set&lt;String&gt; roles);
+    boolean hasAllRoles(Set&lt;String&gt; roles);
+    boolean hasGroup(String group);
+    boolean hasAnyGroup(Set&lt;String&gt; groups);
+    boolean hasAllGroups(Set&lt;String&gt; groups);
+    boolean hasPlatformRole(String role);
+}
+2. AccessContextProvider
+Interface to provide the current user's access context. Implement this in your microservice to integrate with your security system.
+public interface AccessContextProvider {
+    UUID getCurrentUserId();
+    UUID getCurrentAccountId();
+    Set&lt;String&gt; getCurrentUserGroups();
+    Set&lt;String&gt; getCurrentUserRoles();
+    Set&lt;String&gt; getCurrentUserPlatformRoles();
+    
+    // Default method builds AccessContext from above methods
+    default AccessContext getContext() { ... }
+}
+3. AccessChecker
+Core access checker for role, group, and owner-based access control.
+@Component
+public class AccessChecker {
+    
+    // Bypass check (uses ThreadLocal caching for performance)
+    boolean canBypass();
+    
+    // Role checks
+    boolean hasRole(String role);
+    boolean hasAnyRole(String... roles);
+    boolean hasAllRoles(String... roles);
+    
+    // Group checks
+    boolean hasGroup(String group);
+    boolean hasAnyGroup(String... groups);
+    boolean hasAllGroups(String... groups);
+    
+    // Platform role checks
+    boolean hasPlatformRole(String role);
+    boolean hasAnyPlatformRole(String... roles);
+    boolean hasAllPlatformRoles(String... roles);
+    
+    // Owner checks
+    boolean isOwner(UUID ownerId);
+    boolean inSameAccount(UUID entityAccountId);
+    
+    // Get full context
+    AccessContext getContext();
+    
+    // Clear bypass cache (call at request end)
+    static void clearBypassCache();
+}
+4. AccessCriteria
+Configuration for data access filtering. Specifies which fields to check and what conditions to apply.
+@Getter
+@Builder
+public class AccessCriteria {
+    
+    // Field name mappings (defaults shown)
+    @Builder.Default
+    private String ownerField = &quot;ownerId&quot;;
+    
+    @Builder.Default
+    private String accountField = &quot;accountId&quot;;
+    
+    @Builder.Default
+    private String dynamicGroupsField = &quot;dynamicGroups&quot;;
+    
+    @Builder.Default
+    private String sharedToAllAccountsField = null;
+
+    @Builder.Default
+    private String sharedAccountsField = null;
+
+    /**
+     * Custom filters for data access
+     */
+    @Builder.Default
+    private Map&lt;String, Object&gt; customFilters = Collections.emptyMap();
+
+    // Allowed access specifications
+    private Set&lt;String&gt; allowedRoles;        // Roles allowed to access
+    private Set&lt;String&gt; allowedGroups;       // Groups allowed to access
+    private Set&lt;String&gt; allowedPlatformRoles; // Platform roles for bypass
+    
+    // Skip flags
+    @Builder.Default
+    private boolean skipOwnerCheck = false;
+    
+    @Builder.Default
+    private boolean skipAccountCheck = false;
+    
+    @Builder.Default
+    private boolean skipDynamicGroupCheck = true;
+    
+    // Logic mode
+    @Builder.Default
+    private boolean requireAll = false;  // false=OR, true=AND logic
+    
+    // Factory method for defaults
+    public static AccessCriteria defaults() {
+        return AccessCriteria.builder().build();
+    }
+}
+
+ Performance Features
+Auto-Batching for Large IN Clauses
+All filters automatically batch large collections to prevent database query failures:
+// Handles up to millions of IDs automatically
+List&lt;Product&gt; products = dataAccessFilter.findByFieldIn(
+    Product.class, 
+    &quot;id&quot;, 
+    hugeListOfIds,  // Automatically split into batches of 500
+    AccessCriteria.defaults()
+);
+
+Database IN Clause Limits:
+Oracle: 1000 elements max
+SQL Server: ~2100 parameters max
+MySQL: Limited by max_allowed_packet
+PostgreSQL: No hard limit but performance degrades
+MongoDB: 16MB document limit
+Optimized isAccessible() Check
+Uses COUNT query instead of loading the full entity:
+// Efficient - uses COUNT query
+boolean canAccess = dataAccessFilter.isAccessible(Product.class, productId, criteria);
+Request-Scoped Context Caching
+AccessContextHolder prevents N+1 queries for access context:
+// First call - fetches from database
+AccessContext ctx1 = accessContextProvider.getContext();
+
+// Subsequent calls in same request - returns cached value
+AccessContext ctx2 = accessContextProvider.getContext(); // No DB query
+ThreadLocal Bypass Cache
+Caches bypass status per request thread:
+// First check - evaluates bypass roles
+boolean bypass1 = accessChecker.canBypass();
+
+// Subsequent checks in same request - returns cached value
+boolean bypass2 = accessChecker.canBypass(); // No computation
+Cached Reflection
+Method lookups are cached for fast field access:
+// First call - uses reflection
+Object value1 = getFieldValue(entity, &quot;fieldName&quot;);
+
+// Subsequent calls - uses cached Method object
+Object value2 = getFieldValue(entity, &quot;fieldName&quot;); // Fast
+
+ Logging
+The library uses Apache Commons Logging for comprehensive logging support.
+Log Levels
+Level
+What's Logged
+INFO
+Startup configuration, bypass roles
+DEBUG
+Context caching, bypass activation, batch processing
+WARN
+Access denials, fetch failures, missing context
+TRACE
+Request lifecycle, individual access checks
+Example Log Output
+# Startup
+INFO  DacAutoConfiguration - DAC initialized with bypass roles: [PLATFORM_ADMIN, SUPER_ADMIN]
+INFO  IkonAccessContextProviderAutoConfiguration - Configuring IkonAccessContextProvider
+
+# Runtime (DEBUG level)
+DEBUG AccessChecker - Bypass mode activated for user with platform roles: [PLATFORM_ADMIN]
+DEBUG AccessContextHolder - Cached AccessContext for userId=550e8400..., accountId=6ba7b810...
+
+# Security Audit (WARN level)
+WARN  AccessDeniedException - Access denied: Missing required role: ADMIN
+WARN  AccessControlAspect - Access denied: user missing required roles
+
+# Trace level (very verbose)
+TRACE AccessChecker - Role check: role=EDITOR, result=true, userId=550e8400...
+TRACE DacRequestFilter - DAC filter started for: GET /api/users
+Configuring Log Levels
+logging:
+  level:
+    com.ikon.dac: DEBUG
+    com.ikon.dac.core.AccessChecker: TRACE
+
+ Security Features
+1. Field Name Validation
+All field names are validated to prevent injection attacks:
+// This will throw IllegalArgumentException
+AccessCriteria.builder()
+    .ownerField(&quot;ownerId; DROP TABLE users;--&quot;)  // Invalid!
+    .build();
+
+// Valid field names
+AccessCriteria.builder()
+    .ownerField(&quot;owner_id&quot;)
+    .accountField(&quot;tenant.accountId&quot;)
+    .build();
+2. Access Denial Logging
+All access denials are logged at WARN level for security auditing:
+// When access is denied, this is logged:
+// WARN AccessDeniedException - Access denied: Missing required role: ADMIN
+throw AccessDeniedException.missingRole(&quot;ADMIN&quot;);
+3. Immutable Design
+AccessContext and AccessCriteria are immutable to prevent tampering after creation.
+4. ThreadLocal Cleanup
+DacRequestFilter automatically clears ThreadLocal caches at request end to prevent memory leaks and cross-request data leakage.
+
+ Database-Specific Indexes
+JPA/SQL Indexes
+-- Single Column Indexes
+CREATE INDEX idx_entity_account ON your_table(account_id);
+CREATE INDEX idx_entity_owner ON your_table(owner_id);
+CREATE INDEX idx_entity_groups ON your_table(dynamic_groups);
+
+-- Composite Index (Recommended)
+CREATE INDEX idx_entity_access ON your_table(account_id, owner_id, dynamic_groups);
+Database-Specific Notes:
+MySQL: Use InnoDB engine for best index performance
+PostgreSQL: Consider partial indexes for specific access patterns
+Oracle: Use bitmap indexes for low-cardinality columns
+SQL Server: Consider filtered indexes for common access patterns
+MongoDB Indexes
+// Single Field Indexes
+db.collection.createIndex({ accountId: 1 });
+db.collection.createIndex({ ownerId: 1 });
+
+// Compound Index (Recommended)
+db.collection.createIndex({ accountId: 1, ownerId: 1, dynamicGroups: 1 });
+Elasticsearch Mapping
+{
+  &quot;mappings&quot;: {
+    &quot;properties&quot;: {
+      &quot;accountId&quot;: { &quot;type&quot;: &quot;keyword&quot; },
+      &quot;ownerId&quot;: { &quot;type&quot;: &quot;keyword&quot; },
+      &quot;dynamicGroups&quot;: { &quot;type&quot;: &quot;keyword&quot; }
+    }
+  }
+}
+Cassandra Table Design
+-- Use accountId as partition key for optimal access filtering
+CREATE TABLE your_table (
+    account_id UUID,
+    id UUID,
+    owner_id UUID,
+    dynamic_groups SET&lt;TEXT&gt;,
+    -- other fields
+    PRIMARY KEY ((account_id), id)
+);
+
+-- Secondary indexes (use sparingly)
+CREATE INDEX ON your_table(owner_id);
+
+
+
+ Annotations
+@RequireRole
+Require users to have specific role(s) to access a method.
+// Require single role
+@RequireRole(&quot;ADMIN&quot;)
+public void adminOnlyMethod() { ... }
+
+// Require any of multiple roles (OR logic)
+@RequireRole({&quot;ADMIN&quot;, &quot;MANAGER&quot;})
+public void adminOrManagerMethod() { ... }
+
+// Require all roles (AND logic)
+@RequireRole(value = {&quot;ADMIN&quot;, &quot;MANAGER&quot;}, requireAll = true)
+public void adminAndManagerMethod() { ... }
+@RequireGroup
+Require users to be members of specific group(s) to access a method.
+// Require single group membership
+@RequireGroup(&quot;sales-team&quot;)
+public void salesOnlyMethod() { ... }
+
+// Require any of multiple groups (OR logic)
+@RequireGroup({&quot;sales-team&quot;, &quot;marketing-team&quot;})
+public void salesOrMarketingMethod() { ... }
+
+// Require all groups (AND logic)
+@RequireGroup(value = {&quot;sales-team&quot;, &quot;managers&quot;}, requireAll = true)
+public void salesManagersMethod() { ... }
+
+ DataAccessFilter Interface
+The DataAccessFilter interface is the core component for data-level access control.
+Available Implementations
+Bean Name
+Implementation
+Database Support
+jpaAccessFilter
+JpaAccessFilter
+MySQL, PostgreSQL, Oracle, SQL Server, H2
+mongoAccessFilter
+MongoAccessFilter
+MongoDB
+elasticAccessFilter
+ElasticAccessFilter
+Elasticsearch
+cassandraAccessFilter
+CassandraAccessFilter
+Apache Cassandra
+Method Categories
+List Methods
+//findAll
+&lt;T&gt; List&lt;T&gt; findAll(Class&lt;T&gt; entityClass);
+&lt;T&gt; List&lt;T&gt; findAll(Class&lt;T&gt; entityClass, AccessCriteria criteria);
+&lt;T&gt; List&lt;T&gt; findAll(Class&lt;T&gt; entityClass, Map&lt;String, Object&gt; filters);
+&lt;T&gt; List&lt;T&gt; findAll(Class&lt;T&gt; entityClass, Map&lt;String, Object&gt; filters, AccessCriteria criteria);
+&lt;T&gt; List&lt;T&gt; findAll(Class&lt;T&gt; entityClass, Sort sort);
+&lt;T&gt; List&lt;T&gt; findAll(Class&lt;T&gt; entityClass, Sort sort, AccessCriteria criteria);
+&lt;T&gt; List&lt;T&gt; findAll(Class&lt;T&gt; entityClass, Map&lt;String, Object&gt; filters, Sort sort);
+&lt;T&gt; List&lt;T&gt; findAll(Class&lt;T&gt; entityClass, Map&lt;String, Object&gt; filters, Sort sort, AccessCriteria criteria);
+
+//findByIds&lt;T&gt; List&lt;T&gt; findByIds(Class&lt;T&gt; entityClass, Collection&lt;?&gt; ids);
+&lt;T&gt; List&lt;T&gt; findByIds(Class&lt;T&gt; entityClass, Collection&lt;?&gt; ids, AccessCriteria criteria);
+&lt;T&gt; List&lt;T&gt; findByIds(Class&lt;T&gt; entityClass, Collection&lt;?&gt; ids, Sort sort);
+&lt;T&gt; List&lt;T&gt; findByIds(Class&lt;T&gt; entityClass, Collection&lt;?&gt; ids, Sort sort, AccessCriteria criteria);
+//findByFieldIn&lt;T&gt; List&lt;T&gt; findByFieldIn(Class&lt;T&gt; entityClass, String field, Collection&lt;?&gt; values);
+&lt;T&gt; List&lt;T&gt; findByFieldIn(Class&lt;T&gt; entityClass, String field, Collection&lt;?&gt; values, AccessCriteria criteria);
+&lt;T&gt; List&lt;T&gt; findByFieldIn(Class&lt;T&gt; entityClass, String field, Collection&lt;?&gt; values, Sort sort);
+&lt;T&gt; List&lt;T&gt; findByFieldIn(Class&lt;T&gt; entityClass, String field, Collection&lt;?&gt; values, Sort sort, AccessCriteria criteria);
+
+//findByFieldsIn
+&lt;T&gt; List&lt;T&gt; findByFieldsIn(Class&lt;T&gt; entityClass, Map&lt;String, Collection&lt;?&gt;&gt; fieldValues);
+&lt;T&gt; List&lt;T&gt; findByFieldsIn(Class&lt;T&gt; entityClass, Map&lt;String, Collection&lt;?&gt;&gt; fieldValues, AccessCriteria criteria);
+&lt;T&gt; List&lt;T&gt; findByFieldsIn(Class&lt;T&gt; entityClass, Map&lt;String, Collection&lt;?&gt;&gt; fieldValues, Sort sort);
+&lt;T&gt; List&lt;T&gt; findByFieldsIn(Class&lt;T&gt; entityClass, Map&lt;String, Collection&lt;?&gt;&gt; fieldValues, Sort sort, AccessCriteria criteria);
+
+//findByField
+&lt;T&gt; List&lt;T&gt; findByField(Class&lt;T&gt; entityClass, String field, Object value);
+&lt;T&gt; List&lt;T&gt; findByField(Class&lt;T&gt; entityClass, String field, Object value, AccessCriteria criteria);
+&lt;T&gt; List&lt;T&gt; findByField(Class&lt;T&gt; entityClass, String field, Object value, Sort sort);
+&lt;T&gt; List&lt;T&gt; findByField(Class&lt;T&gt; entityClass, String field, Object value, Sort sort, AccessCriteria criteria);
+
+//findByFieldNotIn
+&lt;T&gt; List&lt;T&gt; findByFieldNotIn(Class&lt;T&gt; entityClass, String field, Collection&lt;?&gt; values);
+&lt;T&gt; List&lt;T&gt; findByFieldNotIn(Class&lt;T&gt; entityClass, String field, Collection&lt;?&gt; values, AccessCriteria criteria);
+&lt;T&gt; List&lt;T&gt; findByFieldNotIn(Class&lt;T&gt; entityClass, String field, Collection&lt;?&gt; values, Sort sort);
+&lt;T&gt; List&lt;T&gt; findByFieldNotIn(Class&lt;T&gt; entityClass, String field, Collection&lt;?&gt; values, Sort sort, AccessCriteria criteria);
+Page Methods (Pagination)
+//findAll
+&lt;T&gt; Page&lt;T&gt; findAll(Class&lt;T&gt; entityClass, Pageable pageable);
+&lt;T&gt; Page&lt;T&gt; findAll(Class&lt;T&gt; entityClass, AccessCriteria criteria, Pageable pageable);
+&lt;T&gt; Page&lt;T&gt; findAll(Class&lt;T&gt; entityClass, Map&lt;String, Object&gt; filters, Pageable pageable);
+&lt;T&gt; Page&lt;T&gt; findAll(Class&lt;T&gt; entityClass, Map&lt;String, Object&gt; filters, AccessCriteria criteria, Pageable pageable);
+&lt;T&gt; Page&lt;T&gt; findAll(Class&lt;T&gt; entityClass, String search, Pageable pageable);
+&lt;T&gt; Page&lt;T&gt; findAll(Class&lt;T&gt; entityClass, String search, AccessCriteria criteria, Pageable pageable);
+&lt;T&gt; Page&lt;T&gt; findAll(Class&lt;T&gt; entityClass, Map&lt;String, Object&gt; filters, String search, Pageable pageable);
+&lt;T&gt; Page&lt;T&gt; findAll(Class&lt;T&gt; entityClass, Map&lt;String, Object&gt; filters, String search, AccessCriteria criteria, Pageable pageable);
+
+//findByIds
+&lt;T&gt; Page&lt;T&gt; findByIds(Class&lt;T&gt; entityClass, Collection&lt;?&gt; ids, Pageable pageable);
+&lt;T&gt; Page&lt;T&gt; findByIds(Class&lt;T&gt; entityClass, Collection&lt;?&gt; ids, AccessCriteria criteria, Pageable pageable);
+&lt;T&gt; Page&lt;T&gt; findByIds(Class&lt;T&gt; entityClass, Collection&lt;?&gt; ids, String search, Pageable pageable);
+&lt;T&gt; Page&lt;T&gt; findByIds(Class&lt;T&gt; entityClass, Collection&lt;?&gt; ids, String search, AccessCriteria criteria, Pageable pageable);
+
+//findByFieldIn
+&lt;T&gt; Page&lt;T&gt; findByFieldIn(Class&lt;T&gt; entityClass, String field, Collection&lt;?&gt; values, Pageable pageable);
+&lt;T&gt; Page&lt;T&gt; findByFieldIn(Class&lt;T&gt; entityClass, String field, Collection&lt;?&gt; values, AccessCriteria criteria, Pageable pageable);
+&lt;T&gt; Page&lt;T&gt; findByFieldIn(Class&lt;T&gt; entityClass, String field, Collection&lt;?&gt; values, String search, Pageable pageable);
+&lt;T&gt; Page&lt;T&gt; findByFieldIn(Class&lt;T&gt; entityClass, String field, Collection&lt;?&gt; values, String search, AccessCriteria criteria, Pageable pageable);
+
+//findByFieldsIn
+&lt;T&gt; Page&lt;T&gt; findByFieldsIn(Class&lt;T&gt; entityClass, Map&lt;String, Collection&lt;?&gt;&gt; fieldValues, Pageable pageable);
+&lt;T&gt; Page&lt;T&gt; findByFieldsIn(Class&lt;T&gt; entityClass, Map&lt;String, Collection&lt;?&gt;&gt; fieldValues, AccessCriteria criteria, Pageable pageable);
+&lt;T&gt; Page&lt;T&gt; findByFieldsIn(Class&lt;T&gt; entityClass, Map&lt;String, Collection&lt;?&gt;&gt; fieldValues, String search, Pageable pageable);
+&lt;T&gt; Page&lt;T&gt; findByFieldsIn(Class&lt;T&gt; entityClass, Map&lt;String, Collection&lt;?&gt;&gt; fieldValues, String search, AccessCriteria criteria, Pageable pageable);
+
+//findByField
+&lt;T&gt; Page&lt;T&gt; findByField(Class&lt;T&gt; entityClass, String field, Object value, Pageable pageable);
+&lt;T&gt; Page&lt;T&gt; findByField(Class&lt;T&gt; entityClass, String field, Object value, AccessCriteria criteria, Pageable pageable);
+&lt;T&gt; Page&lt;T&gt; findByField(Class&lt;T&gt; entityClass, String field, Object value, String search, Pageable pageable);
+&lt;T&gt; Page&lt;T&gt; findByField(Class&lt;T&gt; entityClass, String field, Object value, String search, AccessCriteria criteria, Pageable pageable);
+
+//findByFieldNotIn
+&lt;T&gt; Page&lt;T&gt; findByFieldNotIn(Class&lt;T&gt; entityClass, String field, Collection&lt;?&gt; values, Pageable pageable);
+&lt;T&gt; Page&lt;T&gt; findByFieldNotIn(Class&lt;T&gt; entityClass, String field, Collection&lt;?&gt; values, AccessCriteria criteria, Pageable pageable);
+&lt;T&gt; Page&lt;T&gt; findByFieldNotIn(Class&lt;T&gt; entityClass, String field, Collection&lt;?&gt; values, String search, Pageable pageable);
+&lt;T&gt; Page&lt;T&gt; findByFieldNotIn(Class&lt;T&gt; entityClass, String field, Collection&lt;?&gt; values, String search, AccessCriteria criteria, Pageable pageable);
+Single Entity Methods
+&lt;T&gt; Optional&lt;T&gt; findById(Class&lt;T&gt; entityClass, Object id);
+&lt;T&gt; Optional&lt;T&gt; findById(Class&lt;T&gt; entityClass, Object id, AccessCriteria criteria);
+&lt;T&gt; Optional&lt;T&gt; findOne(Class&lt;T&gt; entityClass, Map&lt;String, Object&gt; filters);
+&lt;T&gt; Optional&lt;T&gt; findOne(Class&lt;T&gt; entityClass, Map&lt;String, Object&gt; filters, AccessCriteria criteria);
+&lt;T&gt; Optional&lt;T&gt; findOneByField(Class&lt;T&gt; entityClass, String field, Object value);
+&lt;T&gt; Optional&lt;T&gt; findOneByField(Class&lt;T&gt; entityClass, String field, Object value, AccessCriteria criteria);
+Utility Methods
+&lt;T, V&gt; Map&lt;V, T&gt; findByFieldInAsMap(Class&lt;T&gt; entityClass, String field, Collection&lt;V&gt; values, AccessCriteria criteria);
+&lt;T, V&gt; Map&lt;V, T&gt; findByFieldInAsMap(Class&lt;T&gt; entityClass, String field, Collection&lt;V&gt; values);
+
+&lt;T, V&gt; Map&lt;V, List&lt;T&gt;&gt; findByFieldInAsGroupedMap(Class&lt;T&gt; entityClass, String field, Collection&lt;V&gt; values, AccessCriteria criteria);
+&lt;T, V&gt; Map&lt;V, List&lt;T&gt;&gt; findByFieldInAsGroupedMap(Class&lt;T&gt; entityClass, String field, Collection&lt;V&gt; values);
+
+&lt;T&gt; boolean isAccessible(Class&lt;T&gt; entityClass, Object id, AccessCriteria criteria);
+&lt;T&gt; boolean isAccessible(Class&lt;T&gt; entityClass, Object id);
+
+&lt;T&gt; boolean existsByField(Class&lt;T&gt; entityClass, String field, Object value, AccessCriteria criteria);
+&lt;T&gt; boolean existsByField(Class&lt;T&gt; entityClass, String field, Object value);
+
+&lt;T&gt; Stream&lt;T&gt; streamAll(Class&lt;T&gt; entityClass, Map&lt;String, Object&gt; filters, Sort sort, AccessCriteria criteria);
+&lt;T&gt; Stream&lt;T&gt; streamAll(Class&lt;T&gt; entityClass);
+&lt;T&gt; Stream&lt;T&gt; streamAll(Class&lt;T&gt; entityClass, AccessCriteria criteria);
+&lt;T&gt; Stream&lt;T&gt; streamAll(Class&lt;T&gt; entityClass, Map&lt;String, Object&gt; filters);
+&lt;T&gt; Stream&lt;T&gt; streamAll(Class&lt;T&gt; entityClass, Map&lt;String, Object&gt; filters, AccessCriteria criteria);
+&lt;T&gt; Stream&lt;T&gt; streamAll(Class&lt;T&gt; entityClass, Sort sort);
+&lt;T&gt; Stream&lt;T&gt; streamAll(Class&lt;T&gt; entityClass, Sort sort, AccessCriteria criteria);
+&lt;T&gt; Stream&lt;T&gt; streamAll(Class&lt;T&gt; entityClass, Map&lt;String, Object&gt; filters, Sort sort);
+
+&lt;T&gt; long count(Class&lt;T&gt; entityClass, Map&lt;String, Object&gt; filters, AccessCriteria criteria);
+&lt;T&gt; long count(Class&lt;T&gt; entityClass);
+&lt;T&gt; long count(Class&lt;T&gt; entityClass, AccessCriteria criteria);
+&lt;T&gt; long count(Class&lt;T&gt; entityClass, Map&lt;String, Object&gt; filters);
+
+&lt;T&gt; long countByField(Class&lt;T&gt; entityClass, String field, Object value, AccessCriteria criteria);
+&lt;T&gt; long countByField(Class&lt;T&gt; entityClass, String field, Object value);
+
+&lt;T&gt; boolean exists(Class&lt;T&gt; entityClass, Object id);
+
+ Usage Examples
+Basic Usage
+@Service
+@RequiredArgsConstructor
+public class ProductService {
+    
+    private final DataAccessFilter dataAccessFilter;
+    
+    // Find all accessible products
+    public List&lt;Product&gt; getAllProducts() {
+        return dataAccessFilter.findAll(Product.class, AccessCriteria.defaults());
+    }
+    
+    // Find by ID with access check
+    public Optional&lt;Product&gt; getProduct(UUID productId) {
+        return dataAccessFilter.findById(Product.class, productId, AccessCriteria.defaults());
+    }
+    
+    // Get or throw exception
+    public Product getProductOrThrow(UUID productId) {
+        return dataAccessFilter.findByIdOrThrow(Product.class, productId, AccessCriteria.defaults());
+    }
+    
+    // Paginated query
+    public Page&lt;Product&gt; getProducts(Pageable pageable) {
+        return dataAccessFilter.findAll(Product.class, AccessCriteria.defaults(), pageable);
+    }
+}
+Multiple Database Support
+@Service
+public class MultiDatabaseService {
+    
+    private final DataAccessFilter jpaFilter;
+    private final DataAccessFilter mongoFilter;
+    
+    public MultiDatabaseService(
+            @Qualifier(&quot;jpaAccessFilter&quot;) DataAccessFilter jpaFilter,
+            @Qualifier(&quot;mongoAccessFilter&quot;) DataAccessFilter mongoFilter) {
+        this.jpaFilter = jpaFilter;
+        this.mongoFilter = mongoFilter;
+    }
+    
+    // JPA entities
+    public List&lt;Product&gt; getProducts() {
+        return jpaFilter.findAll(Product.class, AccessCriteria.defaults());
+    }
+    
+    // MongoDB documents
+    public List&lt;AuditLog&gt; getAuditLogs() {
+        return mongoFilter.findAll(AuditLog.class, AccessCriteria.defaults());
+    }
+}
+Custom Access Criteria
+// Skip owner check, rely on account + groups
+AccessCriteria criteria = AccessCriteria.builder()
+    .skipOwnerCheck(true)
+    .skipDynamicGroupCheck(false)
+    .build();
+
+// Custom field names
+AccessCriteria criteria = AccessCriteria.builder()
+    .ownerField(&quot;createdBy&quot;)
+    .accountField(&quot;tenantId&quot;)
+    .dynamicGroupsField(&quot;assignedTeams&quot;)
+    .build();
+
+// Allow specific roles to access
+AccessCriteria criteria = AccessCriteria.builder()
+    .allowedRoles(Set.of(&quot;ADMIN&quot;, &quot;MANAGER&quot;))
+    .build();
+Streaming Large Datasets
+@Transactional(readOnly = true)
+public void exportAllProducts(OutputStream output) {
+    try (Stream&lt;Product&gt; stream = dataAccessFilter.streamAll(Product.class, AccessCriteria.defaults())) {
+        stream.forEach(product -&gt; writeToCsv(output, product));
+    }
+}
+
+ Troubleshooting
+Common Issues
+1. Access Denied When Expected
+Check if user has required roles/groups
+Verify accountId matches entity's account field
+Check if bypass roles are configured correctly
+2. Performance Issues
+Ensure proper database indexes are created
+Check batch size configuration for large queries
+Verify request-scoped caching is working
+3. Memory Issues with Large Queries
+Use streamAll() for large datasets
+Use pagination with findAll(..., Pageable)
+Reduce batch size if individual queries are too large
+Debug Logging
+Enable debug logging to troubleshoot access issues:
+logging:
+  level:
+    com.ikon.dac: DEBUG
+    com.ikon.dac.core.AccessChecker: TRACE
+
+License
+This is proprietary software developed by IKON. All rights reserved.
+

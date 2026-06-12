@@ -11,9 +11,14 @@ import com.ikon.taskmanagement.service.TaskWorklogService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
+import com.ikon.dac.core.AccessCriteria;
+import com.ikon.dac.core.DataAccessFilter;
 
 @Service
 @RequiredArgsConstructor
@@ -22,9 +27,14 @@ public class TaskWorklogServiceImpl implements TaskWorklogService {
     private final TaskWorklogRepository worklogRepository;
     private final TaskRepository taskRepository;
     private final TaskWorklogMapper worklogMapper;
+    private final DataAccessFilter dataAccessFilter;
 
     @Override
     public TaskWorklogResponseDto createWorklog(TaskWorklogRequestDto dto) {
+        AccessCriteria taskWriteCriteria = AccessCriteria.builder().allowedRoles(Set.of("Task Manager")).ownerField("assigneeId").dynamicGroupsField("writeGroups").build();
+        Task task = dataAccessFilter.findById(Task.class, dto.getTaskId(), taskWriteCriteria)
+                .orElseThrow(() -> new RuntimeException("Not authorized to create worklog for this task"));
+
         List<TaskWorklog> existingWorklogs = worklogRepository.findByTaskId(dto.getTaskId());
         TaskWorklog entity;
         if (!existingWorklogs.isEmpty()) {
@@ -48,6 +58,10 @@ public class TaskWorklogServiceImpl implements TaskWorklogService {
             entity = worklogMapper.mapToEntity(dto);
         }
 
+        entity.setAssigneeId(task.getAssigneeId());
+        entity.setReadGroups(task.getReadGroups() != null ? new HashSet<>(task.getReadGroups()) : new HashSet<>());
+        entity.setWriteGroups(task.getWriteGroups() != null ? new HashSet<>(task.getWriteGroups()) : new HashSet<>());
+
         TaskWorklog saved = worklogRepository.save(entity);
         updateTaskActualHours(saved.getTaskId());
         return worklogMapper.mapToDto(saved);
@@ -55,22 +69,26 @@ public class TaskWorklogServiceImpl implements TaskWorklogService {
 
     @Override
     public List<TaskWorklogResponseDto> getWorklogsByTaskId(UUID taskId) {
-        return worklogRepository.findByTaskId(taskId).stream()
+        AccessCriteria readCriteria = AccessCriteria.builder().allowedRoles(Set.of("Task Manager")).ownerField("assigneeId").dynamicGroupsField("readGroups").build();
+        return dataAccessFilter.findAll(TaskWorklog.class, readCriteria).stream()
+                .filter(worklog -> worklog.getTaskId().equals(taskId))
                 .map(worklogMapper::mapToDto)
                 .collect(Collectors.toList());
     }
 
     @Override
     public TaskWorklogResponseDto getWorklogById(UUID id) {
-        TaskWorklog entity = worklogRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Worklog not found"));
+        AccessCriteria readCriteria = AccessCriteria.builder().allowedRoles(Set.of("Task Manager")).ownerField("assigneeId").dynamicGroupsField("readGroups").build();
+        TaskWorklog entity = dataAccessFilter.findById(TaskWorklog.class, id, readCriteria)
+                .orElseThrow(() -> new RuntimeException("Worklog not found or access denied"));
         return worklogMapper.mapToDto(entity);
     }
 
     @Override
     public TaskWorklogResponseDto updateWorklog(UUID id, TaskWorklogRequestDto dto) {
-        TaskWorklog entity = worklogRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Worklog not found"));
+        AccessCriteria writeCriteria = AccessCriteria.builder().allowedRoles(Set.of("Task Manager")).ownerField("assigneeId").dynamicGroupsField("writeGroups").build();
+        TaskWorklog entity = dataAccessFilter.findById(TaskWorklog.class, id, writeCriteria)
+                .orElseThrow(() -> new RuntimeException("Worklog not found or access denied"));
         worklogMapper.updateEntityFromDto(dto, entity);
         TaskWorklog updated = worklogRepository.save(entity);
         updateTaskActualHours(updated.getTaskId());
@@ -79,8 +97,9 @@ public class TaskWorklogServiceImpl implements TaskWorklogService {
 
     @Override
     public void deleteWorklog(UUID id) {
-        TaskWorklog entity = worklogRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Worklog not found"));
+        AccessCriteria writeCriteria = AccessCriteria.builder().allowedRoles(Set.of("Task Manager")).ownerField("assigneeId").dynamicGroupsField("writeGroups").build();
+        TaskWorklog entity = dataAccessFilter.findById(TaskWorklog.class, id, writeCriteria)
+                .orElseThrow(() -> new RuntimeException("Worklog not found or access denied"));
         UUID taskId = entity.getTaskId();
         worklogRepository.deleteById(id);
         updateTaskActualHours(taskId);
@@ -100,13 +119,15 @@ public class TaskWorklogServiceImpl implements TaskWorklogService {
 
     @Override
     public List<TaskWorklogResponseDto> getWorklogsByProjectId(UUID projectId) {
+        AccessCriteria readCriteria = AccessCriteria.builder().allowedRoles(Set.of("Task Manager")).ownerField("assigneeId").dynamicGroupsField("readGroups").build();
         List<UUID> taskIds = taskRepository.findByProjectId(projectId).stream()
                 .map(Task::getId)
                 .collect(Collectors.toList());
         if (taskIds.isEmpty()) {
             return List.of();
         }
-        return worklogRepository.findByTaskIdIn(taskIds).stream()
+        return dataAccessFilter.findAll(TaskWorklog.class, readCriteria).stream()
+                .filter(worklog -> taskIds.contains(worklog.getTaskId()))
                 .map(worklogMapper::mapToDto)
                 .collect(Collectors.toList());
     }

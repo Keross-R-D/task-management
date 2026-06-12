@@ -10,6 +10,7 @@ import com.ikon.taskmanagement.enums.TaskStatus;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -66,6 +67,16 @@ public class Task {
 
     @Column
     private Double plannedDuration;
+
+    @ElementCollection
+    @CollectionTable(name = "task_read_groups", joinColumns = @JoinColumn(name = "task_id"))
+    @Column(name = "group_name")
+    private Set<String> readGroups;
+
+    @ElementCollection
+    @CollectionTable(name = "task_write_groups", joinColumns = @JoinColumn(name = "task_id"))
+    @Column(name = "group_name")
+    private Set<String> writeGroups;
 
     @CreatedDate
     @Column(updatable = false)

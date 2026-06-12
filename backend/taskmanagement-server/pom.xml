@@ -31,6 +31,11 @@
             <artifactId>ikon-client</artifactId>
             <version>${ikon.sdk.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.ikon</groupId>
+            <artifactId>ikon-dac</artifactId>
+            <version>${ikon.sdk.version}</version>
+        </dependency>
         <!-- <dependency>
             <groupId>com.ikon</groupId>
             <artifactId>ikon-processmanagement</artifactId>

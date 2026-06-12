@@ -10,6 +10,7 @@ import com.ikon.taskmanagement.enums.SprintStatus;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -42,6 +43,16 @@ public class Sprint {
     @Enumerated(EnumType.STRING)
     @Column
     private SprintStatus status = SprintStatus.PLANNED;
+
+    @ElementCollection
+    @CollectionTable(name = "sprint_read_groups", joinColumns = @JoinColumn(name = "sprint_id"))
+    @Column(name = "group_name")
+    private Set<String> readGroups;
+
+    @ElementCollection
+    @CollectionTable(name = "sprint_write_groups", joinColumns = @JoinColumn(name = "sprint_id"))
+    @Column(name = "group_name")
+    private Set<String> writeGroups;
 
     @CreatedDate
     @Column(updatable = false)
