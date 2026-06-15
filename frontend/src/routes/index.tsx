@@ -19,6 +19,8 @@ export interface AppRoute {
   title: string;
   icon: any;
   element: React.ReactNode;
+  roles?: string[];
+  groups?: string[];
 }
 
 export const mainRoutes: AppRoute[] = [

@@ -32,6 +32,7 @@ import {
   Bug,
   BookOpen,
 } from "lucide-react";
+import { AccessGuard } from "@/components/AccessGuard";
 
 import { TaskEnum } from "@/enums/task.constants";
 import {
@@ -462,80 +463,82 @@ export default function Epic({
                         {epicSprints.length} sprint
                         {epicSprints.length !== 1 ? "s" : ""}
                       </span>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <div className="p-0 border-none outline-none">
-                            <MoreHorizontal
-                              size={18}
-                              className="cursor-pointer"
-                            />
-                          </div>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent
-                          align="end"
-                          className="border rounded-lg"
-                        >
-                          <DropdownMenuItem
-                            className="rounded-md cursor-pointer"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setAddSprintEpicId(epic.id);
-                            }}
+                      <AccessGuard roles={["Task Manager"]} groups={[`ProjectManager_${epic.projectId}`, `ManagerDelegate_${epic.projectId}`]}>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <div className="p-0 border-none outline-none">
+                              <MoreHorizontal
+                                size={18}
+                                className="cursor-pointer"
+                              />
+                            </div>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent
+                            align="end"
+                            className="border rounded-lg"
                           >
-                            <Plus className="inline mr-2" /> Add Sprint
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            className="rounded-md cursor-pointer"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setEditEpic(epic);
-                            }}
-                          >
-                            <Pencil className="inline mr-2" /> Edit Epic
-                          </DropdownMenuItem>
-                          <hr className="border-red-800 my-1" />
-                          <DropdownMenuItem
-                            className="text-red-600 cursor-pointer"
-                            onClick={(e) => {
-                              e.stopPropagation();
+                            <DropdownMenuItem
+                              className="rounded-md cursor-pointer"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setAddSprintEpicId(epic.id);
+                              }}
+                            >
+                              <Plus className="inline mr-2" /> Add Sprint
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              className="rounded-md cursor-pointer"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setEditEpic(epic);
+                              }}
+                            >
+                              <Pencil className="inline mr-2" /> Edit Epic
+                            </DropdownMenuItem>
+                            <hr className="border-red-800 my-1" />
+                            <DropdownMenuItem
+                              className="text-red-600 cursor-pointer"
+                              onClick={(e) => {
+                                e.stopPropagation();
 
-                              toast.warning("Delete epic ?", {
-                                description:
-                                  "This action will permanently delete this Epic.",
+                                toast.warning("Delete epic ?", {
+                                  description:
+                                    "This action will permanently delete this Epic.",
 
-                                action: {
-                                  label: "Delete",
+                                  action: {
+                                    label: "Delete",
 
-                                  onClick: async () => {
-                                    try {
-                                      await deleteEpic(epic.id).unwrap();
-                                    } catch (err) {
-                                      console.error(
-                                        "Failed to delete epic",
-                                        err,
-                                      );
-                                    }
+                                    onClick: async () => {
+                                      try {
+                                        await deleteEpic(epic.id).unwrap();
+                                      } catch (err) {
+                                        console.error(
+                                          "Failed to delete epic",
+                                          err,
+                                        );
+                                      }
+                                    },
                                   },
-                                },
 
-                                cancel: {
-                                  label: "Cancel",
-                                  onClick: () => {},
-                                },
+                                  cancel: {
+                                    label: "Cancel",
+                                    onClick: () => {},
+                                  },
 
-                                className: "border border-red-500/30",
+                                  className: "border border-red-500/30",
 
-                                actionButtonStyle: {
-                                  backgroundColor: "#dc2626",
-                                  color: "white",
-                                },
-                              });
-                            }}
-                          >
-                            <Trash2 className="inline mr-2" /> Delete Epic
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                                  actionButtonStyle: {
+                                    backgroundColor: "#dc2626",
+                                    color: "white",
+                                  },
+                                });
+                              }}
+                            >
+                              <Trash2 className="inline mr-2" /> Delete Epic
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </AccessGuard>
                     </div>
                   </div>
                 </AccordionTrigger>
@@ -587,113 +590,115 @@ export default function Epic({
                                       {sprintTasks.length} task
                                       {sprintTasks.length !== 1 ? "s" : ""}
                                     </span>
-                                    <DropdownMenu>
-                                      <DropdownMenuTrigger asChild>
-                                        <div className="p-0 border-none outline-none">
-                                          <MoreHorizontal
-                                            size={18}
-                                            className="cursor-pointer"
-                                          />
-                                        </div>
-                                      </DropdownMenuTrigger>
-                                      <DropdownMenuContent
-                                        align="end"
-                                        className="border rounded-lg"
-                                      >
-                                        <DropdownMenuItem
-                                          className="rounded-md cursor-pointer"
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            setAddTaskData({
-                                              sprintId: sprint.id,
-                                              epicId: epic.id,
-                                              projectId: sprint.projectId,
-                                            });
-                                          }}
+                                    <AccessGuard roles={["Task Manager"]} groups={[`ProjectManager_${sprint.projectId}`, `ManagerDelegate_${sprint.projectId}`]}>
+                                      <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
+                                          <div className="p-0 border-none outline-none">
+                                            <MoreHorizontal
+                                              size={18}
+                                              className="cursor-pointer"
+                                            />
+                                          </div>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent
+                                          align="end"
+                                          className="border rounded-lg"
                                         >
-                                          <Plus className="inline mr-2" /> Add
-                                          Task
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem
-                                          className="rounded-md cursor-pointer"
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            setEditSprint(sprint);
-                                          }}
-                                        >
-                                          <Pencil className="inline mr-2" />{" "}
-                                          Edit Sprint
-                                        </DropdownMenuItem>
-                                        <hr className="my-1" />
-                                        {sprintActions[
-                                          sprint.status as SprintStatus
-                                        ]?.map((action) => {
-                                          const Icon = action.icon;
+                                          <DropdownMenuItem
+                                            className="rounded-md cursor-pointer"
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              setAddTaskData({
+                                                sprintId: sprint.id,
+                                                epicId: epic.id,
+                                                projectId: sprint.projectId,
+                                              });
+                                            }}
+                                          >
+                                            <Plus className="inline mr-2" /> Add
+                                            Task
+                                          </DropdownMenuItem>
+                                          <DropdownMenuItem
+                                            className="rounded-md cursor-pointer"
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              setEditSprint(sprint);
+                                            }}
+                                          >
+                                            <Pencil className="inline mr-2" />{" "}
+                                            Edit Sprint
+                                          </DropdownMenuItem>
+                                          <hr className="my-1" />
+                                          {sprintActions[
+                                            sprint.status as SprintStatus
+                                          ]?.map((action) => {
+                                            const Icon = action.icon;
 
-                                          return (
-                                            <DropdownMenuItem
-                                              key={action.status}
-                                              className="rounded-md cursor-pointer"
-                                              onClick={(e) => {
-                                                e.stopPropagation();
-                                                updateSprintStatus({
-                                                  id: sprint.id,
-                                                  status: action.status,
-                                                });
-                                              }}
-                                            >
-                                              <Icon className="inline mr-2" />
-                                              {action.label}
-                                            </DropdownMenuItem>
-                                          );
-                                        })}
-                                        <hr className="py-1 font-bold" />
-                                        <DropdownMenuItem
-                                          className="text-red-600 cursor-pointer"
-                                          onClick={(e) => {
-                                            e.stopPropagation();
+                                            return (
+                                              <DropdownMenuItem
+                                                key={action.status}
+                                                className="rounded-md cursor-pointer"
+                                                onClick={(e) => {
+                                                  e.stopPropagation();
+                                                  updateSprintStatus({
+                                                    id: sprint.id,
+                                                    status: action.status,
+                                                  });
+                                                }}
+                                              >
+                                                <Icon className="inline mr-2" />
+                                                {action.label}
+                                              </DropdownMenuItem>
+                                            );
+                                          })}
+                                          <hr className="py-1 font-bold" />
+                                          <DropdownMenuItem
+                                            className="text-red-600 cursor-pointer"
+                                            onClick={(e) => {
+                                              e.stopPropagation();
 
-                                            toast.warning("Delete sprint ?", {
-                                              description:
-                                                "This action will permanently delete this Sprint.",
+                                              toast.warning("Delete sprint ?", {
+                                                description:
+                                                  "This action will permanently delete this Sprint.",
 
-                                              action: {
-                                                label: "Delete",
+                                                action: {
+                                                  label: "Delete",
 
-                                                onClick: async () => {
-                                                  try {
-                                                    await deleteSprint(
-                                                      sprint.id,
-                                                    ).unwrap();
-                                                  } catch (err) {
-                                                    console.error(
-                                                      "Failed to delete sprint",
-                                                      err,
-                                                    );
-                                                  }
+                                                  onClick: async () => {
+                                                    try {
+                                                      await deleteSprint(
+                                                        sprint.id,
+                                                      ).unwrap();
+                                                    } catch (err) {
+                                                      console.error(
+                                                        "Failed to delete sprint",
+                                                        err,
+                                                      );
+                                                    }
+                                                  },
                                                 },
-                                              },
 
-                                              cancel: {
-                                                label: "Cancel",
-                                                onClick: () => {},
-                                              },
+                                                cancel: {
+                                                  label: "Cancel",
+                                                  onClick: () => {},
+                                                },
 
-                                              className:
-                                                "border border-red-500/30",
+                                                className:
+                                                  "border border-red-500/30",
 
-                                              actionButtonStyle: {
-                                                backgroundColor: "#dc2626",
-                                                color: "white",
-                                              },
-                                            });
-                                          }}
-                                        >
-                                          <Trash2 className="inline mr-2" />{" "}
-                                          Delete Sprint
-                                        </DropdownMenuItem>
-                                      </DropdownMenuContent>
-                                    </DropdownMenu>
+                                                actionButtonStyle: {
+                                                  backgroundColor: "#dc2626",
+                                                  color: "white",
+                                                },
+                                              });
+                                            }}
+                                          >
+                                            <Trash2 className="inline mr-2" />{" "}
+                                            Delete Sprint
+                                          </DropdownMenuItem>
+                                        </DropdownMenuContent>
+                                      </DropdownMenu>
+                                    </AccessGuard>
                                   </div>
                                 </div>
                               </AccordionTrigger>

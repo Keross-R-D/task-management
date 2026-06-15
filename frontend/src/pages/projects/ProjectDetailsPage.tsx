@@ -17,6 +17,7 @@ import ResourceUtilization from "./components/ResouceUtilisation";
 import { useState, useMemo, useEffect } from "react";
 import AddEpicModal from "./components/AddEpicModal";
 import { useDispatch } from "react-redux";
+import { AccessGuard } from "@/components/AccessGuard";
 import { setBreadcrumbLabel } from "@/features/ui/uiSlice";
 import { useGetEpicsByProjectQuery } from "@/features/epics/epicsApiSlice";
 import { useGetSprintsByProjectQuery } from "@/features/sprints/sprintsApiSlice";
@@ -205,10 +206,12 @@ export default function ProjectDetailPage() {
                 <Upload size={16} className="mr-2" />
                 Bulk Upload
               </Button>
-              <Button onClick={() => setOpen(true)}>
-                <Plus size={16} className="mr-2" />
-                Add Epic
-              </Button>
+              <AccessGuard roles={["Task Manager"]} groups={[`ProjectManager_${projectId}`, `ManagerDelegate_${projectId}`]}>
+                <Button onClick={() => setOpen(true)}>
+                  <Plus size={16} className="mr-2" />
+                  Add Epic
+                </Button>
+              </AccessGuard>
             </div>
           </div>
 

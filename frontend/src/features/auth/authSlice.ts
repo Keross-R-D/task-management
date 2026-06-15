@@ -20,6 +20,8 @@ export interface AuthState {
   user: User | null;
   token: TokenResponse | null;
   isAuthenticated: boolean;
+  roles: string[];
+  groups: string[];
 }
 
 // Cookie helpers
@@ -68,6 +70,8 @@ const initialState: AuthState = {
   user: null,
   token,
   isAuthenticated: !!token,
+  roles: [],
+  groups: [],
 };
 
 const authSlice = createSlice({
@@ -101,9 +105,16 @@ const authSlice = createSlice({
       state.user = action.payload;
     },
 
+    setRolesAndGroups: (state, action: PayloadAction<{ roles: string[]; groups: string[] }>) => {
+      state.roles = action.payload.roles;
+      state.groups = action.payload.groups;
+    },
+
     logout: (state) => {
       state.user = null;
       state.token = null;
+      state.roles = [];
+      state.groups = [];
 
       deleteCookie("ikoncloud_next_accessToken");
       deleteCookie("ikoncloud_next_refreshToken");
@@ -115,10 +126,12 @@ const authSlice = createSlice({
   },
 });
 
-export const { setToken, setUser, logout } = authSlice.actions;
+export const { setToken, setUser, setRolesAndGroups, logout } = authSlice.actions;
 
 export const selectCurrentUser = (state: RootState) => state.auth.user;
 export const isAuthenticated = (state: RootState) => state.auth.isAuthenticated;
 export const selectAuthToken = (state: RootState) => state.auth.token;
+export const selectUserRoles = (state: RootState) => state.auth.roles;
+export const selectUserGroups = (state: RootState) => state.auth.groups;
 
 export default authSlice.reducer;
