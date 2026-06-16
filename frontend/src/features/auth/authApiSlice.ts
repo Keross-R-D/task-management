@@ -24,7 +24,7 @@ export const authApiSlice = apiSlice.injectEndpoints({
     }),
     getCurrentUserRolesAndGroups: builder.query<{ roles: string[]; groups: string[] }, void>({
       query: () => ({
-        apiUrl: `${import.meta.env.VITE_API_BASE_URL}/dac/current-user-app-role-group`,
+        apiUrl: `${import.meta.env.VITE_API_BASE_URL_FOR_ROLE}/dac/current-user-app-role-group`,
         config: {
           method: "GET",
         },
