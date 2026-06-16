@@ -8,13 +8,8 @@ import java.util.UUID;
 public class BulkTaskUploadRequestDto {
 
     private UUID projectId;
-
-    private String epicName;
-    private String epicDescription;
-    private String epicStatus;
-    private LocalDate epicStartDate;
-    private LocalDate epicEndDate;
-
+    private UUID epicId;
+   
     private String sprintName;
     private String sprintGoal;
     private String sprintStatus;

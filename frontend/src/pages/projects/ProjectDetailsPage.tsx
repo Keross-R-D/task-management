@@ -37,7 +37,7 @@ const DEFAULT_FILTERS: FilterState = {
   type: "ALL",
   sprintState: "ALL",
 };
-import AddTaskBulkUploadModal from "./components/AddTaskBulkUploadModal";
+import BulkUploadModal from "./components/BulkUploadModal";
 
 export default function ProjectDetailPage() {
   const [bulkOpen, setBulkOpen] = useState(false);
@@ -262,8 +262,10 @@ export default function ProjectDetailPage() {
         projectStartDate={project?.startDate}
         projectEndDate={project?.endDate}
       />
-      <AddTaskBulkUploadModal
+      <BulkUploadModal
         open={bulkOpen}
+        epics={epics}
+        sprints={sprints}
         projectId={projectId}
         onClose={() => setBulkOpen(false)}
       />
