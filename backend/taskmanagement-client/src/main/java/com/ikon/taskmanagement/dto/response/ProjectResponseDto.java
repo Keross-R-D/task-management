@@ -18,7 +18,8 @@ public class ProjectResponseDto {
     private UUID managerDelegateId;
     private LocalDate startDate;
     private LocalDate endDate;
-    private ProjectStatus projectStatus;
+    // private ProjectStatus projectStatus;
+    private String projectStatus;
     private String type;
     private List<UUID> teamMemberIds;
     private LocalDateTime createdAt;

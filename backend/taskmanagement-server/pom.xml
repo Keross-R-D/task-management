@@ -97,6 +97,11 @@
             <artifactId>kafka-avro-serializer</artifactId>
             <version>${avro-serializer.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.ikon</groupId>
+            <artifactId>ikon-connector</artifactId>
+            <version>1.0.0</version>
+        </dependency>
     </dependencies>
 
     <build>

@@ -10,13 +10,16 @@ import java.util.UUID;
 
 @Data
 public class ProjectRequestDto {
+    private UUID id;
     private String projectName;
     private String clientName;
     private UUID managerId;
     private UUID managerDelegateId;
     private LocalDate startDate;
     private LocalDate endDate;
-    private ProjectStatus projectStatus;
+    // removed enum for etl
+    // private ProjectStatus projectStatus;
+    private String projectStatus;
     private String type;
     private List<UUID> teamMemberIds;
 }

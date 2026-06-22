@@ -1,14 +1,14 @@
 {
-  "configurations": [
-    {
-      "type": "java",
-      "name": "Spring Boot-TaskmanagementApplication<taskmanagement-server>",
-      "request": "launch",
-      "cwd": "${workspaceFolder}",
-      "mainClass": "com.ikon.taskmanagement.TaskmanagementApplication",
-      "projectName": "taskmanagement-server",
-      "args": "",
-      "envFile": "${workspaceFolder}/.env"
-    }
-  ]
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-TaskmanagementApplication<taskmanagement-server>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.ikon.taskmanagement.TaskmanagementApplication",
+            "projectName": "taskmanagement-server",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
 }

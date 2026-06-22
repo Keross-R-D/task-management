@@ -44,13 +44,13 @@ public class ProjectServiceImpl extends WebService implements ProjectService {
         this.applicationProperties = applicationProperties;
     }
 
-    private void dynamicGroupCreation(String groupName, String groupDesc, List<UUID> userIds) {
+    private void dynamicGroupCreation(String groupName, String groupDesc, List<UUID> userIds, UUID accountId) {
         try {
             IkonGroup group = IkonGroup.builder()
                     .groupName(groupName)
                     .groupType(GroupType.DYNAMIC)
                     .groupDescription(groupDesc)
-                    .accountId(getActiveAccountId())
+                    .accountId(accountId)
                     .softwareId(applicationProperties.getSoftwareId())
                     .build();
 
@@ -60,7 +60,7 @@ public class ProjectServiceImpl extends WebService implements ProjectService {
                 ikonGroupService.saveMembershipToGroup(
                         createdGroup.getGroupId(),
                         userIds,
-                        getActiveAccountId());
+                        accountId);
             }
         } catch (Exception ex) {
             if (ex.getMessage() != null && ex.getMessage().contains("already exists")) {
@@ -87,18 +87,18 @@ public class ProjectServiceImpl extends WebService implements ProjectService {
         List<UUID> teamMembers = savedProject.getTeamMemberIds() != null ? savedProject.getTeamMemberIds()
                 : new ArrayList<>();
         dynamicGroupCreation(teamMemberGroup, "Dynamic group for Team Members of Project: " + savedProject.getId(),
-                teamMembers);
+                teamMembers, accountId);
 
         List<UUID> pmMembers = savedProject.getManagerId() != null ? List.of(savedProject.getManagerId())
                 : new ArrayList<>();
         dynamicGroupCreation(pmGroup, "Dynamic group for Project Manager of Project: " + savedProject.getId(),
-                pmMembers);
+                pmMembers, accountId);
 
         List<UUID> delegateMembers = savedProject.getManagerDelegateId() != null
                 ? List.of(savedProject.getManagerDelegateId())
                 : new ArrayList<>();
         dynamicGroupCreation(delegateGroup, "Dynamic group for Manager Delegate of Project: " + savedProject.getId(),
-                delegateMembers);
+                delegateMembers, accountId);
 
         savedProject = projectRepository.save(savedProject);
         return projectMapper.mapToDto(savedProject);
@@ -156,18 +156,20 @@ public class ProjectServiceImpl extends WebService implements ProjectService {
         existingProject.getWriteGroups().add(pmGroup);
         existingProject.getWriteGroups().add(delegateGroup);
 
+        UUID accountId = existingProject.getAccountId();
+
         if (!tmGroupExists) {
             List<UUID> teamMembers = existingProject.getTeamMemberIds() != null ? existingProject.getTeamMemberIds()
                     : new ArrayList<>();
             dynamicGroupCreation(teamMemberGroup,
-                    "Dynamic group for Team Members of Project: " + existingProject.getId(), teamMembers);
+                    "Dynamic group for Team Members of Project: " + existingProject.getId(), teamMembers, accountId);
         }
 
         if (!pmGroupExists) {
             List<UUID> pmMembers = existingProject.getManagerId() != null ? List.of(existingProject.getManagerId())
                     : new ArrayList<>();
             dynamicGroupCreation(pmGroup, "Dynamic group for Project Manager of Project: " + existingProject.getId(),
-                    pmMembers);
+                    pmMembers, accountId);
         }
 
         if (!delegateGroupExists) {
@@ -175,7 +177,7 @@ public class ProjectServiceImpl extends WebService implements ProjectService {
                     ? List.of(existingProject.getManagerDelegateId())
                     : new ArrayList<>();
             dynamicGroupCreation(delegateGroup,
-                    "Dynamic group for Manager Delegate of Project: " + existingProject.getId(), delegateMembers);
+                    "Dynamic group for Manager Delegate of Project: " + existingProject.getId(), delegateMembers, accountId);
         }
 
         Project updatedProject = projectRepository.save(existingProject);

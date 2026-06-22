@@ -24,7 +24,7 @@ import java.util.UUID;
 public class Project {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    // @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id", updatable = false, nullable = false)
     private UUID id;
 
@@ -52,9 +52,9 @@ public class Project {
     @Column
     private LocalDate endDate;
 
-    @Enumerated(EnumType.STRING)
+    // @Enumerated(EnumType.STRING)
     @Column
-    private ProjectStatus projectStatus = ProjectStatus.PLANNED;
+    private String projectStatus = ProjectStatus.PLANNED.name();
 
     @Column
     private String type = "Project";

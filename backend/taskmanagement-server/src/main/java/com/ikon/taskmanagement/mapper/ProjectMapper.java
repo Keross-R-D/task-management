@@ -3,6 +3,9 @@ package com.ikon.taskmanagement.mapper;
 import com.ikon.taskmanagement.dto.request.ProjectRequestDto;
 import com.ikon.taskmanagement.dto.response.ProjectResponseDto;
 import com.ikon.taskmanagement.entity.Project;
+
+import java.util.UUID;
+
 import org.springframework.stereotype.Component;
 
 @Component
@@ -13,6 +16,7 @@ public class ProjectMapper {
             return null;
         }
         Project project = new Project();
+        project.setId(dto.getId() != null ? dto.getId() : UUID.randomUUID());
         updateEntityFromDto(dto, project);
         return project;
     }

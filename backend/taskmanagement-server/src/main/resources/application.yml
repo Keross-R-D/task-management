@@ -137,6 +137,14 @@ ikon:
   dac:
     enabled: true
     bypass-roles: [PLATFORM_ADMIN, SUPER_ADMIN]
+
+  connector:
+    internal-auth:
+      tokenUri: https://holocron.keross.com/api/platform/oauth2/token
+      clientId: ikon-client-management
+      clientSecret: F38Ysb4VEOSXUeISKcMyvpKqxtrIL8nf
+    crypto:
+      secretKey: MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=
   user:
     agent: "IKON App Server"
   platform:
