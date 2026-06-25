@@ -16,6 +16,10 @@ import java.util.UUID;
 @RequestMapping("/api/tasks")
 public interface TaskApi {
 
+    @Operation(summary = "Fetch all tasks without access criteria")
+    @GetMapping
+    ResponseEntity<List<TaskResponseDto>> getAllTasks(@RequestHeader("Authorization") String accessToken);
+
     @Operation(summary = "Create a new task")
     @PostMapping
     ResponseEntity<TaskResponseDto> createTask(@RequestHeader("Authorization") String accessToken, @RequestBody TaskRequestDto dto);

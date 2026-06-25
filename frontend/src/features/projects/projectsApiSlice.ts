@@ -49,7 +49,15 @@ export const projectsApiSlice = apiSlice.injectEndpoints({
       }),
       invalidatesTags: [{ type: 'Project', id: 'LIST' }],
     }),
+    triggerProjectSync: builder.mutation<{ status: string; message: string }, void>({
+      query: () => ({
+        apiUrl: '/sync/projects',
+        config: {
+          method: 'POST',
+        },
+      }),
+    }),
   }),
 });
 
-export const { useGetProjectsQuery, useCreateProjectMutation } = projectsApiSlice;
+export const { useGetProjectsQuery, useCreateProjectMutation, useTriggerProjectSyncMutation } = projectsApiSlice;

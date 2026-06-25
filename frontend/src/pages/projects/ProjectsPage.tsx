@@ -13,18 +13,21 @@ import {
   FolderOpen,
   User,
   Calendar,
+  RefreshCw,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { appPath } from "@/utils/basePath";
 import {
   useGetProjectsQuery,
   useCreateProjectMutation,
+  useTriggerProjectSyncMutation,
 } from "@/features/projects/projectsApiSlice";
 import AddProjectModal, {
   type ProjectFormValues,
 } from "./components/AddProjectModal";
 import ErrorState from "@/components/ErrorState";
 import { useUserMap } from "@/utils/userMap";
+import { toast } from "sonner";
 
 //Applying style based on project status
 const getProjectStatusStyles = (status: string) => {
@@ -222,6 +225,7 @@ const ProjectsPage: React.FC = () => {
     refetch,
   } = useGetProjectsQuery();
   const [createProject, { isLoading: isCreating }] = useCreateProjectMutation();
+  const [triggerProjectSync, { isLoading: isSyncing }] = useTriggerProjectSyncMutation();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const formatLocalDate = (date: Date) => {
@@ -254,12 +258,31 @@ const ProjectsPage: React.FC = () => {
     }
   };
 
+  const handleSync = async () => {
+    try {
+      const response = await triggerProjectSync().unwrap();
+      toast.success(response.message || "Project sync triggered successfully.");
+    } catch (error: any) {
+      toast.error(error.data?.error || "Failed to trigger project sync.");
+      console.error("Failed to trigger project sync", error);
+    }
+  };
+
   const headerActions = (
-    <Button
-      onClick={() => setIsModalOpen(true)}
-    >
-      <Plus className="h-4 w-4 mr-2" /> Add Project
-    </Button>
+    <div className="flex gap-2">
+      <Button
+        onClick={handleSync}
+        disabled={isSyncing}
+        className="bg-muted text-foreground hover:bg-muted/80 border border-border"
+      >
+        <RefreshCw className={`h-4 w-4 mr-2 ${isSyncing ? "animate-spin" : ""}`} /> Sync
+      </Button>
+      <Button
+        onClick={() => setIsModalOpen(true)}
+      >
+        <Plus className="h-4 w-4 mr-2" /> Add Project
+      </Button>
+    </div>
   );
 
   return (
