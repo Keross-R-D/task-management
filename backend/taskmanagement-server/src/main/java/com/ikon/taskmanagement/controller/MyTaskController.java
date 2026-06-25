@@ -26,27 +26,31 @@ public class MyTaskController implements MyTaskApi {
     }
 
     @Override
-    public ResponseEntity<MyTaskResponseDto> createMyTask(@RequestHeader("Authorization") String accessToken, MyTaskRequestDto myTaskDto) {
+    public ResponseEntity<MyTaskResponseDto> createMyTask(@RequestHeader("Authorization") String accessToken,
+            MyTaskRequestDto myTaskDto) {
         return new ResponseEntity<>(myTaskService.createMyTask(myTaskDto), HttpStatus.CREATED);
     }
 
     @Override
-    public ResponseEntity<Page<MyTaskResponseDto>> getAllMyTasks(@RequestHeader("Authorization") String accessToken, Pageable pageable) {
+    public ResponseEntity<Page<MyTaskResponseDto>> getAllMyTasks(@RequestHeader("Authorization") String accessToken,
+            Pageable pageable) {
         return ResponseEntity.ok(myTaskService.getAllMyTasks(pageable));
     }
 
     @Override
-    public ResponseEntity<List<MyTaskResponseDto>> getAllMyTasksList(@RequestHeader("Authorization") String accessToken) {
+    public ResponseEntity<List<MyTaskResponseDto>> getAllMyTasksList(
+            @RequestHeader("Authorization") String accessToken) {
         return ResponseEntity.ok(myTaskService.getAllMyTasks());
     }
 
     @Override
-    public ResponseEntity<MyTaskResponseDto> updateMyTask(@RequestHeader("Authorization") String accessToken, UUID id, MyTaskRequestDto myTaskDto) {
+    public ResponseEntity<MyTaskResponseDto> updateMyTask(@RequestHeader("Authorization") String accessToken, UUID id,
+            MyTaskRequestDto myTaskDto) {
         return ResponseEntity.ok(myTaskService.updateMyTask(id, myTaskDto));
     }
 
     @Override
-    public ResponseEntity<MyTaskResponseDto> updateTaskStatus(@RequestHeader("Authorization") String accessToken, 
+    public ResponseEntity<MyTaskResponseDto> updateTaskStatus(@RequestHeader("Authorization") String accessToken,
             UUID id,
             UpdateTaskStatusDto dto) {
 
