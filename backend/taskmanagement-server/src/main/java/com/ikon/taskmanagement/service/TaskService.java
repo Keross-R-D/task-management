@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.UUID;
 
 public interface TaskService {
+    List<TaskResponseDto> getAllTasks();
     TaskResponseDto createTask(TaskRequestDto dto);
     List<TaskResponseDto> getTasksByProjectId(UUID projectId);
     List<TaskResponseDto> getTasksByEpicId(UUID epicId);

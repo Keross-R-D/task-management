@@ -29,6 +29,11 @@ public class TaskServiceImpl implements TaskService {
     private final DataAccessFilter dataAccessFilter;
 
     @Override
+    public List<TaskResponseDto> getAllTasks() {
+        return taskRepository.findAll().stream().map(taskMapper::mapToDto).collect(Collectors.toList());
+    }
+
+    @Override
     public TaskResponseDto createTask(TaskRequestDto dto) {
         Task entity = taskMapper.mapToEntity(dto);
         AccessCriteria projectCriteria = AccessCriteria.builder().allowedRoles(Set.of("Task Manager")).dynamicGroupsField("writeGroups").build();

@@ -5,12 +5,11 @@ import com.ikon.connector.dto.response.ConnectorConfigResponse;
 import com.ikon.connector.service.ConnectionService;
 import com.ikon.connector.service.ConnectorConfigService;
 import com.ikon.connector.service.SyncTaskExecutor;
+import com.ikon.taskmanagement.api.ProjectSyncApi;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
@@ -19,15 +18,14 @@ import java.util.Comparator;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/sync")
 @RequiredArgsConstructor
-public class ProjectSyncController {
+public class ProjectSyncController implements ProjectSyncApi {
 
     private final SyncTaskExecutor syncTaskExecutor;
     private final ConnectionService connectionService;
     private final ConnectorConfigService configService;
 
-    @PostMapping("/projects")
+    @Override
     public ResponseEntity<Map<String, String>> triggerProjectSync() {
         try {
             // 1. Find the LATEST configuration for the Project module

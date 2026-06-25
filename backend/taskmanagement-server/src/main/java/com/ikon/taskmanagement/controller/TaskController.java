@@ -20,6 +20,11 @@ public class TaskController implements TaskApi {
     private final TaskService taskService;
 
     @Override
+    public ResponseEntity<List<TaskResponseDto>> getAllTasks(@RequestHeader("Authorization") String accessToken) {
+        return ResponseEntity.ok(taskService.getAllTasks());
+    }
+
+    @Override
     public ResponseEntity<TaskResponseDto> createTask(@RequestHeader("Authorization") String accessToken, TaskRequestDto dto) {
         return ResponseEntity.ok(taskService.createTask(dto));
     }

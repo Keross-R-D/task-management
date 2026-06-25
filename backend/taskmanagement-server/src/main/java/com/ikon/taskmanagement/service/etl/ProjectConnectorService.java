@@ -32,12 +32,10 @@ import com.ikon.taskmanagement.entity.Project;
 import com.ikon.taskmanagement.enums.ProjectStatus;
 import com.ikon.taskmanagement.repository.ProjectRepository;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class ProjectConnectorService implements ConnectorDataSync {
 
     private final ProjectRepository projectRepository;
@@ -46,6 +44,21 @@ public class ProjectConnectorService implements ConnectorDataSync {
     private final ConnectorConfigService configService;
     private final IkonGroupService ikonGroupService;
     private final IkonApplicationProperties applicationProperties;
+
+    public ProjectConnectorService(
+            ProjectRepository projectRepository,
+            ObjectMapper objectMapper,
+            @org.springframework.context.annotation.Lazy ConnectionService connectionService,
+            @org.springframework.context.annotation.Lazy ConnectorConfigService configService,
+            IkonGroupService ikonGroupService,
+            IkonApplicationProperties applicationProperties) {
+        this.projectRepository = projectRepository;
+        this.objectMapper = objectMapper;
+        this.connectionService = connectionService;
+        this.configService = configService;
+        this.ikonGroupService = ikonGroupService;
+        this.applicationProperties = applicationProperties;
+    }
 
     @Override
     public List<FieldsConfigDto> getFieldsConfig() {
