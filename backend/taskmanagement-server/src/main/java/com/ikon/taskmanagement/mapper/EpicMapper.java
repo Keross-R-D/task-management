@@ -24,6 +24,7 @@ public class EpicMapper {
         entity.setProjectId(dto.getProjectId());
         entity.setName(dto.getName());
         entity.setDescription(dto.getDescription());
+        entity.setEpicNumber(dto.getEpicNumber());
         if (dto.getStatus() != null) {
             entity.setStatus(dto.getStatus());
         }

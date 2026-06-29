@@ -21,9 +21,15 @@ public class Epic {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
+    
+    @Column
+    private Long epicNumber;
 
     @Column(nullable = false)
     private UUID projectId;
+
+    @Column
+    private UUID accountId;
 
     @Column(nullable = false)
     private String name;

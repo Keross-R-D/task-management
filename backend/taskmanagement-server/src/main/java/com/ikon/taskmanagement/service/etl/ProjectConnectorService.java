@@ -67,8 +67,7 @@ public class ProjectConnectorService implements ConnectorDataSync {
         fieldsConfig.add(FieldsConfigDto.builder().key("projectName").label("Project Name").type("string").build());
         fieldsConfig.add(FieldsConfigDto.builder().key("clientName").label("Client Name").type("string").build());
         fieldsConfig.add(FieldsConfigDto.builder().key("managerId").label("Manager ID").type("string").build());
-        fieldsConfig.add(
-                FieldsConfigDto.builder().key("managerDelegateId").label("Manager Delegate ID").type("string").build());
+        fieldsConfig.add(FieldsConfigDto.builder().key("managerDelegateId").label("Manager Delegate ID").type("string").build());
         fieldsConfig.add(FieldsConfigDto.builder().key("startDate").label("Start Date").type("string").build());
         fieldsConfig.add(FieldsConfigDto.builder().key("endDate").label("End Date").type("string").build());
         fieldsConfig.add(FieldsConfigDto.builder().key("projectStatus").label("Project Status").type("string").build());
@@ -101,7 +100,8 @@ public class ProjectConnectorService implements ConnectorDataSync {
     public void syncBatch(List<Map<String, Object>> payload) {
 
         // ── Resolve accountId from the Connection entity ─────────────────────
-        UUID accountId = resolveAccountIdFromConnection();
+        //  UUID accountId = resolveAccountIdFromConnection();
+        UUID accountId = UUID.fromString("b8bbe5c9-ad0d-4874-b563-275a86e4b818");
         if (accountId == null) {
             log.warn(
                     "Could not resolve accountId from connector connection. Projects will be saved without accountId.");

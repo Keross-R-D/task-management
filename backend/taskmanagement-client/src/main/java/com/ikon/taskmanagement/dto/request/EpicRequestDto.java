@@ -9,6 +9,7 @@ import java.util.UUID;
 public class EpicRequestDto {
     private UUID projectId;
     private String name;
+    private Long epicNumber;
     private String description;
     private EpicStatus status;
     private LocalDate startDate;
