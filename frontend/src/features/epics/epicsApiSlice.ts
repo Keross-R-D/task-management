@@ -54,6 +54,14 @@ export const epicsApiSlice = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ['Epic'],
     }),
+    triggerEpicSync: builder.mutation<{ status: string; message: string }, void>({
+      query: () => ({
+        apiUrl: '/sync/epics',
+        config: {
+          method: 'POST',
+        },
+      }),
+    }),
   }),
 });
 
@@ -62,4 +70,5 @@ export const {
   useCreateEpicMutation,
   useUpdateEpicMutation,
   useDeleteEpicMutation,
+  useTriggerEpicSyncMutation
 } = epicsApiSlice;
