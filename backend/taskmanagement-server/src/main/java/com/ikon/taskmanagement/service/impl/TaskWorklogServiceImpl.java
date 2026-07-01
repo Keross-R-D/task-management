@@ -1,6 +1,7 @@
 package com.ikon.taskmanagement.service.impl;
 
 import com.ikon.taskmanagement.dto.request.TaskWorklogRequestDto;
+import com.ikon.taskmanagement.dto.response.TaskWorklogDetailsResponseDto;
 import com.ikon.taskmanagement.dto.response.TaskWorklogResponseDto;
 import com.ikon.taskmanagement.entity.Task;
 import com.ikon.taskmanagement.entity.TaskWorklog;
@@ -11,8 +12,10 @@ import com.ikon.taskmanagement.service.TaskWorklogService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -65,6 +68,36 @@ public class TaskWorklogServiceImpl implements TaskWorklogService {
         TaskWorklog saved = worklogRepository.save(entity);
         updateTaskActualHours(saved.getTaskId());
         return worklogMapper.mapToDto(saved);
+    }
+
+    @Override
+    public List<TaskWorklogDetailsResponseDto> getAllTaskWorklogs() {
+
+        // AccessCriteria readCriteria = AccessCriteria.builder()
+        //         .allowedRoles(Set.of("Task Manager"))
+        //         .ownerField("assigneeId")
+        //         .dynamicGroupsField("readGroups")
+        //         .build();
+
+        Map<UUID, Task> taskMap = taskRepository.findAll()
+                .stream()
+                .collect(Collectors.toMap(Task::getId, task -> task));
+
+        // return dataAccessFilter.findAll(TaskWorklog.class, readCriteria)
+        //         .stream()
+        //         .map(worklog -> {
+        //             Task task = taskMap.get(worklog.getTaskId());
+        //             return worklogMapper.mapToDetailsDto(task, worklog);
+        //         })
+        //         .collect(Collectors.toList());
+
+        return worklogRepository.findAll()
+            .stream()
+            .filter(worklog -> taskMap.containsKey(worklog.getTaskId()))
+            .map(worklog -> worklogMapper.mapToDetailsDto(
+                    taskMap.get(worklog.getTaskId()),
+                    worklog))
+            .collect(Collectors.toList());
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.ikon.taskmanagement.service;
 
 import com.ikon.taskmanagement.dto.request.TaskWorklogRequestDto;
+import com.ikon.taskmanagement.dto.response.TaskWorklogDetailsResponseDto;
 import com.ikon.taskmanagement.dto.response.TaskWorklogResponseDto;
 
 import java.util.List;
@@ -8,6 +9,8 @@ import java.util.UUID;
 
 public interface TaskWorklogService {
     TaskWorklogResponseDto createWorklog(TaskWorklogRequestDto dto);
+
+    List<TaskWorklogDetailsResponseDto> getAllTaskWorklogs();
 
     List<TaskWorklogResponseDto> getWorklogsByTaskId(UUID taskId);
 

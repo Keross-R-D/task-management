@@ -1,12 +1,12 @@
 package com.ikon.taskmanagement.api;
 
 import com.ikon.taskmanagement.dto.request.TaskWorklogRequestDto;
+import com.ikon.taskmanagement.dto.response.TaskWorklogDetailsResponseDto;
 import com.ikon.taskmanagement.dto.response.TaskWorklogResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.bind.annotation.RequestHeader;
 
 import java.util.List;
 import java.util.UUID;
@@ -18,6 +18,10 @@ public interface TaskWorklogApi {
     @Operation(summary = "Create a new worklog")
     @PostMapping
     ResponseEntity<TaskWorklogResponseDto> createWorklog(@RequestHeader("Authorization") String accessToken, @RequestBody TaskWorklogRequestDto dto);
+
+    @Operation(summary = "Fetch all task worklogs")
+    @GetMapping
+    ResponseEntity<List<TaskWorklogDetailsResponseDto>> getAllTaskWorklogs(@RequestHeader("Authorization") String accessToken);
 
     @Operation(summary = "Fetch worklogs by Task ID")
     @GetMapping("/task/{taskId}")

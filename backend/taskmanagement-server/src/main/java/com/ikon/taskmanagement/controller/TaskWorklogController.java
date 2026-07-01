@@ -2,6 +2,7 @@ package com.ikon.taskmanagement.controller;
 
 import com.ikon.taskmanagement.api.TaskWorklogApi;
 import com.ikon.taskmanagement.dto.request.TaskWorklogRequestDto;
+import com.ikon.taskmanagement.dto.response.TaskWorklogDetailsResponseDto;
 import com.ikon.taskmanagement.dto.response.TaskWorklogResponseDto;
 import com.ikon.taskmanagement.service.TaskWorklogService;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,11 @@ public class TaskWorklogController implements TaskWorklogApi {
     @Override
     public ResponseEntity<TaskWorklogResponseDto> createWorklog(@RequestHeader("Authorization") String accessToken, TaskWorklogRequestDto dto) {
         return ResponseEntity.ok(worklogService.createWorklog(dto));
+    }
+
+    @Override
+    public ResponseEntity<List<TaskWorklogDetailsResponseDto>> getAllTaskWorklogs(String accessToken) {
+        return ResponseEntity.ok(worklogService.getAllTaskWorklogs());
     }
 
     @Override
