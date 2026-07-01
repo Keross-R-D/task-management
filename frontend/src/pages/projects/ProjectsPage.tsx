@@ -263,7 +263,7 @@ const ProjectsPage: React.FC = () => {
   const handleSync = async () => {
     try {
       await triggerProjectSync().unwrap();
-      await triggerEpicSync().unwrap();
+      // await triggerEpicSync().unwrap();
       toast.success("sync triggered successfully.");
     } catch (error: any) {
       toast.error(error.data?.error || "Failed to trigger project sync.");

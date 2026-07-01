@@ -51,7 +51,7 @@ export const projectsApiSlice = apiSlice.injectEndpoints({
     }),
     triggerProjectSync: builder.mutation<{ status: string; message: string }, void>({
       query: () => ({
-        apiUrl: '/sync/projects',
+        apiUrl: '/sync/project-epic',
         config: {
           method: 'POST',
         },

@@ -18,12 +18,12 @@ COPY . .
 # Inject build-time environment variables (VITE_* are baked into the bundle)
 # These are placeholder values — override them per environment by rebuilding.
 ENV VITE_BASE_PATH=/apps/task-management/v1/
-ENV VITE_API_BASE_URL=https://holocron.keross.com/api/task-management/v1/api
-ENV VITE_IKON_API_URL=https://holocron.keross.com/api
-ENV VITE_IKON_PLATFORM_UI_URL=https://holocron.keross.com/ikon-portal
-ENV VITE_LOGIN_PAGE_URL=https://holocron.keross.com/ikon-portal/login.html
-ENV VITE_IKON_USER_API_URL=https://holocron.keross.com/api/platform/user/current
-ENV VITE_API_BASE_URL_FOR_ROLE=https://holocron.keross.com/api/task-management/v1
+ENV VITE_API_BASE_URL=https://portal.ikon.keross.com/api/task-management/v1/api
+ENV VITE_IKON_API_URL=https://portal.ikon.keross.com/api
+ENV VITE_IKON_PLATFORM_UI_URL=https://portal.ikon.keross.com/ikon-portal
+ENV VITE_LOGIN_PAGE_URL=https://portal.ikon.keross.com/ikon-portal/login.html
+ENV VITE_IKON_USER_API_URL=https://portal.ikon.keross.com/api/platform/user/current
+ENV VITE_API_BASE_URL_FOR_ROLE=https://portal.ikon.keross.com/api/task-management/v1
 
 RUN npm run build
 

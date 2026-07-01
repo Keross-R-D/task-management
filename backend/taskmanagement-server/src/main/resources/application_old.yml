@@ -75,14 +75,14 @@ spring:
       resourceserver:
         jwt:
 #          issuer-uri: http://localhost:8081/api/platform
-          issuer-uri: https://ikoncloud-dev.keross.com/ikon-api/platform
+          issuer-uri: https://portal.ikon.keross.com/api/platform
 
 ikon:
   user:
     agent: "IKON App Server"
   platform:
     rest:
-      url: https://ikoncloud-dev.keross.com/ikon-api
+      url: https://portal.ikon.keross.com/api
   logger:
     enabled: false # set true when deployed in dev/uat/prod otherwise set to false if running in local/devtools environment.
   accessmanagement:
