@@ -140,7 +140,7 @@ ikon:
 
   connector:
     internal-auth:
-      tokenUri: https://holocron.keross.com/api/platform/oauth2/token
+      tokenUri: https://portal.ikon.keross.com/api/platform/oauth2/token
       clientId: ikon-client-management
       clientSecret: F38Ysb4VEOSXUeISKcMyvpKqxtrIL8nf
     crypto:

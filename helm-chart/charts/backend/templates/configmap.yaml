@@ -107,7 +107,7 @@ data:
         oauth2:
           resourceserver:
             jwt:
-              issuer-uri: https://holocron.keross.com/api/platform
+              issuer-uri: https://portal.ikon.keross.com/api/platform
 
 
     # =============================
@@ -118,7 +118,7 @@ data:
         agent: "IKON App Server"
       time-zone: "Asia/Kolkata"
       platform:
-        rest:  https://holocron.keross.com/api
+        rest:  https://portal.ikon.keross.com/api
       logger:
         enabled: true 
       

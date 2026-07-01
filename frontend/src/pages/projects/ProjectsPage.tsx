@@ -22,6 +22,7 @@ import {
   useCreateProjectMutation,
   useTriggerProjectSyncMutation,
 } from "@/features/projects/projectsApiSlice";
+import { useTriggerEpicSyncMutation } from "@/features/epics/epicsApiSlice";
 import AddProjectModal, {
   type ProjectFormValues,
 } from "./components/AddProjectModal";
@@ -226,6 +227,7 @@ const ProjectsPage: React.FC = () => {
   } = useGetProjectsQuery();
   const [createProject, { isLoading: isCreating }] = useCreateProjectMutation();
   const [triggerProjectSync, { isLoading: isSyncing }] = useTriggerProjectSyncMutation();
+  const [triggerEpicSync, {isloading: isEpicSyncing}] = useTriggerEpicSyncMutation();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const formatLocalDate = (date: Date) => {
@@ -260,8 +262,9 @@ const ProjectsPage: React.FC = () => {
 
   const handleSync = async () => {
     try {
-      const response = await triggerProjectSync().unwrap();
-      toast.success(response.message || "Project sync triggered successfully.");
+      await triggerProjectSync().unwrap();
+      // await triggerEpicSync().unwrap();
+      toast.success("sync triggered successfully.");
     } catch (error: any) {
       toast.error(error.data?.error || "Failed to trigger project sync.");
       console.error("Failed to trigger project sync", error);

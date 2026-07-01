@@ -75,7 +75,7 @@ spring:
       resourceserver:
         jwt:
 #          issuer-uri: http://localhost:8081/api/platform
-          issuer-uri: https://ikoncloud-dev.keross.com/ikon-api/platform
+          issuer-uri: https://portal.ikon.keross.com/api/platform
 
 ikon:
   dac:
